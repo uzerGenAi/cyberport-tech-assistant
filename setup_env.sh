@@ -21,8 +21,10 @@ export REGION="${REGION:-${AWS_REGION:-eu-central-1}}"
 echo "export REGION=$REGION" >> $ENV_FILE
 echo "Region: $REGION"
 
-_cli_region=$(aws configure get region 2>/dev/null)
-if [ -n "$_cli_region" ] && [ "$_cli_region" != "$REGION" ]; then
+# `aws configure get region` exits non-zero when no region is configured (the normal state
+# on a fresh CI runner). The `|| true` stops that from aborting the script under `set -e`.
+_cli_region=$(aws configure get region 2>/dev/null || true)
+if [ -n "${_cli_region:-}" ] && [ "$_cli_region" != "$REGION" ]; then
     echo "ℹ️  Your AWS CLI default Region is $_cli_region; this run uses $REGION."
     echo "    Export REGION=$_cli_region to override, and note that every resource below is"
     echo "    discovered and created in $REGION."
