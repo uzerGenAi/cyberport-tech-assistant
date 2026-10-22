@@ -26,6 +26,10 @@
       </button>
     </div>
     
+    <!-- Filled in by script-enhanced.js when the app is in demo or limited mode.
+         Hidden while everything is live. -->
+    <div id="app-state-banner" class="app-state-banner" role="status" aria-live="polite" hidden></div>
+    
     <div class="hero-panel">
       <div class="hero-copy">
         <p class="eyebrow">Powered by Specialty Bakeries & Pastry Cafés AI</p>
@@ -33,7 +37,7 @@
         <p>Ask about pastries, promotions, bakery locations, or order support — your Pastry Concierge is ready.</p>
         <div class="hero-actions">
           <a class="pill-link" href="#chatbot">Start chatting</a>
-          <span class="hero-note">Demo mode works locally even without live AWS credentials</span>
+          <span class="hero-note">Add <code>?demo=1</code> to browse sample data without live AWS credentials</span>
         </div>
       </div>
       <div class="hero-stats">
@@ -119,8 +123,8 @@
   </div>
 
   <!-- Include enhanced scripts -->
-  <script src="agentcore-client-fixed.js?v=2"></script>
-  <script src="script-enhanced.js?v=2"></script>
+  <script src="agentcore-client-fixed.js?v=3"></script>
+  <script src="script-enhanced.js?v=3"></script>
   
   <script>
     // Store Locator functionality
@@ -224,30 +228,11 @@
     
     // Enhanced functionality for sign out and connection status
     document.addEventListener('DOMContentLoaded', function() {
-      // Ensure Sign Out button works properly
-      const signOutBtn = document.getElementById('signOutButton');
-      if (signOutBtn) {
-        signOutBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          console.log('Sign Out button clicked');
-          
-          // Show confirmation
-          if (confirm('Are you sure you want to sign out?')) {
-            // Clear session storage
-            sessionStorage.removeItem('idToken');
-            sessionStorage.removeItem('username');
-            localStorage.removeItem('chatbot_session_id');
-            
-            console.log('Session cleared, redirecting to login...');
-            
-            // Redirect to login page
-            window.location.href = 'login.html';
-          }
-        });
-        console.log('Sign Out button event listener added successfully');
-      } else {
-        console.error('Sign Out button not found');
-      }
+      // Sign-out is wired once, in script-enhanced.js, which routes through
+      // CognitoAuth.signOut(). A second handler used to live here and cleared
+      // only idToken + username — leaving awsCredentials, userId and demoMode in
+      // sessionStorage, so "signing out" left usable AWS credentials behind and
+      // the next sign-in could inherit the previous user's state. Removed.
       
       // CloudWatch Dropdown Functionality
       const cloudwatchBtn = document.getElementById('cloudwatchButton');
@@ -370,29 +355,10 @@
         }
       }
       
-      // Enhanced connection status simulation
-      setTimeout(() => {
-        const connectionStatus = document.getElementById('connection-status');
-        if (connectionStatus) {
-          connectionStatus.textContent = 'Connected';
-          connectionStatus.classList.add('connected');
-        }
-      }, 2000);
-      
-      // Add test function for loading animation (for debugging)
-      window.testLoadingAnimation = function() {
-        console.log('Testing loading animation...');
-        const testMsg = addMessage('', 'bot', 'processing');
-        console.log('Test loading message created');
-        
-        // Remove after 5 seconds for testing
-        setTimeout(() => {
-          removeProcessingMessages();
-          addMessage('Test loading animation completed!', 'bot');
-        }, 5000);
-      };
-      
-      console.log('Loading animation test function available: testLoadingAnimation()');
+      // The connection status is owned by script-enhanced.js, which sets it from
+      // real AgentCore events. A timer used to force it to "Connected" after two
+      // seconds regardless of whether anything had connected, so the page claimed
+      // a working agent while every message was failing. Removed deliberately.
       
       // Load and display interactive menu
       loadInteractiveMenu();

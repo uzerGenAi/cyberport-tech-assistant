@@ -1,4 +1,4 @@
-/* Enhanced styles for Virtual Coffee Shop - Optimized Version - Updated for BrewBot heading fix */
+/* Enhanced styles for Specialty Bakeries & Pastry Cafés — Pastry Concierge */
 
 /* Import original styles as base */
 @import url('style.css');
@@ -1400,5 +1400,108 @@ h2.section-title {   /* just an example selector */
   
   .menu-item p {
     font-size: 1rem;
+  }
+}
+
+/* ===========================================================================
+   App state banner + honest connection status
+   ---------------------------------------------------------------------------
+   The banner is the page's single visible answer to "am I talking to the live
+   agent?". It appears only in demo or limited mode, and always offers the way
+   out (exit demo / sign in / retry).
+   =========================================================================== */
+
+.app-state-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.app-state-banner[hidden] {
+  display: none;
+}
+
+/* Demo mode: a deliberate choice, so informational rather than alarming. */
+.app-state-banner.demo {
+  background: #e8f1fb;
+  border-color: #9cc3e8;
+  color: #16365c;
+}
+
+/* Limited mode: something is actually wrong and needs attention. */
+.app-state-banner.degraded {
+  background: #fdf3e2;
+  border-color: #e0ad5a;
+  color: #613b06;
+}
+
+.app-state-banner-text {
+  flex: 1 1 320px;
+  font-weight: 500;
+}
+
+.app-state-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.app-state-banner-btn {
+  display: inline-block;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: rgba(255, 255, 255, 0.75);
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.app-state-banner-btn:hover,
+.app-state-banner-btn:focus-visible {
+  background: #fff;
+}
+
+/* Keep keyboard focus clearly visible against both banner backgrounds. */
+.app-state-banner-btn:focus-visible {
+  outline: 3px solid #1a4d8f;
+  outline-offset: 2px;
+}
+
+.app-state-banner-detail {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+/* Demo is a distinct connection state: not connected, but not broken either. */
+.connection-status.demo {
+  background: #1a4d8f;
+  color: #fff;
+}
+
+.user-controls-header .connection-status.demo {
+  background: rgba(26, 77, 143, 0.15);
+  color: #16365c;
+}
+
+.user-controls-header .connection-status.demo::before {
+  content: "🧪";
+}
+
+@media (max-width: 600px) {
+  .app-state-banner {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

@@ -49,8 +49,8 @@
     text-align: center;
 }
 
-/* BrewBot header with connection status */
-.brewbot-header {
+/* Concierge header with connection status */
+.concierge-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -59,7 +59,7 @@
     gap: 1rem;
 }
 
-.brewbot-header h2 {
+.concierge-header h2 {
     font-size: 2.5rem;
     margin: 0;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
@@ -67,8 +67,8 @@
     text-align: left;
 }
 
-/* Connection status in BrewBot section */
-.brewbot-header .connection-status {
+/* Connection status in the concierge section */
+.concierge-header .connection-status {
     display: inline-block;
     padding: 8px 16px;
     border-radius: 20px;
@@ -83,19 +83,19 @@
     text-align: center;
 }
 
-.brewbot-header .connection-status.connected {
+.concierge-header .connection-status.connected {
     background: rgba(76, 175, 80, 0.8);
     border-color: rgba(76, 175, 80, 0.6);
     color: white;
 }
 
-.brewbot-header .connection-status.disconnected {
+.concierge-header .connection-status.disconnected {
     background: rgba(244, 67, 54, 0.8);
     border-color: rgba(244, 67, 54, 0.6);
     color: white;
 }
 
-.brewbot-header .connection-status.error {
+.concierge-header .connection-status.error {
     background: rgba(255, 193, 7, 0.8);
     border-color: rgba(255, 193, 7, 0.6);
     color: white;
@@ -542,13 +542,13 @@ main::before {
     font-size: 2rem;
   }
   
-  .brewbot-header {
+  .concierge-header {
     flex-direction: column;
     text-align: center;
     gap: 0.5rem;
   }
   
-  .brewbot-header h2 {
+  .concierge-header h2 {
     font-size: 2rem;
     text-align: center;
   }

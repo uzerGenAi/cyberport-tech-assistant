@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import json
 import logging
@@ -33,6 +34,33 @@ if not strands_logger.handlers:
     _handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
     strands_logger.addHandler(_handler)
 strands_logger.setLevel(_LOG_LEVEL)
+
+# The model sometimes wraps its internal deliberation in <thinking> tags and that text
+# was being returned to the caller verbatim, so customers could read the agent reasoning
+# about their order. Strip it at the boundary: whatever leaves this runtime is customer
+# facing. An unclosed opening tag means the response was truncated mid-thought, so
+# everything after it is dropped too.
+_REASONING_TAGS = ("thinking", "thought", "reasoning", "scratchpad", "internal")
+_REASONING_PATTERNS = [
+    re.compile(rf"<{tag}\b[^>]*>.*?</{tag}>", re.IGNORECASE | re.DOTALL)
+    for tag in _REASONING_TAGS
+] + [
+    re.compile(rf"<{tag}\b[^>]*>.*$", re.IGNORECASE | re.DOTALL)
+    for tag in _REASONING_TAGS
+] + [
+    re.compile(rf"</{tag}>", re.IGNORECASE)
+    for tag in _REASONING_TAGS
+]
+
+
+def strip_internal_reasoning(text):
+    """Remove model reasoning blocks from a customer-facing response."""
+    if not isinstance(text, str):
+        return text
+    cleaned = text
+    for pattern in _REASONING_PATTERNS:
+        cleaned = pattern.sub("", cleaned)
+    return re.sub(r"\n{3,}", "\n\n", cleaned).strip()
 
 
 # === Tool Wrappers ===
@@ -187,10 +215,15 @@ def pastry_concierge_agent(payload, context):
 
     try:
         response = orchestrator(user_input)
-        assistant_text = getattr(response, "text", None) or str(response)
+        raw_text = getattr(response, "text", None) or str(response)
+        assistant_text = strip_internal_reasoning(raw_text)
         # DEBUG only: responses can include customer names and order details.
         strands_logger.debug("Response: %s", assistant_text.replace("\n", " "))
-        return assistant_text or " "
+        if not assistant_text:
+            # The reply was nothing but internal reasoning.
+            strands_logger.warning("Response contained only internal reasoning; length=%d", len(raw_text))
+            return "I could not form a complete answer to that. Please try rephrasing your question."
+        return assistant_text
     except (ValueError, ConnectionError, KeyError) as e:
         strands_logger.error("Orchestrator error: %s\n%s", str(e), traceback.format_exc())
         return "I'm sorry, I encountered an error processing your request. Please try again."

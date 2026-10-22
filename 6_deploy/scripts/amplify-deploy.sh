@@ -65,11 +65,28 @@ if [ -z "$BRANCH_EXISTS" ] || [ "$BRANCH_EXISTS" = "None" ]; then
   ok "Branch '$BRANCH' created"
 fi
 
-# Package the web app
+# Package the web app.
+# Ship only browser assets: local backup folders, build tooling and the
+# container/helper scripts have no business being served from the web root.
 DEPLOY_ZIP="/tmp/spbc-webapp-$(date +%s).zip"
 log "Packaging web app from $WEB_APP_DIR"
-(cd "$WEB_APP_DIR" && zip -qr "$DEPLOY_ZIP" . --exclude '__pycache__/*' '*.pyc' '.DS_Store')
+(cd "$WEB_APP_DIR" && zip -qr "$DEPLOY_ZIP" . \
+  -x '__pycache__/*' \
+  -x '*.pyc' \
+  -x '.DS_Store' \
+  -x 'backup_*/*' \
+  -x '*.sh' \
+  -x '*.py' \
+  -x 'Dockerfile')
 ok "Package created: $DEPLOY_ZIP"
+
+log "Bundle contents:"
+unzip -Z1 "$DEPLOY_ZIP" | sed 's/^/    /'
+
+# Fail fast rather than publishing a backup folder or a shell script.
+if unzip -Z1 "$DEPLOY_ZIP" | grep -Eq '^backup_|\.sh$|\.py$'; then
+  err "Deployment package contains files that must not be published"
+fi
 
 # Create a deployment
 log "Creating Amplify deployment"
@@ -129,13 +146,6 @@ for i in $(seq 1 30); do
 done
 
 # Get the domain
-DOMAIN=$(aws amplify get-branch \
-  --app-id "$APP_ID" \
-  --branch-name "$BRANCH" \
-  --region "$REGION" \
-  --query 'branch.displayName' \
-  --output text 2>/dev/null || echo "unknown")
-
 APP_DOMAIN=$(aws amplify get-app \
   --app-id "$APP_ID" \
   --region "$REGION" \

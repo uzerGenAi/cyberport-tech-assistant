@@ -1,11 +1,56 @@
+// Every failure this client raises carries a machine-readable `reason` so the UI
+// can say what actually went wrong instead of blaming the agent for everything.
+// Keep these codes in sync with FAILURE_COPY in script-enhanced.js.
+const AGENTCORE_REASONS = Object.freeze({
+  NOT_SIGNED_IN: 'not-signed-in',
+  CREDENTIALS_EXPIRED: 'credentials-expired',
+  ACCESS_DENIED: 'access-denied',
+  NOT_CONFIGURED: 'not-configured',
+  BAD_REQUEST: 'bad-request',
+  RATE_LIMITED: 'rate-limited',
+  AGENT_ERROR: 'agent-error',
+  NETWORK: 'network',
+  UNKNOWN: 'unknown',
+});
+
 class FixedAgentCoreClient {
   constructor() {
     this.agentRuntimeArn = null;
     this.isInitialized = false;
     this.credentials = null;
+    // 'unconfigured' | 'ready' | 'failed'
+    this.status = 'unconfigured';
+    this.lastFailure = null;
 
     this.LOCALSTORAGE_KEY = 'chatbot_session_id';
     this.sessionId = this.#initSession();
+  }
+
+  // Build an Error tagged with a reason code (and the HTTP details when known).
+  #fail(message, reason, extra = {}) {
+    const err = new Error(message);
+    err.reason = reason;
+    Object.assign(err, extra);
+    this.lastFailure = { reason, message, ...extra };
+    return err;
+  }
+
+  // Report connection state without touching the DOM: the page owns its own UI.
+  #emitStatus(state, text) {
+    try {
+      window.dispatchEvent(new CustomEvent('agentcore:status', { detail: { state, text } }));
+    } catch { /* CustomEvent unavailable — status display is non-essential */ }
+  }
+
+  // Translate an HTTP status into a reason the user can act on.
+  #reasonForStatus(status) {
+    if (status === 400 || status === 422) return AGENTCORE_REASONS.BAD_REQUEST;
+    if (status === 401) return AGENTCORE_REASONS.CREDENTIALS_EXPIRED;
+    if (status === 403) return AGENTCORE_REASONS.ACCESS_DENIED;
+    if (status === 404) return AGENTCORE_REASONS.NOT_CONFIGURED;
+    if (status === 429) return AGENTCORE_REASONS.RATE_LIMITED;
+    if (status >= 500) return AGENTCORE_REASONS.AGENT_ERROR;
+    return AGENTCORE_REASONS.UNKNOWN;
   }
 
   // === Session handling ===
@@ -69,23 +114,43 @@ class FixedAgentCoreClient {
       });
 
       this.isInitialized = true;
+      this.status = 'ready';
+      this.lastFailure = null;
       console.log('✅ Fixed AgentCore client initialized successfully');
       console.log('Agent Runtime ARN:', this.agentRuntimeArn);
       console.log('Session ID:', this.sessionId);
     } catch (err) {
       console.error('❌ Failed to initialize Fixed AgentCore client:', err);
-      throw new Error(`AgentCore initialization failed: ${err.message}`);
+      this.status = 'failed';
+      // Preserve the underlying reason — an un-authenticated user and a missing
+      // config file are different problems and deserve different messages.
+      throw this.#fail(
+        `AgentCore initialization failed: ${err.message}`,
+        err.reason || AGENTCORE_REASONS.UNKNOWN,
+      );
     }
   }
 
   async #loadAgentCoreConfig() {
     try {
       const resp = await fetch('agentcore-config.json', { cache: 'no-store' });
+      if (!resp.ok) {
+        throw this.#fail(
+          `agentcore-config.json returned HTTP ${resp.status}`,
+          AGENTCORE_REASONS.NOT_CONFIGURED,
+        );
+      }
       const cfg = await resp.json();
-      if (!cfg || !cfg.agentRuntimeArn) throw new Error('agentRuntimeArn missing in agentcore-config.json');
+      if (!cfg || !cfg.agentRuntimeArn) {
+        throw this.#fail(
+          'agentRuntimeArn missing in agentcore-config.json',
+          AGENTCORE_REASONS.NOT_CONFIGURED,
+        );
+      }
       this.agentRuntimeArn = cfg.agentRuntimeArn;
     } catch (e) {
       console.error('Failed to load AgentCore configuration:', e);
+      if (!e.reason) e.reason = AGENTCORE_REASONS.NOT_CONFIGURED;
       throw e;
     }
   }
@@ -124,7 +189,9 @@ class FixedAgentCoreClient {
     let attempt = 0;
     const baseDelay = 500; // base delay in ms
 
-    const connectionStatus = document.getElementById('connection-status');
+    // If a credential refresh fails mid-flight we remember why, so a follow-up
+    // 403 is reported as an expired session rather than a permissions problem.
+    let authFailureReason = null;
 
     while (true) {
       attempt++;
@@ -145,7 +212,9 @@ class FixedAgentCoreClient {
           const status = resp.status;
           const responseText = await resp.text();
 
-          // 1. Handle credential expiry (403 Unauthorized/Forbidden)
+          // 1. A 403 can mean expired credentials *or* a missing IAM permission.
+          //    Try one refresh: if the refresh works and we still get 403, it is
+          //    a genuine authorization problem, not an expiry.
           if (status === 403 && attempt <= maxRetries) {
             console.warn(`[AgentCore] Attempt ${attempt} failed with 403. Refreshing AWS credentials...`);
             try {
@@ -159,6 +228,7 @@ class FixedAgentCoreClient {
               continue;
             } catch (authErr) {
               console.error('[AgentCore] Failed to refresh credentials:', authErr);
+              authFailureReason = authErr.reason || AGENTCORE_REASONS.CREDENTIALS_EXPIRED;
             }
           }
 
@@ -166,11 +236,7 @@ class FixedAgentCoreClient {
           const isRetriable = status === 429 || (status >= 500 && status <= 599);
           if (isRetriable && attempt <= maxRetries) {
             console.warn(`[AgentCore] Attempt ${attempt} failed with status ${status}. Retrying...`);
-            
-            if (connectionStatus) {
-              connectionStatus.textContent = `Retrying (${attempt}/${maxRetries})...`;
-              connectionStatus.className = 'connection-status'; // Reset to yellow connecting style
-            }
+            this.#emitStatus('connecting', `Retrying (${attempt}/${maxRetries})...`);
 
             // Exponential backoff with 20% randomized jitter
             const delay = baseDelay * Math.pow(2, attempt - 1);
@@ -179,14 +245,17 @@ class FixedAgentCoreClient {
             continue;
           }
 
-          throw new Error(`HTTP ${status}: ${responseText}`);
+          this.#emitStatus('error', 'Disconnected');
+          throw this.#fail(
+            `HTTP ${status}: ${responseText}`,
+            authFailureReason || this.#reasonForStatus(status),
+            { httpStatus: status, responseText },
+          );
         }
 
         // Reset connection status to connected on success
-        if (connectionStatus) {
-          connectionStatus.textContent = 'Connected';
-          connectionStatus.className = 'connection-status connected';
-        }
+        this.#emitStatus('connected', 'Connected');
+        this.lastFailure = null;
 
         const text = await resp.text();
         try {
@@ -197,15 +266,17 @@ class FixedAgentCoreClient {
         }
 
       } catch (err) {
-        // Handle transient network errors (DNS, offline)
+        // An error we already classified (e.g. the HTTP throw above) passes straight through.
+        if (err.reason) {
+          this.#emitStatus('error', 'Disconnected');
+          throw err;
+        }
+
+        // Handle transient network errors (DNS, offline, CORS, TLS)
         const isNetworkError = err instanceof TypeError || err.message.includes('fetch') || err.message.includes('NetworkError');
         if (isNetworkError && attempt <= maxRetries) {
           console.warn(`[AgentCore] Attempt ${attempt} network error: ${err.message}. Retrying...`);
-          
-          if (connectionStatus) {
-            connectionStatus.textContent = `Retrying (${attempt}/${maxRetries})...`;
-            connectionStatus.className = 'connection-status';
-          }
+          this.#emitStatus('connecting', `Retrying (${attempt}/${maxRetries})...`);
 
           const delay = baseDelay * Math.pow(2, attempt - 1);
           const jitter = delay * (0.8 + Math.random() * 0.4);
@@ -214,11 +285,11 @@ class FixedAgentCoreClient {
         }
 
         // Final failure after exhaustion or non-retriable error
-        if (connectionStatus) {
-          connectionStatus.textContent = 'Disconnected';
-          connectionStatus.className = 'connection-status error';
-        }
-        throw err;
+        this.#emitStatus('error', 'Disconnected');
+        throw this.#fail(
+          err.message,
+          isNetworkError ? AGENTCORE_REASONS.NETWORK : AGENTCORE_REASONS.UNKNOWN,
+        );
       }
     }
   }
@@ -226,7 +297,9 @@ class FixedAgentCoreClient {
 
   // === Status ===
   isReady() { return this.isInitialized && !!this.credentials; }
+  getLastFailure() { return this.lastFailure; }
 }
 
 // Create a global singleton so the same session is reused across your app
 window.fixedAgentCoreClient = new FixedAgentCoreClient();
+window.AGENTCORE_REASONS = AGENTCORE_REASONS;

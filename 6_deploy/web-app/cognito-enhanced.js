@@ -22,15 +22,57 @@ document.addEventListener('DOMContentLoaded', function() {
 let cognitoConfig = null;
 let awsCredentials = null;
 
+// Build an Error that carries a machine-readable `reason` so callers can explain
+// *why* something failed instead of guessing. Keep these codes in sync with the
+// FAILURE_COPY table in script-enhanced.js.
+//   not-signed-in       — nothing stored; the user never authenticated on this tab
+//   credentials-expired — had credentials/token, but they are no longer usable
+//   not-configured      — deployment config missing or incomplete
+function authError(message, reason) {
+  const err = new Error(message);
+  err.reason = reason;
+  return err;
+}
+
+// Demo mode is explicit and un-sticky: `?demo=1` turns it on for the tab,
+// `?demo=0` clears it. Without a query parameter the stored value decides.
+function isDemoMode() {
+  const requested = new URLSearchParams(window.location.search).get('demo');
+  if (requested === '1') {
+    sessionStorage.setItem('demoMode', '1');
+    return true;
+  }
+  if (requested === '0') {
+    sessionStorage.removeItem('demoMode');
+    return false;
+  }
+  return sessionStorage.getItem('demoMode') === '1';
+}
+
+function setDemoMode(enabled) {
+  if (enabled) {
+    sessionStorage.setItem('demoMode', '1');
+  } else {
+    sessionStorage.removeItem('demoMode');
+  }
+}
+
 // Function to load Cognito configuration
 async function loadCognitoConfig() {
   try {
     const response = await fetch('cognito-config.json');
+    if (!response.ok) {
+      throw authError(`cognito-config.json returned HTTP ${response.status}`, 'not-configured');
+    }
     cognitoConfig = await response.json();
+    if (!cognitoConfig || !cognitoConfig.UserPoolId || !cognitoConfig.ClientId || !cognitoConfig.IdentityPoolId) {
+      throw authError('cognito-config.json is missing UserPoolId, ClientId or IdentityPoolId', 'not-configured');
+    }
     console.log('Cognito configuration loaded:', cognitoConfig);
     return cognitoConfig;
   } catch (error) {
     console.error('Error loading Cognito configuration:', error);
+    if (!error.reason) error.reason = 'not-configured';
     throw error;
   }
 }
@@ -45,8 +87,7 @@ async function checkAuthentication() {
 
   if (isLoginPage()) return;
 
-  const demoMode = sessionStorage.getItem('demoMode') === '1' || new URLSearchParams(window.location.search).get('demo') === '1';
-  if (demoMode) {
+  if (isDemoMode()) {
     sessionStorage.removeItem('redirectedToLogin');
     console.log('Demo mode enabled; skipping auth redirect');
     return;
@@ -60,7 +101,6 @@ async function checkAuthentication() {
       sessionStorage.setItem('redirectedToLogin', '1');
       window.location.replace('login.html');
     }
-return;
     return;
   }
   
@@ -241,9 +281,15 @@ async function getCurrentAWSCredentials() {
   if (!awsCredentials) {
     const storedCredentials = sessionStorage.getItem('awsCredentials');
     if (storedCredentials) {
-      awsCredentials = JSON.parse(storedCredentials);
+      try {
+        awsCredentials = JSON.parse(storedCredentials);
+      } catch (parseError) {
+        sessionStorage.removeItem('awsCredentials');
+        throw authError('Stored AWS credentials were unreadable. Please sign in again.', 'credentials-expired');
+      }
     } else {
-      throw new Error('No AWS credentials available. Please log in again.');
+      // Nothing stored at all: this tab never completed a sign-in.
+      throw authError('Not signed in — no AWS credentials in this session.', 'not-signed-in');
     }
   }
   
@@ -254,10 +300,19 @@ async function getCurrentAWSCredentials() {
     
     const idToken = sessionStorage.getItem('idToken');
     if (!idToken) {
-      throw new Error('No ID token available for credential refresh. Please log in again.');
+      throw authError('Session expired and no ID token is available to refresh it.', 'credentials-expired');
     }
     
-    await getAWSCredentials(idToken);
+    if (!cognitoConfig) {
+      await loadCognitoConfig();
+    }
+    
+    try {
+      await getAWSCredentials(idToken);
+    } catch (refreshError) {
+      // The ID token itself has expired or been revoked.
+      throw authError(`Session expired and could not be refreshed: ${refreshError.message}`, 'credentials-expired');
+    }
   }
   
   return awsCredentials;
@@ -289,19 +344,27 @@ function showError(message) {
   }
 }
 
-// Function to sign out user
+// Function to sign out user.
+// Clears every piece of per-user state, including demo mode and the agent
+// session id — otherwise the next user inherits the previous conversation.
 function signOut() {
-  // Clear all stored data
-  sessionStorage.removeItem('idToken');
-  sessionStorage.removeItem('awsCredentials');
-  sessionStorage.removeItem('userId');
-  sessionStorage.removeItem('username');
+  [
+    'idToken',
+    'awsCredentials',
+    'userId',
+    'username',
+    'selectedStore',
+    'demoMode',
+    'redirectedToLogin',
+  ].forEach(key => sessionStorage.removeItem(key));
+  
+  try { localStorage.removeItem('chatbot_session_id'); } catch { /* ignore */ }
   
   // Clear global variables
   awsCredentials = null;
   
   // Redirect to login page
-  window.location.href = 'login.html';
+  window.location.replace('login.html');
 }
 
 // Export functions for use in other scripts
@@ -309,5 +372,8 @@ window.CognitoAuth = {
   getCurrentAWSCredentials,
   createAWSServiceClient,
   signOut,
-  loadCognitoConfig
+  loadCognitoConfig,
+  isDemoMode,
+  setDemoMode,
+  getConfig: () => cognitoConfig,
 };
