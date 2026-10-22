@@ -3,6 +3,8 @@
     "item_id": "croissant_plain",
     "name": "Plain Croissant",
     "category": "viennoiserie",
+    "price_eur": 2.20,
+    "prices_by_size_eur": { "single": 2.20, "box_of_4": 7.90 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -17,6 +19,8 @@
     "item_id": "croissant_almond",
     "name": "Almond Croissant",
     "category": "viennoiserie",
+    "price_eur": 2.80,
+    "prices_by_size_eur": { "single": 2.80, "box_of_4": 10.40 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -31,6 +35,8 @@
     "item_id": "pain_au_chocolat",
     "name": "Pain au Chocolat",
     "category": "viennoiserie",
+    "price_eur": 2.60,
+    "prices_by_size_eur": { "single": 2.60, "box_of_4": 9.60 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -45,6 +51,8 @@
     "item_id": "brioche_loaf",
     "name": "Brioche Loaf",
     "category": "breads",
+    "price_eur": 5.50,
+    "prices_by_size_eur": { "half_loaf": 3.20, "full_loaf": 5.50 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -59,6 +67,8 @@
     "item_id": "sourdough_loaf",
     "name": "Sourdough Loaf",
     "category": "breads",
+    "price_eur": 4.80,
+    "prices_by_size_eur": { "half_loaf": 2.80, "full_loaf": 4.80 },
     "attributes_json": {
       "is_dairy_free": true,
       "is_sugar_free": true,
@@ -73,6 +83,8 @@
     "item_id": "rye_bread",
     "name": "Dark Rye Bread",
     "category": "breads",
+    "price_eur": 4.50,
+    "prices_by_size_eur": { "half_loaf": 2.60, "full_loaf": 4.50 },
     "attributes_json": {
       "is_dairy_free": true,
       "is_sugar_free": true,
@@ -87,6 +99,8 @@
     "item_id": "eclair_chocolate",
     "name": "Chocolate Éclair",
     "category": "patisserie",
+    "price_eur": 3.80,
+    "prices_by_size_eur": { "single": 3.80 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -101,6 +115,8 @@
     "item_id": "eclair_vanilla",
     "name": "Vanilla Éclair",
     "category": "patisserie",
+    "price_eur": 3.80,
+    "prices_by_size_eur": { "single": 3.80 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -115,6 +131,8 @@
     "item_id": "fruit_tart",
     "name": "Fresh Fruit Tart",
     "category": "patisserie",
+    "price_eur": 4.20,
+    "prices_by_size_eur": { "individual": 4.20, "large_6inch": 22.00 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -129,6 +147,8 @@
     "item_id": "lemon_tart",
     "name": "Lemon Tart",
     "category": "patisserie",
+    "price_eur": 4.00,
+    "prices_by_size_eur": { "individual": 4.00, "large_6inch": 21.00 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -143,6 +163,8 @@
     "item_id": "macaron_assorted",
     "name": "Macaron (Assorted Flavours)",
     "category": "patisserie",
+    "price_eur": 2.00,
+    "prices_by_size_eur": { "single": 2.00, "box_of_6": 11.00, "box_of_12": 20.00 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -157,6 +179,8 @@
     "item_id": "opera_cake_slice",
     "name": "Opéra Cake Slice",
     "category": "cakes",
+    "price_eur": 5.50,
+    "prices_by_size_eur": { "slice": 5.50 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -171,6 +195,8 @@
     "item_id": "black_forest_slice",
     "name": "Black Forest Cake Slice",
     "category": "cakes",
+    "price_eur": 5.20,
+    "prices_by_size_eur": { "slice": 5.20 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -185,6 +211,8 @@
     "item_id": "custom_celebration_cake",
     "name": "Custom Celebration Cake",
     "category": "cakes",
+    "price_eur": 38.00,
+    "prices_by_size_eur": { "6inch": 38.00, "8inch": 52.00, "10inch": 68.00 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -200,6 +228,8 @@
     "item_id": "quiche_lorraine",
     "name": "Quiche Lorraine",
     "category": "savoury",
+    "price_eur": 4.60,
+    "prices_by_size_eur": { "slice": 4.60, "whole_8inch": 24.00 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": true,
@@ -214,6 +244,8 @@
     "item_id": "spinach_feta_pastry",
     "name": "Spinach & Feta Pastry",
     "category": "savoury",
+    "price_eur": 3.60,
+    "prices_by_size_eur": { "single": 3.60 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": true,
@@ -228,6 +260,8 @@
     "item_id": "espresso",
     "name": "Espresso",
     "category": "coffee",
+    "price_eur": 2.20,
+    "prices_by_size_eur": { "single": 2.20, "double": 2.80 },
     "attributes_json": {
       "is_dairy_free": true,
       "is_sugar_free": true,
@@ -242,6 +276,8 @@
     "item_id": "cappuccino",
     "name": "Cappuccino",
     "category": "coffee",
+    "price_eur": 3.40,
+    "prices_by_size_eur": { "small": 3.40, "large": 4.10 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -256,6 +292,8 @@
     "item_id": "flat_white",
     "name": "Flat White",
     "category": "coffee",
+    "price_eur": 3.60,
+    "prices_by_size_eur": { "small": 3.60, "large": 4.30 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -270,6 +308,8 @@
     "item_id": "filter_coffee",
     "name": "Filter Coffee",
     "category": "coffee",
+    "price_eur": 2.80,
+    "prices_by_size_eur": { "small": 2.80, "medium": 3.20, "large": 3.60 },
     "attributes_json": {
       "is_dairy_free": true,
       "is_sugar_free": true,
@@ -284,6 +324,8 @@
     "item_id": "latte",
     "name": "Café Latte",
     "category": "coffee",
+    "price_eur": 3.80,
+    "prices_by_size_eur": { "small": 3.80, "medium": 4.20, "large": 4.60 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -298,6 +340,8 @@
     "item_id": "hot_chocolate",
     "name": "Hot Chocolate",
     "category": "hot_drinks",
+    "price_eur": 3.60,
+    "prices_by_size_eur": { "small": 3.60, "large": 4.30 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -312,6 +356,8 @@
     "item_id": "chai_latte",
     "name": "Chai Latte",
     "category": "hot_drinks",
+    "price_eur": 3.80,
+    "prices_by_size_eur": { "small": 3.80, "large": 4.40 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -326,6 +372,8 @@
     "item_id": "matcha_latte",
     "name": "Matcha Latte",
     "category": "hot_drinks",
+    "price_eur": 4.20,
+    "prices_by_size_eur": { "small": 4.20, "large": 4.80 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -340,6 +388,8 @@
     "item_id": "stollen_slice",
     "name": "Christmas Stollen Slice",
     "category": "seasonal_pastry",
+    "price_eur": 3.50,
+    "prices_by_size_eur": { "slice": 3.50 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -356,6 +406,8 @@
     "item_id": "hot_cross_bun",
     "name": "Hot Cross Bun",
     "category": "seasonal_pastry",
+    "price_eur": 2.40,
+    "prices_by_size_eur": { "single": 2.40, "box_of_6": 13.00 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -372,6 +424,8 @@
     "item_id": "galette_des_rois",
     "name": "Galette des Rois",
     "category": "seasonal_pastry",
+    "price_eur": 4.50,
+    "prices_by_size_eur": { "slice": 4.50, "whole_8inch": 28.00 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -388,6 +442,8 @@
     "item_id": "strawberry_mille_feuille",
     "name": "Strawberry Mille-Feuille",
     "category": "seasonal_pastry",
+    "price_eur": 4.60,
+    "prices_by_size_eur": { "individual": 4.60 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
@@ -404,6 +460,8 @@
     "item_id": "pumpkin_spice_brioche",
     "name": "Pumpkin Spice Brioche",
     "category": "seasonal_pastry",
+    "price_eur": 3.20,
+    "prices_by_size_eur": { "single": 3.20, "box_of_4": 11.50 },
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,

@@ -158,8 +158,11 @@ Route queries to the appropriate tool:
 When a new order request is received:
 - Use menu_agent_tool to confirm items exist AND check seasonal availability
 - Use menu_agent_tool to calculate the total cost in Euros (€)
-- Prices are set per category, not per item: tell menu_agent_tool the item type
-  (coffee, pastry, bread or cake) and, for coffee, the size
+- Prices are per item. Pass menu_agent_tool each item by its menu name (e.g.
+  "Almond Croissant"), a quantity, and a size only when the customer gave one
+  (e.g. "large", "8inch", "box_of_4"). Do not invent a size.
+- If the pricing result lists any unpriced items, do not quote a total — ask the
+  customer to clarify those items first
 - Display items and total cost BEFORE asking for personal information
 - Ask for the customer's name or Pastry Rewards member ID
 - Use store_id 'SPBC-STORE-001' as default if not specified
