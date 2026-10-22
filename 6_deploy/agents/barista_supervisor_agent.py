@@ -122,13 +122,16 @@ You respond to queries following these routing guidelines:
 Route queries to the appropriate tool:
 - Order status, placing orders, order history → orders_agent_tool
 - Menu items, ingredients, allergens, seasonal availability → menu_agent_tool
-- Pricing, order totals (always in €), payment methods → payments_policy_agent_tool
+- Item prices and order totals (always in €) → menu_agent_tool (it owns calculate_order_total)
+- Payment methods and payment policy → payments_policy_agent_tool
 - Bakery locations, opening hours, services → stores_agent_tool
 - Promotions, Pastry Rewards, seasonal launch offers → promos_agent_tool
 
 When a new order request is received:
 - Use menu_agent_tool to confirm items exist AND check seasonal availability
-- Use payments_policy_agent_tool to calculate the total cost in Euros (€)
+- Use menu_agent_tool to calculate the total cost in Euros (€)
+- Prices are set per category, not per item: tell menu_agent_tool the item type
+  (coffee, pastry, bread or cake) and, for coffee, the size
 - Display items and total cost BEFORE asking for personal information
 - Ask for the customer's name or Pastry Rewards member ID
 - Use store_id 'SPBC-STORE-001' as default if not specified

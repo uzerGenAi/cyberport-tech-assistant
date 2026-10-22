@@ -473,6 +473,10 @@ TRUST
     # Baseline runtime permissions (ECR pull, logs, X-Ray, metrics, workload identity) plus
     # exactly what the agent code calls (models, KBs, guardrail, S3, DynamoDB). The stores database
     # and promotions API are in a second policy, SPBC-AgentCore-Backends (put_backends_policy).
+    # NOTE on the two knowledge base statements below: bedrock:Retrieve takes a knowledge-base
+    # resource, but bedrock:RetrieveAndGenerate supports no resource types, so scoping it to a
+    # knowledge-base ARN denies it. That denial surfaced only at runtime, as the agents
+    # answering "there was an error retrieving information".
     local policy_doc
     policy_doc=$(cat <<POLICY
 {
@@ -535,6 +539,12 @@ TRUST
       ]
     },
     {
+      "Sid": "NovaProProfileMetadata",
+      "Effect": "Allow",
+      "Action": "bedrock:GetInferenceProfile",
+      "Resource": "arn:aws:bedrock:${REGION}:${ACCOUNT_ID}:inference-profile/${LLM_MODEL_ID}"
+    },
+    {
       "Sid": "NovaProEuProfile",
       "Effect": "Allow",
       "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
@@ -547,10 +557,16 @@ TRUST
       ]
     },
     {
-      "Sid": "KnowledgeBases",
+      "Sid": "KnowledgeBaseRetrieve",
       "Effect": "Allow",
-      "Action": ["bedrock:Retrieve", "bedrock:RetrieveAndGenerate"],
+      "Action": "bedrock:Retrieve",
       "Resource": "arn:aws:bedrock:${REGION}:${ACCOUNT_ID}:knowledge-base/*"
+    },
+    {
+      "Sid": "KnowledgeBaseRetrieveAndGenerate",
+      "Effect": "Allow",
+      "Action": "bedrock:RetrieveAndGenerate",
+      "Resource": "*"
     },
     {
       "Sid": "Guardrail",
@@ -751,56 +767,87 @@ step5_knowledge_bases() {
 step6_guardrail() {
     header "Step 6 — Create Bedrock Guardrail"
 
-    local existing_gr gr_result
+    local existing_gr gr_result description topic_policy content_policy pii_policy
+
+    description="Content guardrail for SPBC Pastry Concierge — blocks out-of-scope topics and card numbers"
+
+    # The denied topic must describe what to BLOCK, in concrete terms. An earlier version
+    # defined it by negation ("anything other than pastries, breads, ... store hours"), which
+    # listed every bakery subject inside the deny definition and so blocked the very questions
+    # the agent exists to answer: menu, promos and stores all came back with the blocked-input
+    # or blocked-output message. Keep this list positive and specific.
+    # Bedrock caps a topic definition at 200 characters, so the detail lives in the examples.
+    topic_policy='{
+        "topicsConfig": [
+            {
+                "name": "OutOfScopeRequests",
+                "definition": "Subjects outside food and drink retail: software and IT help, crypto or investment advice, medical, legal or tax advice, politics, travel booking, or homework and essay writing.",
+                "examples": [
+                    "Tell me about cryptocurrency",
+                    "Help me write Python code",
+                    "What is your opinion on the election",
+                    "Write my history essay for me",
+                    "What stocks should I buy?"
+                ],
+                "type": "DENY"
+            }
+        ]
+    }'
+
+    content_policy='{
+        "filtersConfig": [
+            { "type": "SEXUAL",     "inputStrength": "HIGH", "outputStrength": "HIGH" },
+            { "type": "VIOLENCE",   "inputStrength": "HIGH", "outputStrength": "HIGH" },
+            { "type": "HATE",       "inputStrength": "HIGH", "outputStrength": "HIGH" },
+            { "type": "INSULTS",    "inputStrength": "MEDIUM", "outputStrength": "MEDIUM" },
+            { "type": "MISCONDUCT", "inputStrength": "MEDIUM", "outputStrength": "MEDIUM" },
+            { "type": "PROMPT_ATTACK", "inputStrength": "HIGH", "outputStrength": "NONE" }
+        ]
+    }'
+
+    # NAME is deliberately not a PII filter: the order flow asks for the customer's name.
+    pii_policy='{
+        "piiEntitiesConfig": [
+            { "type": "EMAIL",         "action": "ANONYMIZE" },
+            { "type": "PHONE",         "action": "ANONYMIZE" },
+            { "type": "CREDIT_DEBIT_CARD_NUMBER", "action": "BLOCK" }
+        ]
+    }'
+
     existing_gr=$(aws bedrock list-guardrails \
         --region "$REGION" \
-        --query "guardrails[?name=='${GUARDRAIL_NAME}'].guardrailId | [0]" \
+        --query "guardrails[?name=='${GUARDRAIL_NAME}'].id | [0]" \
         --output text 2>/dev/null || true)
 
     if [ -n "$existing_gr" ] && [ "$existing_gr" != "None" ]; then
-        log "Guardrail '${GUARDRAIL_NAME}' already exists: ${existing_gr}"
+        # Update, don't just adopt: reusing the guardrail without re-applying the policies meant
+        # an edited definition here never reached the deployed guardrail.
+        log "Guardrail '${GUARDRAIL_NAME}' already exists (${existing_gr}) — updating its configuration"
+        aws bedrock update-guardrail \
+            --region "$REGION" \
+            --guardrail-identifier "$existing_gr" \
+            --name "$GUARDRAIL_NAME" \
+            --description "$description" \
+            --blocked-input-messaging "I'm sorry, I can only help with bakery and pastry-related questions." \
+            --blocked-outputs-messaging "I'm sorry, I cannot provide that information." \
+            --topic-policy-config "$topic_policy" \
+            --content-policy-config "$content_policy" \
+            --sensitive-information-policy-config "$pii_policy" >/dev/null
         GUARDRAIL_ID="$existing_gr"
+        log "Configuration updated"
     else
         info "Creating guardrail: ${GUARDRAIL_NAME}"
-        # NAME is deliberately not a PII filter: the order flow asks for the customer's name.
         gr_result=$(aws bedrock create-guardrail \
             --region "$REGION" \
             --name "$GUARDRAIL_NAME" \
-            --description "Content guardrail for SPBC Pastry Concierge — blocks non-bakery topics and card numbers" \
+            --description "$description" \
             --blocked-input-messaging "I'm sorry, I can only help with bakery and pastry-related questions." \
             --blocked-outputs-messaging "I'm sorry, I cannot provide that information." \
-            --topic-policy-config '{
-                "topicsConfig": [
-                    {
-                        "name": "NonBakeryTopics",
-                        "definition": "Requests unrelated to the bakery business: anything other than pastries, breads, cakes, drinks, menu items, ordering, order status, payments, promotions, loyalty rewards, or store locations and hours",
-                        "examples": [
-                            "Tell me about cryptocurrency",
-                            "Help me write code",
-                            "What is your opinion on the election"
-                        ],
-                        "type": "DENY"
-                    }
-                ]
-            }' \
-            --content-policy-config '{
-                "filtersConfig": [
-                    { "type": "SEXUAL",     "inputStrength": "HIGH", "outputStrength": "HIGH" },
-                    { "type": "VIOLENCE",   "inputStrength": "HIGH", "outputStrength": "HIGH" },
-                    { "type": "HATE",       "inputStrength": "HIGH", "outputStrength": "HIGH" },
-                    { "type": "INSULTS",    "inputStrength": "HIGH", "outputStrength": "HIGH" },
-                    { "type": "MISCONDUCT", "inputStrength": "HIGH", "outputStrength": "HIGH" },
-                    { "type": "PROMPT_ATTACK", "inputStrength": "HIGH", "outputStrength": "NONE" }
-                ]
-            }' \
-            --sensitive-information-policy-config '{
-                "piiEntitiesConfig": [
-                    { "type": "EMAIL",         "action": "ANONYMIZE" },
-                    { "type": "PHONE",         "action": "ANONYMIZE" },
-                    { "type": "CREDIT_DEBIT_CARD_NUMBER", "action": "BLOCK" }
-                ]
-            }')
+            --topic-policy-config "$topic_policy" \
+            --content-policy-config "$content_policy" \
+            --sensitive-information-policy-config "$pii_policy")
 
+        # CreateGuardrail's response calls it guardrailId; ListGuardrails calls it id
         GUARDRAIL_ID=$(echo "$gr_result" | jq -r '.guardrailId')
         log "Guardrail created: ${GUARDRAIL_ID}"
     fi
@@ -1033,9 +1080,12 @@ step8_create_runtime() {
     fi
 
     # ── Guardrail (optional): use the highest numbered version ──
+    # NOTE: ListGuardrails returns the identifier as "id"; only CreateGuardrail's response
+    # calls it "guardrailId". Querying .guardrailId here returns None, which silently left
+    # the runtime with no guardrail attached.
     if [ -z "${GUARDRAIL_ID:-}" ]; then
         GUARDRAIL_ID=$(aws bedrock list-guardrails --region "$REGION" \
-            --query "guardrails[?name=='${GUARDRAIL_NAME}'].guardrailId | [0]" --output text 2>/dev/null || true)
+            --query "guardrails[?name=='${GUARDRAIL_NAME}'].id | [0]" --output text 2>/dev/null || true)
         if [ "$GUARDRAIL_ID" = "None" ]; then GUARDRAIL_ID=""; fi
     fi
     if [ -n "${GUARDRAIL_ID:-}" ] && [ -z "${GUARDRAIL_VERSION:-}" ]; then
@@ -1166,7 +1216,9 @@ step9_test_runtime() {
         case "$domain" in
             menu)
                 prompt="Do you have an Almond Croissant, and what does it cost?"
-                expect="croissant"
+                # A price, not just the item name: naming the pastry while failing to price it
+                # is what a broken menu/price tool looks like
+                expect="[0-9]+[.,][0-9]{2}|€ ?[0-9]|[0-9] ?(EUR|euro)"
                 requirement="required" ;;
             orders)
                 prompt="What is the status of the most recent order for user_001?"
@@ -1175,7 +1227,8 @@ step9_test_runtime() {
                 requirement="required" ;;
             payments)
                 prompt="Can I pay with cash at the bakery?"
-                expect="cash|card|payment"
+                # Must actually answer: "payment" alone matches the apology for a failed lookup
+                expect="(yes|accept|can pay|do take|welcome).{0,60}(cash|card)|cash.{0,40}(accepted|welcome|fine)"
                 requirement="required" ;;
             promos)
                 prompt="What do I get on Fresh Pastry Tuesdays?"
@@ -1214,9 +1267,11 @@ step9_test_runtime() {
         response=$(cat "$out_file")
         echo "  Response: $(printf '%s' "$response" | head -c 400)"
 
-        # Phrases the agents emit when a tool or the model failed. The runtime still
-        # returns 200 for these, so they have to be matched explicitly.
-        if printf '%s' "$response" | grep -qiE "sorry, i encountered|failed to retrieve|error fetching|could not connect|failed to connect|accessdenied|traceback"; then
+        # Phrases that mean a tool or the model failed. The runtime still returns 200 for
+        # these, so they have to be matched explicitly. A well-prompted agent reports a broken
+        # tool *politely* ("I'm unable to retrieve...", "please contact support"), and those
+        # phrasings sailed past an earlier, narrower version of this list.
+        if printf '%s' "$response" | grep -qiE "sorry, i encountered|failed to retrieve|error fetching|could not connect|failed to connect|accessdenied|traceback|error (in |when )?retriev|unable to (retrieve|determine|provide)|try again later|contact (our |a )?(support|team member)|check (our website|with a team member)"; then
             failures=$((failures + 1))
             err "[${domain}] the answer reports a failure — check the runtime logs"
             continue
@@ -1331,7 +1386,7 @@ teardown() {
 
     info "Deleting guardrail..."
     gr_id=$(aws bedrock list-guardrails --region "$REGION" \
-        --query "guardrails[?name=='${GUARDRAIL_NAME}'].guardrailId | [0]" --output text 2>/dev/null || true)
+        --query "guardrails[?name=='${GUARDRAIL_NAME}'].id | [0]" --output text 2>/dev/null || true)
     if [ -n "$gr_id" ] && [ "$gr_id" != "None" ]; then
         aws bedrock delete-guardrail --region "$REGION" --guardrail-identifier "$gr_id" && log "Guardrail deleted"
     fi

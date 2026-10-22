@@ -665,14 +665,20 @@ Replace `<ACCOUNT_ID>`, `<BUCKET>`, the KB IDs, `<GUARDRAIL_ID>` and `<RUNTIME_N
         "arn:aws:bedrock:eu-north-1::foundation-model/amazon.nova-pro-v1:0",
         "arn:aws:bedrock:eu-west-1::foundation-model/amazon.nova-pro-v1:0",
         "arn:aws:bedrock:eu-west-3::foundation-model/amazon.nova-pro-v1:0" ] },
-    { "Sid": "KnowledgeBases", "Effect": "Allow",
-      "Action": ["bedrock:Retrieve", "bedrock:RetrieveAndGenerate"],
+    { "Sid": "NovaProProfileMetadata", "Effect": "Allow",
+      "Action": "bedrock:GetInferenceProfile",
+      "Resource": "arn:aws:bedrock:eu-central-1:<ACCOUNT_ID>:inference-profile/eu.amazon.nova-pro-v1:0" },
+    { "Sid": "KnowledgeBaseRetrieve", "Effect": "Allow",
+      "Action": "bedrock:Retrieve",
       "Resource": [
         "arn:aws:bedrock:eu-central-1:<ACCOUNT_ID>:knowledge-base/<MENU_KB>",
         "arn:aws:bedrock:eu-central-1:<ACCOUNT_ID>:knowledge-base/<ORDERS_KB>",
         "arn:aws:bedrock:eu-central-1:<ACCOUNT_ID>:knowledge-base/<PAYMENTS_KB>",
         "arn:aws:bedrock:eu-central-1:<ACCOUNT_ID>:knowledge-base/<STORES_KB>",
         "arn:aws:bedrock:eu-central-1:<ACCOUNT_ID>:knowledge-base/<PROMOS_KB>" ] },
+    { "Sid": "KnowledgeBaseRetrieveAndGenerate", "Effect": "Allow",
+      "Action": "bedrock:RetrieveAndGenerate",
+      "Resource": "*" },
     { "Sid": "Guardrail", "Effect": "Allow", "Action": "bedrock:ApplyGuardrail",
       "Resource": "arn:aws:bedrock:eu-central-1:<ACCOUNT_ID>:guardrail/<GUARDRAIL_ID>" },
     { "Sid": "MenuJson", "Effect": "Allow", "Action": "s3:GetObject",
@@ -684,6 +690,12 @@ Replace `<ACCOUNT_ID>`, `<BUCKET>`, the KB IDs, `<GUARDRAIL_ID>` and `<RUNTIME_N
 ```
 
 Drop the statements and KB ARNs for anything you descoped. Remove the `Guardrail` statement if you skipped Step 5.
+
+Three details here were confirmed the hard way, on a real deployment:
+
+- **`bedrock:RetrieveAndGenerate` must use `"Resource": "*"`.** The action supports no resource types, so scoping it to a knowledge base ARN denies it. `bedrock:Retrieve` is resource-scoped and stays on the KB ARNs.
+- **`bedrock:GetInferenceProfile` is required.** `RetrieveAndGenerate` resolves the inference profile before invoking it. Without this the agents answer "I'm unable to retrieve that information" for every knowledge base question while the tool-backed domains keep working — so the symptom looks like a knowledge base problem, not an IAM one.
+- Both failures return HTTP 200. Only a check that reads the answer's content catches them (Step 8).
 
 ### A.4 Backends policy `SPBC-AgentCore-Backends` (with the Step 2 stack)
 

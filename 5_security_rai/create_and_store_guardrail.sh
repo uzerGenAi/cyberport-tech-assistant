@@ -170,7 +170,7 @@ create_guardrail() {
 
     # Re-running the script reuses the guardrail instead of failing on the duplicate name
     GUARDRAIL_ID=$(aws bedrock list-guardrails --region "$REGION" \
-      --query "guardrails[?name=='${GUARDRAIL_NAME}'].guardrailId | [0]" \
+      --query "guardrails[?name=='${GUARDRAIL_NAME}'].id | [0]" \
       --output text 2>/dev/null || true)
 
     if [ -n "$GUARDRAIL_ID" ] && [ "$GUARDRAIL_ID" != "None" ]; then
