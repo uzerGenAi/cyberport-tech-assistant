@@ -57,7 +57,7 @@ echo "=== Discovering AWS Resources ==="
 
 # Discover Aurora DB cluster by name pattern
 echo "Looking for Aurora DB cluster..."
-DB_CLUSTER_NAME=$(aws rds describe-db-clusters --query 'DBClusters[?starts_with(DBClusterIdentifier, `spbc-aurora-cluster`)].DBClusterIdentifier' --output text | head -1)
+DB_CLUSTER_NAME=$(aws rds describe-db-clusters --query 'DBClusters[?starts_with(DBClusterIdentifier, `spbc-aurora-cluster`)].DBClusterIdentifier' --output text 2>/dev/null | head -1 || true)
 if [ -n "$DB_CLUSTER_NAME" ]; then
     echo "export DB_CLUSTER_NAME=$DB_CLUSTER_NAME" >> $ENV_FILE
     echo "✅ Found DB Cluster: $DB_CLUSTER_NAME"
@@ -67,7 +67,7 @@ fi
 
 # Discover Secrets Manager secret
 echo "Looking for database credentials secret..."
-DB_SECRET_NAME=$(aws secretsmanager list-secrets --query 'SecretList[?starts_with(Name, `spbc-aurora-db-credentials`)].Name' --output text | head -1)
+DB_SECRET_NAME=$(aws secretsmanager list-secrets --query 'SecretList[?starts_with(Name, `spbc-aurora-db-credentials`)].Name' --output text 2>/dev/null | head -1 || true)
 if [ -n "$DB_SECRET_NAME" ]; then
     echo "export DB_SECRET_NAME=$DB_SECRET_NAME" >> $ENV_FILE
     echo "✅ Found DB Secret: $DB_SECRET_NAME"
@@ -80,9 +80,9 @@ fi
 # the legacy cluster/secret above. Stale values from an earlier run are unset, never kept.
 echo "Looking for the stores database Data API settings..."
 _stores_cluster_arn=$(aws rds describe-db-clusters --region "$REGION" --db-cluster-identifier spbc-aurora-cluster \
-    --query 'DBClusters[?HttpEndpointEnabled==`true`].DBClusterArn | [0]' --output text 2>/dev/null)
+    --query 'DBClusters[?HttpEndpointEnabled==`true`].DBClusterArn | [0]' --output text 2>/dev/null || true)
 _stores_secret_arn=$(aws secretsmanager describe-secret --region "$REGION" --secret-id spbc-stores-db-reader \
-    --query 'DeletedDate == null && ARN || `null`' --output text 2>/dev/null)
+    --query 'DeletedDate == null && ARN || `null`' --output text 2>/dev/null || true)
 if [ -n "$_stores_cluster_arn" ] && [ "$_stores_cluster_arn" != "None" ] \
     && [ -n "$_stores_secret_arn" ] && [ "$_stores_secret_arn" != "None" ]; then
     echo "export STORES_DB_CLUSTER_ARN=$_stores_cluster_arn" >> $ENV_FILE
@@ -99,7 +99,7 @@ unset _stores_cluster_arn _stores_secret_arn
 # Promotions API: HTTP API spbcBakeryAPI from the same stack (IAM-authorized GET /prod/promotions)
 echo "Looking for the promotions API..."
 _promos_endpoint=$(aws apigatewayv2 get-apis --region "$REGION" \
-    --query "Items[?Name=='spbcBakeryAPI'].ApiEndpoint | [0]" --output text 2>/dev/null)
+    --query "Items[?Name=='spbcBakeryAPI'].ApiEndpoint | [0]" --output text 2>/dev/null || true)
 if [ -n "$_promos_endpoint" ] && [ "$_promos_endpoint" != "None" ]; then
     echo "export PROMOS_API_URL=${_promos_endpoint}/prod/promotions" >> $ENV_FILE
     echo "✅ Found promotions API: ${_promos_endpoint}/prod/promotions"
@@ -111,7 +111,7 @@ unset _promos_endpoint
 
 # Discover DynamoDB tables
 echo "Looking for DynamoDB tables..."
-ORDERS_TABLE=$(aws dynamodb list-tables --query 'TableNames[?starts_with(@, `spbc-orders-table`)]' --output text | head -1)
+ORDERS_TABLE=$(aws dynamodb list-tables --query 'TableNames[?starts_with(@, `spbc-orders-table`)]' --output text 2>/dev/null | head -1 || true)
 if [ -n "$ORDERS_TABLE" ]; then
     echo "export ORDERS_TABLE=$ORDERS_TABLE" >> $ENV_FILE
     echo "✅ Found Orders Table: $ORDERS_TABLE"
@@ -119,7 +119,7 @@ else
     echo "❌ Orders table not found (expected: spbc-orders-table)"
 fi
 
-SESSIONS_TABLE=$(aws dynamodb list-tables --query 'TableNames[?starts_with(@, `spbc-sessions-table`)]' --output text | head -1)
+SESSIONS_TABLE=$(aws dynamodb list-tables --query 'TableNames[?starts_with(@, `spbc-sessions-table`)]' --output text 2>/dev/null | head -1 || true)
 if [ -n "$SESSIONS_TABLE" ]; then
     echo "export SESSIONS_TABLE=$SESSIONS_TABLE" >> $ENV_FILE
     echo "✅ Found Sessions Table: $SESSIONS_TABLE"
@@ -129,17 +129,17 @@ fi
 
 # Discover OpenSearch collection
 echo "Looking for OpenSearch collection..."
-OPENSEARCH_COLLECTION=$(aws opensearchserverless list-collections --query 'collectionSummaries[?starts_with(name, `spbc-`) || contains(name, `bakery`) || contains(name, `pastry`)].name' --output text | head -1)
+OPENSEARCH_COLLECTION=$(aws opensearchserverless list-collections --query 'collectionSummaries[?starts_with(name, `spbc-`) || contains(name, `bakery`) || contains(name, `pastry`)].name' --output text 2>/dev/null | head -1 || true)
 if [ -n "$OPENSEARCH_COLLECTION" ]; then
     # Get collection endpoint
-    AOSSENDPOINT=$(aws opensearchserverless batch-get-collection --names "$OPENSEARCH_COLLECTION" --query 'collectionDetails[0].collectionEndpoint' --output text)
+    AOSSENDPOINT=$(aws opensearchserverless batch-get-collection --names "$OPENSEARCH_COLLECTION" --query 'collectionDetails[0].collectionEndpoint' --output text 2>/dev/null || true)
     echo "export OPENSEARCH_COLLECTION=$OPENSEARCH_COLLECTION" >> $ENV_FILE
     echo "export AOSSENDPOINT=$AOSSENDPOINT" >> $ENV_FILE
     echo "✅ Found OpenSearch Collection: $OPENSEARCH_COLLECTION"
     echo "✅ OpenSearch Endpoint: $AOSSENDPOINT"
     
     # Get collection ARN
-    OPENSEARCH_COLLECTION_ARN=$(aws opensearchserverless batch-get-collection --names "$OPENSEARCH_COLLECTION" --query 'collectionDetails[0].arn' --output text)
+    OPENSEARCH_COLLECTION_ARN=$(aws opensearchserverless batch-get-collection --names "$OPENSEARCH_COLLECTION" --query 'collectionDetails[0].arn' --output text 2>/dev/null || true)
     echo "export OPENSEARCH_COLLECTION_ARN=$OPENSEARCH_COLLECTION_ARN" >> $ENV_FILE
     echo "✅ OpenSearch Collection ARN: $OPENSEARCH_COLLECTION_ARN"
 else
@@ -148,7 +148,7 @@ fi
 
 # Discover S3 buckets
 echo "Looking for CloudAge S3 bucket..."
-CLOUDAGE_S3_BUCKET=$(aws s3api list-buckets --query 'Buckets[?starts_with(Name, `spbc-input-docs-bucket-`) || starts_with(Name, `spbc-kb-`)].Name' --output text | head -1)
+CLOUDAGE_S3_BUCKET=$(aws s3api list-buckets --query 'Buckets[?starts_with(Name, `spbc-input-docs-bucket-`) || starts_with(Name, `spbc-kb-`)].Name' --output text 2>/dev/null | head -1 || true)
 if [ -n "$CLOUDAGE_S3_BUCKET" ]; then
     echo "export CLOUDAGE_S3_BUCKET=$CLOUDAGE_S3_BUCKET" >> $ENV_FILE
     echo "✅ Found CloudAge S3 Bucket: $CLOUDAGE_S3_BUCKET"
@@ -173,7 +173,7 @@ for domain in menu orders payments stores promos; do
     var_name="$(echo "$domain" | tr '[:lower:]' '[:upper:]')_KNOWLEDGE_BASE_ID"
     kb_id=$(aws bedrock-agent list-knowledge-bases --region "$REGION" \
         --query "knowledgeBaseSummaries[?name=='spbc-${domain}-knowledge-base'].knowledgeBaseId | [0]" \
-        --output text 2>/dev/null)
+        --output text 2>/dev/null || true)
     if [ -n "$kb_id" ] && [ "$kb_id" != "None" ]; then
         echo "export ${var_name}=${kb_id}" >> $ENV_FILE
         echo "✅ Found ${var_name}: ${kb_id}"
@@ -185,8 +185,12 @@ for domain in menu orders payments stores promos; do
 done
 
 # Guardrail (optional) — stored in SSM by 5_security_rai/create_and_store_guardrail.sh
-GR_ID=$(aws ssm get-parameter --name "/SPBC/guardrail/id" --region "$REGION" --query "Parameter.Value" --output text 2>/dev/null)
-GR_VERSION=$(aws ssm get-parameter --name "/SPBC/guardrail/version" --region "$REGION" --query "Parameter.Value" --output text 2>/dev/null)
+# The guardrail is optional and may not be in SSM. The `|| true` keeps a missing parameter
+# from aborting the script when it is sourced under `set -e` (as the CI deploy job does): a
+# failed command substitution is itself a failed command, which `set -e` treats as fatal even
+# though the `if` below is written to handle an empty value.
+GR_ID=$(aws ssm get-parameter --name "/SPBC/guardrail/id" --region "$REGION" --query "Parameter.Value" --output text 2>/dev/null || true)
+GR_VERSION=$(aws ssm get-parameter --name "/SPBC/guardrail/version" --region "$REGION" --query "Parameter.Value" --output text 2>/dev/null || true)
 if [ -n "$GR_ID" ] && [ -n "$GR_VERSION" ]; then
     echo "export GUARDRAIL_ID=$GR_ID" >> $ENV_FILE
     echo "export GUARDRAIL_VERSION=$GR_VERSION" >> $ENV_FILE
