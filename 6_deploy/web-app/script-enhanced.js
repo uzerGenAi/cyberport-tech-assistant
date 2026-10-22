@@ -14,7 +14,7 @@ let isInitialized = false;
 //
 // The page runs in exactly one of three modes, and it says which one it is in:
 //   live     — signed in, AgentCore client ready, answers come from the agent
-//   demo     — deliberately offline (?demo=1); answers come from local page data
+//   preview  — deliberately offline (?preview=1); answers come from local page data
 //   degraded — meant to be live but something failed; `reason` says what
 // ---------------------------------------------------------------------------
 const appState = {
@@ -119,29 +119,29 @@ function renderStateBanner() {
         return;
     }
 
-    const isDemo = appState.mode === 'demo';
-    const copy = isDemo ? null : failureCopy(appState.reason);
+    const isPreview = appState.mode === 'preview';
+    const copy = isPreview ? null : failureCopy(appState.reason);
 
     host.hidden = false;
-    host.className = `app-state-banner ${isDemo ? 'demo' : 'degraded'}`;
+    host.className = `app-state-banner ${isPreview ? 'preview' : 'degraded'}`;
     host.innerHTML = '';
 
     const text = document.createElement('span');
     text.className = 'app-state-banner-text';
-    text.textContent = isDemo
-        ? 'Demo mode: answers come from this page\u2019s local sample data, not the live agent.'
+    text.textContent = isPreview
+        ? 'Preview mode: answers come from this page\u2019s local sample data, not the live agent.'
         : `Limited mode: ${copy.banner} Answers come from this page\u2019s local sample data.`;
     host.appendChild(text);
 
     const actions = document.createElement('span');
     actions.className = 'app-state-banner-actions';
 
-    if (isDemo) {
+    if (isPreview) {
         const exit = document.createElement('button');
         exit.type = 'button';
         exit.className = 'app-state-banner-btn';
-        exit.textContent = 'Exit demo mode';
-        exit.addEventListener('click', exitDemoMode);
+        exit.textContent = 'Exit preview mode';
+        exit.addEventListener('click', exitPreviewMode);
         actions.appendChild(exit);
     } else if (copy.action === 'signin') {
         const signIn = document.createElement('a');
@@ -169,15 +169,17 @@ function renderStateBanner() {
     host.appendChild(actions);
 }
 
-// Leaving demo mode clears the sticky flag *and* the ?demo=1 parameter, so a
-// reload does not silently drop the user back into demo mode.
-function exitDemoMode() {
-    if (window.CognitoAuth && typeof window.CognitoAuth.setDemoMode === 'function') {
-        window.CognitoAuth.setDemoMode(false);
+// Leaving preview mode clears the sticky flag *and* the URL parameter (new and
+// legacy), so a reload does not silently drop the user back into preview mode.
+function exitPreviewMode() {
+    if (window.CognitoAuth && typeof window.CognitoAuth.setPreviewMode === 'function') {
+        window.CognitoAuth.setPreviewMode(false);
     } else {
+        sessionStorage.removeItem('previewMode');
         sessionStorage.removeItem('demoMode');
     }
     const url = new URL(window.location.href);
+    url.searchParams.delete('preview');
     url.searchParams.delete('demo');
     window.location.replace(url.toString());
 }
@@ -225,7 +227,7 @@ function wireSignOut() {
         if (window.CognitoAuth && typeof window.CognitoAuth.signOut === 'function') {
             window.CognitoAuth.signOut();
         } else {
-            ['idToken', 'awsCredentials', 'userId', 'username', 'selectedStore', 'demoMode', 'redirectedToLogin']
+            ['idToken', 'awsCredentials', 'userId', 'username', 'selectedStore', 'previewMode', 'demoMode', 'redirectedToLogin']
                 .forEach(key => sessionStorage.removeItem(key));
             try { localStorage.removeItem('chatbot_session_id'); } catch { /* ignore */ }
             window.location.replace('login.html');
@@ -239,13 +241,13 @@ async function initializeApp() {
     
     wireSignOut();
     
-    const demoMode = (window.CognitoAuth && typeof window.CognitoAuth.isDemoMode === 'function')
-        ? window.CognitoAuth.isDemoMode()
-        : sessionStorage.getItem('demoMode') === '1';
+    const previewMode = (window.CognitoAuth && typeof window.CognitoAuth.isPreviewMode === 'function')
+        ? window.CognitoAuth.isPreviewMode()
+        : sessionStorage.getItem('previewMode') === '1' || sessionStorage.getItem('demoMode') === '1';
     
-    if (demoMode) {
-        setAppState('demo');
-        setConnectionStatus('demo', 'Demo mode');
+    if (previewMode) {
+        setAppState('preview');
+        setConnectionStatus('preview', 'Preview mode');
     } else {
         setConnectionStatus('connecting', 'Connecting...');
         try {
@@ -273,8 +275,8 @@ async function initializeApp() {
     
     addPersonalizedGreeting();
     
-    if (appState.mode === 'demo') {
-        addMessage(`Demo mode is on, so I answer from this page\u2019s local sample data instead of the live ${ASSISTANT_NAME}. Use "Exit demo mode" in the banner above to connect for real.`, 'bot');
+    if (appState.mode === 'preview') {
+        addMessage(`Preview mode is on, so I answer from this page\u2019s local sample data instead of the live ${ASSISTANT_NAME}. Use "Exit preview mode" in the banner above to connect for real.`, 'bot');
     } else if (appState.mode === 'degraded') {
         const copy = failureCopy(appState.reason);
         addMessage(`${copy.headline} I can still show you the sample menu, bakery locations and promotions stored on this page.`, 'bot');
@@ -402,7 +404,7 @@ function sendSamplePrompt(promptText) {
 // Make function globally available
 window.sendSamplePrompt = sendSamplePrompt;
 
-// Sample promotions kept on the page for demo and limited modes.
+// Sample promotions kept on the page for preview and limited modes.
 // Mirrors 2_data_strategy/promos/promos_records.json — the live agent reads the
 // authoritative copy from the promotions API, so this list can lag behind.
 const LOCAL_PROMOTIONS = [
@@ -415,7 +417,7 @@ const LOCAL_PROMOTIONS = [
     { title: 'Seasonal Pastry Launch — 20% Off', description: '20% off all new seasonal pastries during the first week of each seasonal launch.', code: 'SEASONLAUNCH' },
 ];
 
-// Client-side fallback for demo mode and for genuine failures.
+// Client-side fallback for preview mode and for genuine failures.
 //
 // The headline states the real cause (from `error.reason`); the body is clearly
 // labelled as this page's local sample data, because it is not a live lookup.
@@ -444,11 +446,11 @@ function handleAgentFallback(userInput, error) {
                          inputLower.includes('discount') || inputLower.includes('coupon') || 
                          inputLower.includes('offer') || inputLower.includes('special');
 
-    // Headline: demo mode is a choice, a failure is a failure, and each failure
-    // names its own cause. Nothing here claims the agent is offline unless it is.
+    // Headline: preview mode is a choice, a failure is a failure, and each
+    // failure names its own cause. Nothing here claims the agent is offline unless it is.
     let fallbackMsg;
-    if (appState.mode === 'demo') {
-        fallbackMsg = 'Demo mode is on, so this is not a live answer. ';
+    if (appState.mode === 'preview') {
+        fallbackMsg = 'Preview mode is on, so this is not a live answer. ';
     } else {
         fallbackMsg = `${failureCopy(reason).headline} `;
     }
@@ -539,12 +541,12 @@ async function handleFormSubmit(event) {
     // Clear input
     chatbotInput.value = '';
     
-    // In demo or limited mode, answer locally and say so — do not pretend to call
-    // the agent and then report the inevitable failure as an outage.
+    // In preview or limited mode, answer locally and say so — do not pretend to
+    // call the agent and then report the inevitable failure as an outage.
     const clientUsable = window.fixedAgentCoreClient &&
                          typeof window.fixedAgentCoreClient.sendMessage === 'function';
     
-    if (appState.mode === 'demo') {
+    if (appState.mode === 'preview') {
         handleAgentFallback(userInput, null);
         return;
     }

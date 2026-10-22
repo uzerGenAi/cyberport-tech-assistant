@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="enhanced-styles.css">
   <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
   <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1563.0.min.js"></script>
-  <script src="cognito-enhanced.js"></script>
+  <script src="cognito-enhanced.js?v=4"></script>
 </head>
 <body>
   <div class="main-container">
@@ -26,7 +26,7 @@
       </button>
     </div>
     
-    <!-- Filled in by script-enhanced.js when the app is in demo or limited mode.
+    <!-- Filled in by script-enhanced.js when the app is in preview or limited mode.
          Hidden while everything is live. -->
     <div id="app-state-banner" class="app-state-banner" role="status" aria-live="polite" hidden></div>
     
@@ -37,14 +37,14 @@
         <p>Ask about pastries, promotions, bakery locations, or order support — your Pastry Concierge is ready.</p>
         <div class="hero-actions">
           <a class="pill-link" href="#chatbot">Start chatting</a>
-          <span class="hero-note">Add <code>?demo=1</code> to browse sample data without live AWS credentials</span>
+          <span class="hero-note">Add <code>?preview=1</code> to browse sample data without live AWS credentials</span>
         </div>
       </div>
       <div class="hero-stats">
         <div class="stat-card"><strong>24/7</strong><span>Friendly support</span></div>
         <div class="stat-card"><strong>10+</strong><span>Store locations</span></div>
         <div class="stat-card"><strong>3</strong><span>Menu favorites</span></div>
-        <div class="stat-card"><strong>100%</strong><span>Local demo ready</span></div>
+        <div class="stat-card"><strong>100%</strong><span>Local preview ready</span></div>
       </div>
     </div>
 
@@ -123,8 +123,8 @@
   </div>
 
   <!-- Include enhanced scripts -->
-  <script src="agentcore-client-fixed.js?v=3"></script>
-  <script src="script-enhanced.js?v=3"></script>
+  <script src="agentcore-client-fixed.js?v=4"></script>
+  <script src="script-enhanced.js?v=4"></script>
   
   <script>
     // Store Locator functionality
@@ -134,7 +134,7 @@
     // Load store data from the stores records
     async function loadStoreData() {
       try {
-        // Store data from stores_records.json (subset for demo)
+        // Store data from stores_records.json (subset for preview)
         storeData = [
           {"store_id": "spbc-de-001", "name": "Backstube Frankfurt Innenstadt", "address": "Zeil 106", "city": "Frankfurt am Main", "state": "DE", "zip_code": "60313", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:00"},
           {"store_id": "spbc-de-004", "name": "Backstube München Marienplatz", "address": "Kaufingerstraße 15", "city": "München", "state": "DE", "zip_code": "80331", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:30"},
@@ -230,9 +230,10 @@
     document.addEventListener('DOMContentLoaded', function() {
       // Sign-out is wired once, in script-enhanced.js, which routes through
       // CognitoAuth.signOut(). A second handler used to live here and cleared
-      // only idToken + username — leaving awsCredentials, userId and demoMode in
-      // sessionStorage, so "signing out" left usable AWS credentials behind and
-      // the next sign-in could inherit the previous user's state. Removed.
+      // only idToken + username — leaving awsCredentials, userId and other
+      // per-user state in sessionStorage, so "signing out" left usable AWS
+      // credentials behind and the next sign-in could inherit the previous
+      // user's state. Removed.
       
       // CloudWatch Dropdown Functionality
       const cloudwatchBtn = document.getElementById('cloudwatchButton');

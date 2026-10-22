@@ -1407,8 +1407,8 @@ h2.section-title {   /* just an example selector */
    App state banner + honest connection status
    ---------------------------------------------------------------------------
    The banner is the page's single visible answer to "am I talking to the live
-   agent?". It appears only in demo or limited mode, and always offers the way
-   out (exit demo / sign in / retry).
+   agent?". It appears only in preview or limited mode, and always offers the way
+   out (exit preview / sign in / retry).
    =========================================================================== */
 
 .app-state-banner {
@@ -1428,8 +1428,8 @@ h2.section-title {   /* just an example selector */
   display: none;
 }
 
-/* Demo mode: a deliberate choice, so informational rather than alarming. */
-.app-state-banner.demo {
+/* Preview mode: a deliberate choice, so informational rather than alarming. */
+.app-state-banner.preview {
   background: #e8f1fb;
   border-color: #9cc3e8;
   color: #16365c;
@@ -1484,18 +1484,18 @@ h2.section-title {   /* just an example selector */
   opacity: 0.85;
 }
 
-/* Demo is a distinct connection state: not connected, but not broken either. */
-.connection-status.demo {
+/* Preview is a distinct connection state: not connected, but not broken either. */
+.connection-status.preview {
   background: #1a4d8f;
   color: #fff;
 }
 
-.user-controls-header .connection-status.demo {
+.user-controls-header .connection-status.preview {
   background: rgba(26, 77, 143, 0.15);
   color: #16365c;
 }
 
-.user-controls-header .connection-status.demo::before {
+.user-controls-header .connection-status.preview::before {
   content: "🧪";
 }
 

@@ -34,26 +34,44 @@ function authError(message, reason) {
   return err;
 }
 
-// Demo mode is explicit and un-sticky: `?demo=1` turns it on for the tab,
-// `?demo=0` clears it. Without a query parameter the stored value decides.
-function isDemoMode() {
-  const requested = new URLSearchParams(window.location.search).get('demo');
+// Preview mode lets a visitor browse the page's local sample data without live
+// AWS credentials. It is explicit and un-sticky: `?preview=1` turns it on for
+// the tab, `?preview=0` clears it. Without a query parameter the stored value
+// decides.
+//
+// The feature used to be called "demo". The legacy `?demo=1` parameter and the
+// legacy `demoMode` storage key are still honoured so old bookmarks and
+// in-flight sessions keep working, but everything written going forward uses
+// the `preview` names.
+const PREVIEW_KEY = 'previewMode';
+const LEGACY_PREVIEW_KEY = 'demoMode';
+
+function readPreviewParam() {
+  const params = new URLSearchParams(window.location.search);
+  // New name wins; fall back to the legacy one.
+  return params.get('preview') ?? params.get('demo');
+}
+
+function isPreviewMode() {
+  const requested = readPreviewParam();
   if (requested === '1') {
-    sessionStorage.setItem('demoMode', '1');
+    setPreviewMode(true);
     return true;
   }
   if (requested === '0') {
-    sessionStorage.removeItem('demoMode');
+    setPreviewMode(false);
     return false;
   }
-  return sessionStorage.getItem('demoMode') === '1';
+  return sessionStorage.getItem(PREVIEW_KEY) === '1'
+      || sessionStorage.getItem(LEGACY_PREVIEW_KEY) === '1';
 }
 
-function setDemoMode(enabled) {
+function setPreviewMode(enabled) {
   if (enabled) {
-    sessionStorage.setItem('demoMode', '1');
+    sessionStorage.setItem(PREVIEW_KEY, '1');
   } else {
-    sessionStorage.removeItem('demoMode');
+    sessionStorage.removeItem(PREVIEW_KEY);
+    sessionStorage.removeItem(LEGACY_PREVIEW_KEY);
   }
 }
 
@@ -87,9 +105,9 @@ async function checkAuthentication() {
 
   if (isLoginPage()) return;
 
-  if (isDemoMode()) {
+  if (isPreviewMode()) {
     sessionStorage.removeItem('redirectedToLogin');
-    console.log('Demo mode enabled; skipping auth redirect');
+    console.log('Preview mode enabled; skipping auth redirect');
     return;
   }
   
@@ -345,7 +363,7 @@ function showError(message) {
 }
 
 // Function to sign out user.
-// Clears every piece of per-user state, including demo mode and the agent
+// Clears every piece of per-user state, including preview mode and the agent
 // session id — otherwise the next user inherits the previous conversation.
 function signOut() {
   [
@@ -354,6 +372,7 @@ function signOut() {
     'userId',
     'username',
     'selectedStore',
+    'previewMode',
     'demoMode',
     'redirectedToLogin',
   ].forEach(key => sessionStorage.removeItem(key));
@@ -373,7 +392,7 @@ window.CognitoAuth = {
   createAWSServiceClient,
   signOut,
   loadCognitoConfig,
-  isDemoMode,
-  setDemoMode,
+  isPreviewMode,
+  setPreviewMode,
   getConfig: () => cognitoConfig,
 };

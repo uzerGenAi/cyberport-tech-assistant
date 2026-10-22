@@ -186,7 +186,7 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
   <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1563.0.min.js"></script>
-  <script src="cognito-enhanced.js"></script>
+  <script src="cognito-enhanced.js?v=4"></script>
 </head>
 <body>
   <div class="login-header">
@@ -215,13 +215,13 @@
         <button type="submit" class="btn" id="login-button">
           Sign In
         </button>
-        <button type="button" class="btn btn-secondary" id="demo-button">
-          Try Demo Mode
+        <button type="button" class="btn btn-secondary" id="preview-button">
+          Try Preview Mode
         </button>
       </div>
       
       <div id="errorMessage" class="error-message"></div>
-      <p class="helper-text">Demo mode lets you preview the experience locally without live AWS credentials.</p>
+      <p class="helper-text">Preview mode lets you explore the experience locally without live AWS credentials.</p>
     </form>
   </div>
 
@@ -230,12 +230,12 @@
     document.addEventListener('DOMContentLoaded', function() {
       const loginForm = document.getElementById('loginForm');
       const loginButton = document.getElementById('login-button');
-      const demoButton = document.getElementById('demo-button');
+      const previewButton = document.getElementById('preview-button');
       
-      if (demoButton) {
-        demoButton.addEventListener('click', function() {
-          sessionStorage.setItem('demoMode', '1');
-          window.location.href = 'index.html?demo=1';
+      if (previewButton) {
+        previewButton.addEventListener('click', function() {
+          sessionStorage.setItem('previewMode', '1');
+          window.location.href = 'index.html?preview=1';
         });
       }
       
