@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Specialty Bakeries & Pastry Cafés</title>
+  <!-- Montserrat font for flashy title -->
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:900&display=swap" rel="stylesheet">
+  <!-- Enhanced styles -->
+  <link rel="stylesheet" href="enhanced-styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1563.0.min.js"></script>
+  <script src="cognito-enhanced.js"></script>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Top Header with Title and Sign Out -->
+    <div class="top-header">
+      <div class="header-content">
+        <h1 class="main-title">🥐 Specialty Bakeries & Pastry Cafés</h1>
+        <p class="subtitle">Artisan pastries, fresh breads, and specialty coffee — baked fresh daily.</p>
+      </div>
+      <button id="signOutButton" class="bubble-btn signout-btn compact top-signout">
+        <span class="btn-icon">👋</span>
+        <span class="btn-text">Sign Out</span>
+      </button>
+    </div>
+    
+    <div class="hero-panel">
+      <div class="hero-copy">
+        <p class="eyebrow">Powered by Specialty Bakeries & Pastry Cafés AI</p>
+        <h2>Order smarter, discover seasonal pastries, and find your nearest bakery.</h2>
+        <p>Ask about pastries, promotions, bakery locations, or order support — your Pastry Concierge is ready.</p>
+        <div class="hero-actions">
+          <a class="pill-link" href="#chatbot">Start chatting</a>
+          <span class="hero-note">Demo mode works locally even without live AWS credentials</span>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card"><strong>24/7</strong><span>Friendly support</span></div>
+        <div class="stat-card"><strong>10+</strong><span>Store locations</span></div>
+        <div class="stat-card"><strong>3</strong><span>Menu favorites</span></div>
+        <div class="stat-card"><strong>100%</strong><span>Local demo ready</span></div>
+      </div>
+    </div>
+
+    <div class="chatbot-section">
+      <div class="chatbot-header">
+        <h2>Pastry Concierge Assistant</h2>
+        <div class="user-controls-header">
+          <div class="connection-status" id="connection-status">Connecting...</div>
+          
+          <!-- CloudWatch Dropdown Button -->
+          <div class="dropdown-container">
+            <button id="cloudwatchButton" class="bubble-btn cloudwatch-btn compact">
+              <span class="btn-icon">📊</span>
+              <span class="btn-text">CloudWatch</span>
+              <span class="dropdown-arrow">▼</span>
+            </button>
+            <div id="cloudwatchDropdown" class="dropdown-menu">
+              <a href="#" id="agentDashboardLink" class="dropdown-item">
+                <span class="dropdown-icon">📈</span>
+                Agent Dashboard
+              </a>
+              <a href="#" id="agentLogsLink" class="dropdown-item">
+                <span class="dropdown-icon">📋</span>
+                Agent Logs
+              </a>
+            </div>
+          </div>
+          
+          <!-- Store Locator Dropdown Button -->
+          <div class="dropdown-container">
+            <button id="storeLocatorButton" class="bubble-btn store-locator-btn compact">
+              <span class="btn-icon">📍</span>
+              <span class="btn-text" id="selected-store-text">Select Store</span>
+              <span class="dropdown-arrow">▼</span>
+            </button>
+            <div id="storeLocatorDropdown" class="dropdown-menu store-dropdown-menu">
+              <!-- Store options will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Enhanced Chatbot Widget - Larger Size -->
+      <div class="chatbot-container-main large" id="chatbot">
+        <div class="chatbot-messages" id="chatbot-messages">
+          <div class="bot-message" id="initial-greeting">Loading...</div>
+        </div>
+        <form class="chatbot-input-area" id="chatbot-form">
+          <input type="text" id="chatbot-input" placeholder="Type your message..." autocomplete="off" required>
+          <button type="submit">Send</button>
+        </form>
+      </div>
+      
+      <!-- Sample Prompts Section -->
+      <div class="sample-prompts">
+        <h3>Try these sample prompts to test your Pastry Concierge:</h3>
+        <div class="prompt-buttons">
+          <button class="prompt-btn" onclick="sendSamplePrompt('Do you have any gluten-free options?')">Do you have any gluten-free options?</button>
+          <button class="prompt-btn" onclick="sendSamplePrompt('What seasonal pastries are available right now?')">What seasonal pastries are available right now?</button>
+          <button class="prompt-btn" onclick="sendSamplePrompt('I received the wrong item — what should I do?')">I received the wrong item — what should I do?</button>
+          <button class="prompt-btn" onclick="sendSamplePrompt('What payment methods do you accept?')">What payment methods do you accept?</button>
+          <button class="prompt-btn" onclick="sendSamplePrompt('How can I use the Fresh Pastry Tuesdays promotion?')">How can I use the Fresh Pastry Tuesdays promotion?</button>
+          <button class="prompt-btn" onclick="sendSamplePrompt('I want to order a custom celebration cake for 20 people')">I want to order a custom celebration cake for 20 people</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu Section -->
+    <div class="menu-section">
+      <h2>Our Menu</h2>
+      <div class="menu-categories" id="menu-categories">
+        <!-- Menu will be loaded dynamically -->
+        <div class="loading-menu">Loading menu...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include enhanced scripts -->
+  <script src="agentcore-client-fixed.js?v=2"></script>
+  <script src="script-enhanced.js?v=2"></script>
+  
+  <script>
+    // Store Locator functionality
+    let selectedStore = null;
+    let storeData = [];
+    
+    // Load store data from the stores records
+    async function loadStoreData() {
+      try {
+        // Store data from stores_records.json (subset for demo)
+        storeData = [
+          {"store_id": "spbc-de-001", "name": "Backstube Frankfurt Innenstadt", "address": "Zeil 106", "city": "Frankfurt am Main", "state": "DE", "zip_code": "60313", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:00"},
+          {"store_id": "spbc-de-004", "name": "Backstube München Marienplatz", "address": "Kaufingerstraße 15", "city": "München", "state": "DE", "zip_code": "80331", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:30"},
+          {"store_id": "spbc-de-007", "name": "Backstube Berlin Mitte", "address": "Friedrichstraße 120", "city": "Berlin", "state": "DE", "zip_code": "10117", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:00"},
+          {"store_id": "spbc-de-008", "name": "Backstube Berlin Prenzlauer Berg", "address": "Kastanienallee 22", "city": "Berlin", "state": "DE", "zip_code": "10435", "has_drive_thru": false, "hours_start": "07:30", "hours_end": "18:30"},
+          {"store_id": "spbc-de-010", "name": "Backstube Hamburg Altstadt", "address": "Mönckebergstraße 12", "city": "Hamburg", "state": "DE", "zip_code": "20095", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:00"},
+          {"store_id": "spbc-de-012", "name": "Backstube Köln Altstadt", "address": "Hohe Straße 88", "city": "Köln", "state": "DE", "zip_code": "50667", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:00"},
+          {"store_id": "spbc-at-001", "name": "Konditorei Wien Innere Stadt", "address": "Kärntner Straße 45", "city": "Wien", "state": "AT", "zip_code": "1010", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:30"},
+          {"store_id": "spbc-ch-001", "name": "Boulangerie Zürich Altstadt", "address": "Bahnhofstrasse 60", "city": "Zürich", "state": "CH", "zip_code": "8001", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:00"},
+          {"store_id": "spbc-de-018", "name": "Backstube Hannover Mitte", "address": "Georgstraße 25", "city": "Hannover", "state": "DE", "zip_code": "30159", "has_drive_thru": true, "hours_start": "06:30", "hours_end": "19:30"},
+          {"store_id": "spbc-de-014", "name": "Backstube Stuttgart Mitte", "address": "Königstraße 34", "city": "Stuttgart", "state": "DE", "zip_code": "70173", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "18:30"}
+        ];
+
+        // Set default store to Frankfurt Innenstadt
+        selectedStore = storeData.find(store => store.store_id === "spbc-de-001");
+        updateSelectedStoreDisplay();
+        populateStoreDropdown();
+
+      } catch (error) {
+        console.error('Error loading store data:', error);
+      }
+    }
+    
+    function populateStoreDropdown() {
+      const dropdown = document.getElementById('storeLocatorDropdown');
+      if (!dropdown) return;
+      
+      // Group stores by city
+      const storesByCity = {};
+      storeData.forEach(store => {
+        const cityState = `${store.city}, ${store.state}`;
+        if (!storesByCity[cityState]) {
+          storesByCity[cityState] = [];
+        }
+        storesByCity[cityState].push(store);
+      });
+      
+      // Sort cities alphabetically
+      const sortedCities = Object.keys(storesByCity).sort();
+      
+      let dropdownHTML = '';
+      sortedCities.forEach(cityState => {
+        dropdownHTML += `<div class="store-city-group">`;
+        dropdownHTML += `<div class="store-city-header">${cityState}</div>`;
+        
+        // Sort stores within city by name
+        storesByCity[cityState].sort((a, b) => a.name.localeCompare(b.name));
+        
+        storesByCity[cityState].forEach(store => {
+          const hours = `${store.hours_start} - ${store.hours_end}`;
+          const driveThruBadge = store.has_drive_thru ? '<span class="drive-thru-badge">Drive-Thru</span>' : '';
+          
+          dropdownHTML += `
+            <div class="store-item" onclick="selectStore('${store.store_id}')">
+              <div class="store-name">${store.name}${driveThruBadge}</div>
+              <div class="store-address">${store.address}, ${store.city}, ${store.state} ${store.zip_code}</div>
+              <div class="store-hours">Hours: ${hours}</div>
+            </div>
+          `;
+        });
+        
+        dropdownHTML += `</div>`;
+      });
+      
+      dropdown.innerHTML = dropdownHTML;
+    }
+    
+    function selectStore(storeId) {
+      selectedStore = storeData.find(store => store.store_id === storeId);
+      updateSelectedStoreDisplay();
+      
+      // Close dropdown using active class
+      const storeDropdownContainer = document.querySelector('#storeLocatorButton')?.closest('.dropdown-container');
+      if (storeDropdownContainer) {
+        storeDropdownContainer.classList.remove('active');
+      }
+      
+      // Store selection in session storage for agent use
+      if (selectedStore) {
+        sessionStorage.setItem('selectedStore', JSON.stringify(selectedStore));
+        console.log('Selected store:', selectedStore);
+      }
+    }
+    
+    function updateSelectedStoreDisplay() {
+      const selectedStoreText = document.getElementById('selected-store-text');
+      if (selectedStoreText && selectedStore) {
+        selectedStoreText.textContent = `${selectedStore.name} - ${selectedStore.city}`;
+      }
+    }
+    
+    // Enhanced functionality for sign out and connection status
+    document.addEventListener('DOMContentLoaded', function() {
+      // Ensure Sign Out button works properly
+      const signOutBtn = document.getElementById('signOutButton');
+      if (signOutBtn) {
+        signOutBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          console.log('Sign Out button clicked');
+          
+          // Show confirmation
+          if (confirm('Are you sure you want to sign out?')) {
+            // Clear session storage
+            sessionStorage.removeItem('idToken');
+            sessionStorage.removeItem('username');
+            localStorage.removeItem('chatbot_session_id');
+            
+            console.log('Session cleared, redirecting to login...');
+            
+            // Redirect to login page
+            window.location.href = 'login.html';
+          }
+        });
+        console.log('Sign Out button event listener added successfully');
+      } else {
+        console.error('Sign Out button not found');
+      }
+      
+      // CloudWatch Dropdown Functionality
+      const cloudwatchBtn = document.getElementById('cloudwatchButton');
+      const cloudwatchDropdown = document.getElementById('cloudwatchDropdown');
+      const dropdownContainer = cloudwatchBtn?.parentElement;
+      
+      if (cloudwatchBtn && cloudwatchDropdown) {
+        // Toggle dropdown on button click
+        cloudwatchBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          dropdownContainer.classList.toggle('active');
+          console.log('CloudWatch dropdown toggled');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!dropdownContainer.contains(e.target)) {
+            dropdownContainer.classList.remove('active');
+          }
+          
+          // Close store locator dropdown when clicking outside
+          const storeDropdownContainer = document.querySelector('#storeLocatorButton')?.closest('.dropdown-container');
+          if (storeDropdownContainer && !storeDropdownContainer.contains(e.target)) {
+            storeDropdownContainer.classList.remove('active');
+          }
+        });
+        
+        // Load observability configuration and set up links
+        loadObservabilityConfig();
+        
+        console.log('CloudWatch dropdown functionality added successfully');
+      } else {
+        console.error('CloudWatch dropdown elements not found');
+      }
+      
+      // Store Locator Dropdown Functionality
+      const storeLocatorButton = document.getElementById('storeLocatorButton');
+      const storeLocatorDropdown = document.getElementById('storeLocatorDropdown');
+      const storeDropdownContainer = storeLocatorButton?.closest('.dropdown-container');
+      
+      if (storeLocatorButton && storeLocatorDropdown && storeDropdownContainer) {
+        storeLocatorButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Close other dropdowns
+          if (dropdownContainer) {
+            dropdownContainer.classList.remove('active');
+          }
+          
+          // Toggle store dropdown using active class
+          storeDropdownContainer.classList.toggle('active');
+        });
+        
+        console.log('Store Locator dropdown functionality added successfully');
+      } else {
+        console.error('Store Locator dropdown elements not found');
+      }
+      
+      // Initialize store data
+      loadStoreData();
+      
+      // Function to load observability configuration
+      async function loadObservabilityConfig() {
+        try {
+          const response = await fetch('observability-config.json');
+          const config = await response.json();
+          
+          // Set up Agent Dashboard link
+          const agentDashboardLink = document.getElementById('agentDashboardLink');
+          if (agentDashboardLink && config.cloudwatch?.dashboardUrl) {
+            agentDashboardLink.addEventListener('click', function(e) {
+              e.preventDefault();
+              window.open(config.cloudwatch.dashboardUrl, '_blank');
+              dropdownContainer.classList.remove('active');
+              console.log('Opening Agent Dashboard:', config.cloudwatch.dashboardUrl);
+            });
+          }
+          
+          // Set up Agent Logs link
+          const agentLogsLink = document.getElementById('agentLogsLink');
+          if (agentLogsLink) {
+            const logsUrl = 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fp2pTestAgentsWebSocketFunction';
+            agentLogsLink.addEventListener('click', function(e) {
+              e.preventDefault();
+              window.open(logsUrl, '_blank');
+              dropdownContainer.classList.remove('active');
+              console.log('Opening Agent Logs:', logsUrl);
+            });
+          }
+          
+          console.log('Observability configuration loaded successfully');
+        } catch (error) {
+          console.error('Failed to load observability configuration:', error);
+          
+          // Fallback URLs if config fails to load
+          const agentDashboardLink = document.getElementById('agentDashboardLink');
+          const agentLogsLink = document.getElementById('agentLogsLink');
+          
+          if (agentDashboardLink) {
+            agentDashboardLink.addEventListener('click', function(e) {
+              e.preventDefault();
+              const fallbackDashboardUrl = 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#dashboards:name=P2P-Agent-Metrics';
+              window.open(fallbackDashboardUrl, '_blank');
+              dropdownContainer.classList.remove('active');
+              console.log('Opening Agent Dashboard (fallback):', fallbackDashboardUrl);
+            });
+          }
+          
+          if (agentLogsLink) {
+            agentLogsLink.addEventListener('click', function(e) {
+              e.preventDefault();
+              const fallbackLogsUrl = 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fp2pTestAgentsWebSocketFunction';
+              window.open(fallbackLogsUrl, '_blank');
+              dropdownContainer.classList.remove('active');
+              console.log('Opening Agent Logs (fallback):', fallbackLogsUrl);
+            });
+          }
+        }
+      }
+      
+      // Enhanced connection status simulation
+      setTimeout(() => {
+        const connectionStatus = document.getElementById('connection-status');
+        if (connectionStatus) {
+          connectionStatus.textContent = 'Connected';
+          connectionStatus.classList.add('connected');
+        }
+      }, 2000);
+      
+      // Add test function for loading animation (for debugging)
+      window.testLoadingAnimation = function() {
+        console.log('Testing loading animation...');
+        const testMsg = addMessage('', 'bot', 'processing');
+        console.log('Test loading message created');
+        
+        // Remove after 5 seconds for testing
+        setTimeout(() => {
+          removeProcessingMessages();
+          addMessage('Test loading animation completed!', 'bot');
+        }, 5000);
+      };
+      
+      console.log('Loading animation test function available: testLoadingAnimation()');
+      
+      // Load and display interactive menu
+      loadInteractiveMenu();
+    });
+    
+    
+    // Menu data (embedded to avoid CORS issues) — Specialty Bakeries & Pastry Cafés
+    const menuData = [
+      {"item_id": "croissant_plain", "name": "Plain Croissant", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 95}},
+      {"item_id": "croissant_almond", "name": "Almond Croissant", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 92}},
+      {"item_id": "pain_au_chocolat", "name": "Pain au Chocolat", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 93}},
+      {"item_id": "sourdough_loaf", "name": "Sourdough Loaf", "category": "breads", "attributes_json": {"is_dairy_free": true, "is_sugar_free": true, "popularity_score": 91}},
+      {"item_id": "brioche_loaf", "name": "Brioche Loaf", "category": "breads", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 88}},
+      {"item_id": "rye_bread", "name": "Dark Rye Bread", "category": "breads", "attributes_json": {"is_dairy_free": true, "is_sugar_free": true, "popularity_score": 82}},
+      {"item_id": "eclair_chocolate", "name": "Chocolate Éclair", "category": "patisserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 90}},
+      {"item_id": "eclair_vanilla", "name": "Vanilla Éclair", "category": "patisserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 87}},
+      {"item_id": "fruit_tart", "name": "Fresh Fruit Tart", "category": "patisserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 89}},
+      {"item_id": "lemon_tart", "name": "Lemon Tart", "category": "patisserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 86}},
+      {"item_id": "macaron_assorted", "name": "Macaron (Assorted Flavours)", "category": "patisserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 94}},
+      {"item_id": "black_forest_slice", "name": "Black Forest Cake Slice", "category": "cakes", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 88}},
+      {"item_id": "opera_cake_slice", "name": "Opéra Cake Slice", "category": "cakes", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 85}},
+      {"item_id": "quiche_lorraine", "name": "Quiche Lorraine", "category": "savoury", "attributes_json": {"is_dairy_free": false, "is_sugar_free": true, "popularity_score": 83}},
+      {"item_id": "spinach_feta_pastry", "name": "Spinach & Feta Pastry", "category": "savoury", "attributes_json": {"is_dairy_free": false, "is_sugar_free": true, "popularity_score": 80}},
+      {"item_id": "espresso", "name": "Espresso", "category": "coffee", "attributes_json": {"is_dairy_free": true, "is_sugar_free": true, "popularity_score": 90, "caffeine_mg": 90}},
+      {"item_id": "cappuccino", "name": "Cappuccino", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 91, "caffeine_mg": 120}},
+      {"item_id": "flat_white", "name": "Flat White", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 89, "caffeine_mg": 130}},
+      {"item_id": "latte", "name": "Café Latte", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 88, "caffeine_mg": 150}},
+      {"item_id": "hot_chocolate", "name": "Hot Chocolate", "category": "hot_drinks", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 84, "caffeine_mg": 10}},
+      {"item_id": "chai_latte", "name": "Chai Latte", "category": "hot_drinks", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 79, "caffeine_mg": 60}},
+      {"item_id": "matcha_latte", "name": "Matcha Latte", "category": "hot_drinks", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 81, "caffeine_mg": 45}}
+    ];
+    
+    function loadInteractiveMenu() {
+      const menuContainer = document.getElementById('menu-categories');
+      if (!menuContainer) return;
+      
+      // Group items by category
+      const categories = {};
+      menuData.forEach(item => {
+        if (!categories[item.category]) {
+          categories[item.category] = [];
+        }
+        categories[item.category].push(item);
+      });
+      
+      // Sort items within each category by popularity
+      Object.keys(categories).forEach(category => {
+        categories[category].sort((a, b) => b.attributes_json.popularity_score - a.attributes_json.popularity_score);
+      });
+      
+      // Create category display names and icons
+      const categoryInfo = {
+        'viennoiserie': { name: 'Viennoiserie', icon: '🥐', description: 'Freshly laminated butter croissants and pastries' },
+        'breads':       { name: 'Artisan Breads', icon: '🍞', description: 'Sourdough, brioche, and rye — baked fresh every morning' },
+        'patisserie':   { name: 'Patisserie', icon: '🎂', description: 'Éclairs, tarts, macarons, and fine French pastries' },
+        'cakes':        { name: 'Cakes', icon: '🍰', description: 'Celebration cakes and signature slices' },
+        'savoury':      { name: 'Savoury', icon: '🥗', description: 'Quiches and savoury pastries' },
+        'coffee':       { name: 'Coffee', icon: '☕', description: 'Specialty espresso drinks, flat whites, and filter coffee' },
+        'hot_drinks':   { name: 'Hot Drinks', icon: '🍵', description: 'Hot chocolate, chai latte, and matcha' }
+      };
+      
+      // Clear loading message
+      menuContainer.innerHTML = '';
+      
+      // Create expandable categories
+      Object.keys(categories).forEach(categoryKey => {
+        const category = categoryInfo[categoryKey] || { name: categoryKey, icon: '🛒', description: '' };
+        const items = categories[categoryKey];
+        
+        const categoryElement = document.createElement('div');
+        categoryElement.className = 'menu-category';
+        
+        categoryElement.innerHTML = `
+          <div class="menu-category-header" onclick="toggleCategory('${categoryKey}')">
+            <div class="category-info">
+              <span class="category-icon">${category.icon}</span>
+              <div class="category-text">
+                <h3>${category.name}</h3>
+                <p>${category.description}</p>
+              </div>
+            </div>
+            <span class="category-arrow">▼</span>
+          </div>
+          <div class="menu-category-items" id="category-${categoryKey}">
+            ${items.map(item => `
+              <div class="menu-item-card" onclick="selectMenuItem('${item.item_id}', '${item.name}')">
+                <div class="item-header">
+                  <h4>${item.name}</h4>
+                  <span class="popularity-badge">${item.attributes_json.popularity_score}% ⭐</span>
+                </div>
+                <div class="item-details">
+                  ${item.attributes_json.caffeine_mg ? `<span class="detail-badge caffeine">☕ ${item.attributes_json.caffeine_mg}mg caffeine</span>` : ''}
+                  ${item.attributes_json.is_dairy_free ? '<span class="detail-badge dairy-free">🥛 Dairy Free</span>' : ''}
+                  ${item.attributes_json.is_sugar_free ? '<span class="detail-badge sugar-free">🍯 Sugar Free</span>' : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        
+        menuContainer.appendChild(categoryElement);
+      });
+      
+      console.log('Interactive menu loaded successfully');
+    }
+    
+    function toggleCategory(categoryKey) {
+      const categoryItems = document.getElementById(`category-${categoryKey}`);
+      const arrow = categoryItems.parentElement.querySelector('.category-arrow');
+      
+      if (categoryItems.style.display === 'none' || !categoryItems.style.display) {
+        categoryItems.style.display = 'block';
+        arrow.style.transform = 'rotate(180deg)';
+        categoryItems.parentElement.classList.add('expanded');
+      } else {
+        categoryItems.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+        categoryItems.parentElement.classList.remove('expanded');
+      }
+    }
+    
+    function selectMenuItem(itemId, itemName) {
+      // Add the selected item to the chat
+      const chatInput = document.getElementById('chatbot-input');
+      if (chatInput) {
+        chatInput.value = `I'd like to order a ${itemName}`;
+        chatInput.focus();
+      }
+      
+      // Optional: Auto-send the message
+      // const chatForm = document.getElementById('chatbot-form');
+      // if (chatForm) {
+      //   chatForm.dispatchEvent(new Event('submit'));
+      // }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+[
+    {
+      "user_id": "user_001",
+      "order_timestamp": "2025-05-01T10:15:00Z",
+      "order_id": "order_1001",
+      "status": "DELIVERED",
+      "items": [
+        {
+          "item_id": "latte",
+          "customizations": {
+            "size": "12oz",
+            "milk": "oat",
+            "temperature": "hot",
+            "syrup": "vanilla",
+            "shots": 1
+          }
+        },
+        {
+          "item_id": "donut_glazed",
+          "customizations": {}
+        }
+      ],
+      "store_id": "store_123",
+      "total_amount": 7.5
+    },
+    {
+      "user_id": "user_001",
+      "order_timestamp": "2025-05-02T08:45:00Z",
+      "order_id": "order_1002",
+      "status": "PLACED",
+      "items": [
+        {
+          "item_id": "coldbrew",
+          "customizations": {
+            "size": "16oz",
+            "milk": "almond",
+            "ice": "less",
+            "sweetener": "none"
+          }
+        }
+      ],
+      "store_id": "store_101",
+      "total_amount": 4.25
+    },
+    {
+      "user_id": "user_002",
+      "order_timestamp": "2025-05-03T12:30:00Z",
+      "order_id": "order_2001",
+      "status": "CANCELLED",
+      "items": [
+        {
+          "item_id": "donut_chocolate",
+          "customizations": {}
+        }
+      ],
+      "store_id": "store_321",
+      "total_amount": 2.95
+    },
+    {
+      "user_id": "user_003",
+      "order_timestamp": "2025-05-04T09:00:00Z",
+      "order_id": "order_3001",
+      "status": "DELIVERED",
+      "items": [
+        {
+          "item_id": "americano",
+          "customizations": {
+            "size": "16oz",
+            "temperature": "hot"
+          }
+        }
+      ],
+      "store_id": "store_222",
+      "total_amount": 3.5
+    },
+    {
+      "user_id": "user_003",
+      "order_timestamp": "2025-05-05T14:20:00Z",
+      "order_id": "order_3002",
+      "status": "PLACED",
+      "items": [
+        {
+          "item_id": "donut_maple",
+          "customizations": {}
+        },
+        {
+          "item_id": "latte",
+          "customizations": {
+            "size": "8oz",
+            "milk": "soy",
+            "temperature": "hot"
+          }
+        }
+      ],
+      "store_id": "store_222",
+      "total_amount": 6.0
+    },
+    {
+      "user_id": "user_004",
+      "order_timestamp": "2025-05-06T07:50:00Z",
+      "order_id": "order_4001",
+      "status": "DELIVERED",
+      "items": [
+        {
+          "item_id": "coldbrew",
+          "customizations": {
+            "size": "12oz",
+            "milk": "none",
+            "ice": "normal",
+            "sweetener": "stevia"
+          }
+        }
+      ],
+      "store_id": "store_555",
+      "total_amount": 3.95
+    },
+    {
+      "user_id": "user_005",
+      "order_timestamp": "2025-05-07T11:00:00Z",
+      "order_id": "order_5001",
+      "status": "PLACED",
+      "items": [
+        {
+          "item_id": "donut_glazed",
+          "customizations": {}
+        }
+      ],
+      "store_id": "store_123",
+      "total_amount": 2.25
+    },
+    {
+      "user_id": "user_006",
+      "order_timestamp": "2025-05-07T12:45:00Z",
+      "order_id": "order_6001",
+      "status": "DELIVERED",
+      "items": [
+        {
+          "item_id": "latte",
+          "customizations": {
+            "size": "16oz",
+            "milk": "whole",
+            "temperature": "hot"
+          }
+        }
+      ],
+      "store_id": "store_888",
+      "total_amount": 4.75
+    },
+    {
+      "user_id": "user_005",
+      "order_timestamp": "2025-05-08T10:15:00Z",
+      "order_id": "order_5002",
+      "status": "DELIVERED",
+      "items": [
+        {
+          "item_id": "americano",
+          "customizations": {
+            "size": "12oz",
+            "temperature": "iced"
+          }
+        },
+        {
+          "item_id": "donut_chocolate",
+          "customizations": {}
+        }
+      ],
+      "store_id": "store_123",
+      "total_amount": 6.25
+    },
+    {
+      "user_id": "user_007",
+      "order_timestamp": "2025-05-08T13:00:00Z",
+      "order_id": "order_7001",
+      "status": "CANCELLED",
+      "items": [
+        {
+          "item_id": "coldbrew",
+          "customizations": {
+            "size": "16oz",
+            "ice": "none",
+            "sweetener": "honey"
+          }
+        }
+      ],
+      "store_id": "store_666",
+      "total_amount": 4.0
+    },
+    {
+      "user_id": "user_008",
+      "order_timestamp": "2025-05-09T08:30:00Z",
+      "order_id": "order_8001",
+      "status": "PLACED",
+      "items": [
+        {
+          "item_id": "latte",
+          "customizations": {
+            "size": "8oz",
+            "milk": "skim",
+            "temperature": "hot",
+            "syrup": "caramel"
+          }
+        }
+      ],
+      "store_id": "store_999",
+      "total_amount": 3.95
+    }
+  ]
+  

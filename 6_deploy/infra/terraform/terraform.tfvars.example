@@ -1,0 +1,15 @@
+aws_region            = "eu-central-1"
+environment           = "prod"
+cluster_name          = "pastrycafe-prod"
+app_name              = "pastrycafe"
+domain_name           = "cloudageglobal.com"
+app_subdomain         = "pastrycafe"
+route53_zone_id       = ""
+route53_alias_name    = ""
+route53_alias_zone_id = ""
+node_instance_type      = "t3.medium"
+desired_node_count      = 2
+# eks_public_access_cidrs is REQUIRED — no default.
+# Run `bash 6_deploy/scripts/terraform_backend_setup.sh` to auto-detect your IP and
+# write terraform.tfvars with the correct value, or set manually:
+# eks_public_access_cidrs = ["YOUR_CI_RUNNER_IP/32", "YOUR_OFFICE_IP/32"]

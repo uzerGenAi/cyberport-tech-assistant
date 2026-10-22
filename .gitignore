@@ -1,0 +1,55 @@
+# ── Environment-specific configuration (contains account IDs, ARNs, IP addresses) ──
+env.sh
+6_deploy/web-app/agentcore-config.json
+6_deploy/web-app/cognito-config.json
+6_deploy/web-app/observability-config.json
+6_deploy/web-app/backup_*/
+
+# ── Terraform ──
+.terraform/
+.terraform.lock.hcl.bak
+*.tfstate
+*.tfstate.*
+*.tfplan
+terraform.tfvars
+crash.log
+# .terraform.lock.hcl IS committed on purpose: it pins provider versions.
+
+# ── Build output ──
+.build/
+build/
+*.zip
+dist/
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.hypothesis/
+.mypy_cache/
+
+# ── Node ──
+node_modules/
+
+# ── The sibling AgentCore Harness project (its own repository) ──
+# 618 MB, mostly a virtualenv and CDK output. Excluded wholesale so it is never staged here.
+AWSHarnessLoopEngineering/
+
+# ── Local tooling / OS ──
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
+kubeconfig
+*.pem
+*.key
+
+# ── Credentials: never commit, under any name ──
+*credentials*.json
+.env
+.env.*
+!.env.example

@@ -1,0 +1,4 @@
+# Operator tooling for configure_runtime.py (not shipped in the runtime artifact).
+# Install with: pip install -r 6_deploy/agents/requirements-deploy.txt
+-r requirements.txt
+bedrock-agentcore-starter-toolkit==0.3.14

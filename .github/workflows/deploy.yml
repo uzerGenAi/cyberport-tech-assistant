@@ -1,0 +1,220 @@
+# Unattended deployment of the SPBC Pastry Concierge.
+#
+# This replaces codepipeline-deploy.yml, which was a placeholder: it carried a dummy account
+# id, the wrong Region, an image name from another project, and push/deploy steps that only
+# echoed text.
+#
+# Nothing here is hardcoded to an account. Configure these in the repository (or
+# environment) settings before the first run:
+#
+#   Variables (Settings → Secrets and variables → Actions → Variables)
+#     AWS_DEPLOY_ROLE_ARN              required. IAM role for GitHub OIDC to assume.
+#     AWS_REGION                       optional, defaults to eu-central-1.
+#     COGNITO_ADMIN_USERNAME           optional. With the next variable, creates the sign-in user.
+#     COGNITO_ADMIN_PASSWORD_SECRET_ID optional. Secrets Manager id holding that password.
+#                                      Without both, the run passes --skip-user.
+#     SMOKE_TEST_URL                   optional. When set, the frontend smoke test runs.
+#
+# The IAM role needs a trust policy for token.actions.githubusercontent.com restricted to this
+# repository. See the AWS documentation for "Configure AWS credentials for GitHub Actions".
+#
+# Add required reviewers to the "production" environment to gate the deploy job behind an
+# approval; without that, a dispatch deploys straight away.
+
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      provision_backends:
+        description: "Apply the Aurora stores DB + promotions API stack (slow, billable)"
+        type: boolean
+        default: false
+      setup_knowledge_bases:
+        description: "Create/sync the vector store and all five knowledge bases"
+        type: boolean
+        default: false
+      deploy_agent:
+        description: "Deploy Cognito, the AgentCore runtime and the Amplify frontend"
+        type: boolean
+        default: true
+      deploy_eks:
+        description: "Also build the web image and do a blue/green rollout onto EKS"
+        type: boolean
+        default: false
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  id-token: write # required for OIDC
+  contents: read
+
+# Never let two deploys race for the same runtime or cluster
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'eu-central-1' }}
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.6
+          terraform_wrapper: false
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run CI checks
+        run: make ci
+
+  deploy:
+    name: Deploy
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      # Fail with an explanation rather than an opaque OIDC error
+      - name: Check deployment configuration
+        run: |
+          if [ -z "${{ vars.AWS_DEPLOY_ROLE_ARN }}" ]; then
+            echo "::error::Repository variable AWS_DEPLOY_ROLE_ARN is not set."
+            echo "Set it to the IAM role GitHub OIDC should assume, then re-run."
+            exit 1
+          fi
+          echo "Region: ${AWS_REGION}"
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: spbc-deploy-${{ github.run_id }}
+
+      - name: Confirm the assumed identity
+        run: aws sts get-caller-identity
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.6
+          terraform_wrapper: false
+
+      - name: Install deployment dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # requirements.txt already brings awscurl, needed for the knowledge base indexes
+          pip install -r requirements.txt
+          # Starter toolkit used by configure_runtime.py
+          pip install -r 6_deploy/agents/requirements-deploy.txt
+
+      # Per-build immutable tag: a mutable tag would leave nothing to roll back to
+      - name: Resolve the image tag
+        run: echo "IMAGE_TAG=${GITHUB_SHA::12}" >> "$GITHUB_ENV"
+
+      - name: Provision data backends
+        if: inputs.provision_backends
+        run: |
+          AUTO_APPROVE=1 bash 6_deploy/scripts/agentcore_backends.sh apply
+          bash 6_deploy/scripts/agentcore_backends.sh seed
+          bash 6_deploy/scripts/agentcore_backends.sh check
+
+      # Writes ~/environment/env.sh, which later steps source (steps share the filesystem,
+      # not the shell, so each step loads it explicitly)
+      - name: Discover AWS resources
+        run: |
+          set -euo pipefail
+          # shellcheck source=/dev/null
+          source setup_env.sh
+          echo "--- discovered ---"
+          grep -E '^export (MENU|ORDERS|PAYMENTS|STORES|PROMOS)_KNOWLEDGE_BASE_ID|^export S3_BUCKET_NAME' \
+            ~/environment/env.sh || echo "(no knowledge bases yet)"
+
+      - name: Create knowledge bases
+        if: inputs.setup_knowledge_bases
+        run: |
+          set -euo pipefail
+          # shellcheck source=/dev/null
+          source ~/environment/env.sh
+          bash 3_proof_of_concept/knowledge_bases/bootstrap_vector_store.sh
+          bash 3_proof_of_concept/knowledge_bases/setup_knowledge_bases.sh
+          # shellcheck source=/dev/null
+          source setup_env.sh   # pick up the new knowledge base IDs
+
+      # post_deploy.sh --force always redeploys: without --force a populated
+      # agentcore-config.json makes the runtime launch a no-op.
+      - name: Deploy Cognito, AgentCore runtime and frontend
+        if: inputs.deploy_agent || github.event_name == 'push'
+        env:
+          COGNITO_ADMIN_USERNAME: ${{ vars.COGNITO_ADMIN_USERNAME }}
+          COGNITO_ADMIN_PASSWORD_SECRET_ID: ${{ vars.COGNITO_ADMIN_PASSWORD_SECRET_ID }}
+        run: |
+          set -euo pipefail
+          # shellcheck source=/dev/null
+          source ~/environment/env.sh
+          args=(--force --non-interactive)
+          if [ -z "${COGNITO_ADMIN_USERNAME}" ] || [ -z "${COGNITO_ADMIN_PASSWORD_SECRET_ID}" ]; then
+            echo "No sign-in user configured; deploying infrastructure only (--skip-user)."
+            args+=(--skip-user)
+          fi
+          bash 6_deploy/scripts/post_deploy.sh "${args[@]}"
+
+      # Asserts each domain's answer rather than just a 200 response
+      - name: Verify the agent answers
+        if: inputs.deploy_agent || github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          # shellcheck source=/dev/null
+          source ~/environment/env.sh
+          ./deploy_agentcore.sh step9-test-runtime
+
+      - name: Build, push and roll out the web image on EKS
+        if: inputs.deploy_eks
+        run: |
+          set -euo pipefail
+          # shellcheck source=/dev/null
+          source ~/environment/env.sh
+          terraform -chdir=6_deploy/infra/terraform init -input=false >/dev/null
+          ECR_REPOSITORY_URL=$(terraform -chdir=6_deploy/infra/terraform output -raw ecr_repository_url)
+          export ECR_REPOSITORY_URL
+          aws ecr get-login-password --region "$AWS_REGION" \
+            | docker login --username AWS --password-stdin "${ECR_REPOSITORY_URL%%/*}"
+          docker build -t "${ECR_REPOSITORY_URL}:${IMAGE_TAG}" 6_deploy/web-app
+          docker push "${ECR_REPOSITORY_URL}:${IMAGE_TAG}"
+          aws eks update-kubeconfig --region "$AWS_REGION" --name "${EKS_CLUSTER_NAME:-pastrycafe-prod}"
+          bash 6_deploy/scripts/deploy_blue_green.sh
+
+      - name: Smoke test the frontend
+        if: vars.SMOKE_TEST_URL != ''
+        env:
+          SMOKE_TEST_URL: ${{ vars.SMOKE_TEST_URL }}
+        run: bash 6_deploy/scripts/smoke_test.sh
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### SPBC deployment"
+            echo ""
+            echo "| Item | Value |"
+            echo "|---|---|"
+            echo "| Region | ${AWS_REGION} |"
+            echo "| Image tag | ${IMAGE_TAG:-n/a} |"
+            echo "| Commit | ${GITHUB_SHA} |"
+            echo "| Backends applied | ${{ inputs.provision_backends || false }} |"
+            echo "| Knowledge bases | ${{ inputs.setup_knowledge_bases || false }} |"
+            echo "| EKS rollout | ${{ inputs.deploy_eks || false }} |"
+          } >> "$GITHUB_STEP_SUMMARY"

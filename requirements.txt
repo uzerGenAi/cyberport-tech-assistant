@@ -1,0 +1,16 @@
+awscli
+awscurl
+streamlit
+requests
+streamlit-cognito-auth
+boto3
+pymysql
+tabulate
+strands-agents
+strands-agents-tools
+opentelemetry-sdk
+opentelemetry-propagator-aws-xray
+opentelemetry-exporter-otlp
+opentelemetry-instrumentation-logging 
+opentelemetry-sdk-extension-aws
+strands-agents[otel]

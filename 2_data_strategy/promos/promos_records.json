@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Fresh Pastry Tuesdays",
+    "description": "Every Tuesday, get a free plain croissant with any hot drink purchase.",
+    "valid_from": "2026-01-01",
+    "valid_to": "2027-12-31",
+    "eligibility": "All customers",
+    "promo_code": "TUESDAYCROISSANT"
+  },
+  {
+    "title": "Pastry Rewards — Double Points Weekend",
+    "description": "Earn 2× Pastry Rewards points on all purchases over €15 every Saturday and Sunday.",
+    "valid_from": "2026-01-01",
+    "valid_to": "2027-12-31",
+    "eligibility": "Pastry Rewards members",
+    "promo_code": ""
+  },
+  {
+    "title": "New Customer Welcome",
+    "description": "€5 off your first order of €15 or more when you register in the app.",
+    "valid_from": "2026-01-01",
+    "valid_to": "2027-12-31",
+    "eligibility": "New customers (first order only)",
+    "promo_code": "WELCOME5"
+  },
+  {
+    "title": "Student Discount",
+    "description": "10% off your entire order with a valid student ID or university email.",
+    "valid_from": "2026-09-01",
+    "valid_to": "2027-07-31",
+    "eligibility": "Students only",
+    "promo_code": "STUDENT10"
+  },
+  {
+    "title": "Birthday Cake Offer",
+    "description": "Receive a complimentary 6-inch celebration cake slice on your birthday month when you are a Pastry Rewards member.",
+    "valid_from": "2026-01-01",
+    "valid_to": "2027-12-31",
+    "eligibility": "Pastry Rewards members (birthday month only)",
+    "promo_code": ""
+  },
+  {
+    "title": "Office Catering Bundle",
+    "description": "Order a catering package for 10 or more people and receive a complimentary assorted macaron box (12 pieces).",
+    "valid_from": "2026-01-01",
+    "valid_to": "2027-12-31",
+    "eligibility": "Catering orders of 10+ people",
+    "promo_code": "CATERINGBONUS"
+  },
+  {
+    "title": "Seasonal Pastry Launch — 20% Off",
+    "description": "20% off all new seasonal pastries during the first week of each seasonal launch.",
+    "valid_from": "2026-01-01",
+    "valid_to": "2027-12-31",
+    "eligibility": "All customers",
+    "promo_code": "SEASONLAUNCH"
+  }
+]

@@ -1,0 +1,248 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "bedrock:*",
+                "bedrock-agentcore:*",
+                "s3:CreateBucket",
+                "ec2:*",
+                "elasticloadbalancing:*",
+                "logs:*",
+                "cloudwatch:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:DescribeTable"
+            ],
+            "Resource": "arn:aws:dynamodb:*:*:table/p2p*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion",
+                "s3:ListBucket",
+                "s3:PutObject",
+                "s3:PutLifecycleConfiguration"
+            ],
+            "Resource": [
+                "arn:aws:s3:::p2p*",
+                "arn:aws:s3:::p2p*/*",
+                "arn:aws:s3:::bedrock-agentcore-*",
+                "arn:aws:s3:::bedrock-agentcore-*/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:DescribeLogGroups",
+                "logs:DescribeLogStreams"
+            ],
+            "Resource": "arn:aws:logs:*:*:log-group:*p2p*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cloudwatch:PutMetricData",
+                "cloudwatch:GetMetricStatistics",
+                "cloudwatch:ListMetrics",
+                "cloudwatch:PutDashboard",
+                "cloudwatch:GetDashboard",
+                "cloudwatch:ListDashboards"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:PutParameter",
+                "ssm:DescribeParameters"
+            ],
+            "Resource": "arn:aws:ssm:*:*:parameter/*p2p*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:CreateRepository",
+                "ecr:PutImage",
+                "ecr:DescribeRepositories",
+                "ecr:DescribeImages",
+                "ecr:ListImages",
+                "ecr:InitiateLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:CompleteLayerUpload"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "eks:*",
+                "eks:DescribeAccessEntry",
+                "eks:ListAccessEntries",
+                "eks:CreateAddon",
+                "eks:DescribeAddon"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "lambda:InvokeFunction",
+                "lambda:GetFunction",
+                "lambda:CreateFunction",
+                "lambda:UpdateFunctionCode"
+            ],
+            "Resource": "arn:aws:lambda:*:*:function:p2p*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "apigateway:GET",
+                "apigateway:POST"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cognito-idp:*",
+                "cognito-identity:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cloudfront:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cloudfront:CreateVpcOrigin",
+                "cloudfront:GetVpcOrigin",
+                "cloudfront:ListVpcOrigins",
+                "cloudfront:UpdateVpcOrigin",
+                "cloudfront:DeleteVpcOrigin",
+                "cloudfront:TagResource",
+                "cloudfront:UntagResource",
+                "cloudfront:ListTagsForResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "vpc-lattice:*",
+                "servicediscovery:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:CreateSecret"
+            ],
+            "Resource": "arn:aws:secretsmanager:*:*:secret:p2p*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "elasticloadbalancing:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sts:AssumeRole",
+                "sts:GetCallerIdentity"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:PassRole",
+                "iam:GetRole",
+                "iam:CreateRole",
+                "iam:AttachRolePolicy",
+                "iam:UpdateAssumeRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:CreateServiceLinkedRole",
+                "iam:GetServiceLinkedRoleDeletionStatus",
+                "iam:DeleteServiceLinkedRole"
+            ],
+            "Resource": [
+                "arn:aws:iam::*:role/p2p*",
+                "arn:aws:iam::*:role/service-role/cloudAgeRole*",
+                "arn:aws:iam::*:role/AmazonBedrockAgentCore*",
+                "arn:aws:iam::*:role/service-role/AmazonBedrockAgentCore*",
+                "arn:aws:iam::*:role/CoffeeShop_*",
+                "arn:aws:iam::*:role/Cognito_*",
+                "arn:aws:iam::*:role/aws-service-role/cloudfront.amazonaws.com/*",
+                "arn:aws:iam::*:role/aws-service-role/vpcorigin.cloudfront.amazonaws.com/*",
+                "arn:aws:iam::*:role/aws-service-role/elasticloadbalancing.amazonaws.com/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "rds:DescribeDBClusters",
+                "rds:DescribeDBInstances",
+                "rds:DescribeDBSubnetGroups",
+                "rds:CreateDBCluster",
+                "rds:CreateDBInstance"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "codebuild:CreateProject",
+                "codebuild:StartBuild",
+                "codebuild:BatchGetBuilds",
+                "codebuild:BatchGetProjects",
+                "codebuild:UpdateProject",
+                "codebuild:DeleteProject"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+# Copy to terraform.tfvars and adjust. Every value shown is the default.
+aws_region  = "eu-central-1"
+environment = "prod"
+
+# Stores database (Aurora MySQL Serverless v2, Data API)
+aurora_instance_count        = 2   # 1 halves the cost but removes the standby
+aurora_min_acu               = 0.5 # 0 = auto-pause when idle (non-production; ~15 s resume)
+aurora_max_acu               = 4
+# aurora_seconds_until_auto_pause = 300 # only used with aurora_min_acu = 0
+aurora_backup_retention_days = 7
+aurora_deletion_protection   = true # set false and apply before terraform destroy
+
+# Set true only if the EKS stack (make provision) does NOT already own spbc-orders-table
+create_orders_table = false
+
+# Reuse an existing VPC instead of the isolated one this stack creates (optional)
+# existing_vpc_id     = "vpc-0123456789abcdef0"
+# existing_subnet_ids = ["subnet-aaa", "subnet-bbb"]

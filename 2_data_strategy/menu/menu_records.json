@@ -1,0 +1,419 @@
+[
+  {
+    "item_id": "croissant_plain",
+    "name": "Plain Croissant",
+    "category": "viennoiserie",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 95,
+      "available_size": ["single", "box_of_4"],
+      "allergens": ["gluten", "dairy", "eggs"]
+    }
+  },
+  {
+    "item_id": "croissant_almond",
+    "name": "Almond Croissant",
+    "category": "viennoiserie",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 92,
+      "available_size": ["single", "box_of_4"],
+      "allergens": ["gluten", "dairy", "eggs", "nuts"]
+    }
+  },
+  {
+    "item_id": "pain_au_chocolat",
+    "name": "Pain au Chocolat",
+    "category": "viennoiserie",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 93,
+      "available_size": ["single", "box_of_4"],
+      "allergens": ["gluten", "dairy", "eggs", "soy"]
+    }
+  },
+  {
+    "item_id": "brioche_loaf",
+    "name": "Brioche Loaf",
+    "category": "breads",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 88,
+      "available_size": ["half_loaf", "full_loaf"],
+      "allergens": ["gluten", "dairy", "eggs"]
+    }
+  },
+  {
+    "item_id": "sourdough_loaf",
+    "name": "Sourdough Loaf",
+    "category": "breads",
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": true,
+      "is_vegan": true,
+      "is_gluten_free": false,
+      "popularity_score": 91,
+      "available_size": ["half_loaf", "full_loaf"],
+      "allergens": ["gluten"]
+    }
+  },
+  {
+    "item_id": "rye_bread",
+    "name": "Dark Rye Bread",
+    "category": "breads",
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": true,
+      "is_vegan": true,
+      "is_gluten_free": false,
+      "popularity_score": 82,
+      "available_size": ["half_loaf", "full_loaf"],
+      "allergens": ["gluten"]
+    }
+  },
+  {
+    "item_id": "eclair_chocolate",
+    "name": "Chocolate Éclair",
+    "category": "patisserie",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 90,
+      "available_size": ["single"],
+      "allergens": ["gluten", "dairy", "eggs"]
+    }
+  },
+  {
+    "item_id": "eclair_vanilla",
+    "name": "Vanilla Éclair",
+    "category": "patisserie",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 87,
+      "available_size": ["single"],
+      "allergens": ["gluten", "dairy", "eggs"]
+    }
+  },
+  {
+    "item_id": "fruit_tart",
+    "name": "Fresh Fruit Tart",
+    "category": "patisserie",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 89,
+      "available_size": ["individual", "large_6inch"],
+      "allergens": ["gluten", "dairy", "eggs"]
+    }
+  },
+  {
+    "item_id": "lemon_tart",
+    "name": "Lemon Tart",
+    "category": "patisserie",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 86,
+      "available_size": ["individual", "large_6inch"],
+      "allergens": ["gluten", "dairy", "eggs"]
+    }
+  },
+  {
+    "item_id": "macaron_assorted",
+    "name": "Macaron (Assorted Flavours)",
+    "category": "patisserie",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": true,
+      "popularity_score": 94,
+      "available_size": ["single", "box_of_6", "box_of_12"],
+      "allergens": ["dairy", "eggs", "nuts"]
+    }
+  },
+  {
+    "item_id": "opera_cake_slice",
+    "name": "Opéra Cake Slice",
+    "category": "cakes",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 85,
+      "available_size": ["slice"],
+      "allergens": ["gluten", "dairy", "eggs", "nuts"]
+    }
+  },
+  {
+    "item_id": "black_forest_slice",
+    "name": "Black Forest Cake Slice",
+    "category": "cakes",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 88,
+      "available_size": ["slice"],
+      "allergens": ["gluten", "dairy", "eggs"]
+    }
+  },
+  {
+    "item_id": "custom_celebration_cake",
+    "name": "Custom Celebration Cake",
+    "category": "cakes",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 96,
+      "available_size": ["6inch", "8inch", "10inch"],
+      "allergens": ["gluten", "dairy", "eggs"],
+      "requires_advance_order_days": 3
+    }
+  },
+  {
+    "item_id": "quiche_lorraine",
+    "name": "Quiche Lorraine",
+    "category": "savoury",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": true,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 83,
+      "available_size": ["slice", "whole_8inch"],
+      "allergens": ["gluten", "dairy", "eggs"]
+    }
+  },
+  {
+    "item_id": "spinach_feta_pastry",
+    "name": "Spinach & Feta Pastry",
+    "category": "savoury",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": true,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 80,
+      "available_size": ["single"],
+      "allergens": ["gluten", "dairy", "eggs"]
+    }
+  },
+  {
+    "item_id": "espresso",
+    "name": "Espresso",
+    "category": "coffee",
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": true,
+      "popularity_score": 90,
+      "caffeine_mg": 90,
+      "can_be_offered_in_cold": false,
+      "can_be_offered_in_hot": true,
+      "available_size": ["single", "double"]
+    }
+  },
+  {
+    "item_id": "cappuccino",
+    "name": "Cappuccino",
+    "category": "coffee",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "popularity_score": 91,
+      "caffeine_mg": 120,
+      "can_be_offered_in_cold": false,
+      "can_be_offered_in_hot": true,
+      "available_size": ["small", "large"]
+    }
+  },
+  {
+    "item_id": "flat_white",
+    "name": "Flat White",
+    "category": "coffee",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "popularity_score": 89,
+      "caffeine_mg": 130,
+      "can_be_offered_in_cold": false,
+      "can_be_offered_in_hot": true,
+      "available_size": ["small", "large"]
+    }
+  },
+  {
+    "item_id": "filter_coffee",
+    "name": "Filter Coffee",
+    "category": "coffee",
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": true,
+      "popularity_score": 78,
+      "caffeine_mg": 110,
+      "can_be_offered_in_cold": false,
+      "can_be_offered_in_hot": true,
+      "available_size": ["small", "medium", "large"]
+    }
+  },
+  {
+    "item_id": "latte",
+    "name": "Café Latte",
+    "category": "coffee",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "popularity_score": 88,
+      "caffeine_mg": 150,
+      "can_be_offered_in_cold": true,
+      "can_be_offered_in_hot": true,
+      "available_size": ["small", "medium", "large"]
+    }
+  },
+  {
+    "item_id": "hot_chocolate",
+    "name": "Hot Chocolate",
+    "category": "hot_drinks",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "popularity_score": 84,
+      "caffeine_mg": 10,
+      "can_be_offered_in_cold": false,
+      "can_be_offered_in_hot": true,
+      "available_size": ["small", "large"]
+    }
+  },
+  {
+    "item_id": "chai_latte",
+    "name": "Chai Latte",
+    "category": "hot_drinks",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "popularity_score": 79,
+      "caffeine_mg": 60,
+      "can_be_offered_in_cold": true,
+      "can_be_offered_in_hot": true,
+      "available_size": ["small", "large"]
+    }
+  },
+  {
+    "item_id": "matcha_latte",
+    "name": "Matcha Latte",
+    "category": "hot_drinks",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "popularity_score": 81,
+      "caffeine_mg": 45,
+      "can_be_offered_in_cold": true,
+      "can_be_offered_in_hot": true,
+      "available_size": ["small", "large"]
+    }
+  },
+  {
+    "item_id": "stollen_slice",
+    "name": "Christmas Stollen Slice",
+    "category": "seasonal_pastry",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 93,
+      "available_size": ["slice"],
+      "allergens": ["gluten", "dairy", "eggs", "nuts"],
+      "seasonal": true,
+      "season_months": [11, 12]
+    }
+  },
+  {
+    "item_id": "hot_cross_bun",
+    "name": "Hot Cross Bun",
+    "category": "seasonal_pastry",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 90,
+      "available_size": ["single", "box_of_6"],
+      "allergens": ["gluten", "dairy", "eggs"],
+      "seasonal": true,
+      "season_months": [3, 4]
+    }
+  },
+  {
+    "item_id": "galette_des_rois",
+    "name": "Galette des Rois",
+    "category": "seasonal_pastry",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 88,
+      "available_size": ["slice", "whole_8inch"],
+      "allergens": ["gluten", "dairy", "eggs", "nuts"],
+      "seasonal": true,
+      "season_months": [1]
+    }
+  },
+  {
+    "item_id": "strawberry_mille_feuille",
+    "name": "Strawberry Mille-Feuille",
+    "category": "seasonal_pastry",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 92,
+      "available_size": ["individual"],
+      "allergens": ["gluten", "dairy", "eggs"],
+      "seasonal": true,
+      "season_months": [5, 6, 7]
+    }
+  },
+  {
+    "item_id": "pumpkin_spice_brioche",
+    "name": "Pumpkin Spice Brioche",
+    "category": "seasonal_pastry",
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_gluten_free": false,
+      "popularity_score": 87,
+      "available_size": ["single", "box_of_4"],
+      "allergens": ["gluten", "dairy", "eggs"],
+      "seasonal": true,
+      "season_months": [9, 10, 11]
+    }
+  }
+]

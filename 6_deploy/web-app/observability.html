@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Monitoring Dashboard - Virtual Coffee Shop</title>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:900&display=swap" rel="stylesheet">
+  <style>
+    /* Import main styles */
+    @import url('style.css');
+    
+    /* Observability-specific styles */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .observability-header {
+      text-align: center;
+      padding: 40px 20px;
+      color: white;
+    }
+    
+    .observability-header h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 3rem;
+      margin: 0 0 10px 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .observability-header p {
+      font-size: 1.2rem;
+      margin: 0;
+      opacity: 0.9;
+    }
+    
+    .monitoring-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: white;
+      border-radius: 15px 15px 0 0;
+      min-height: calc(100vh - 200px);
+    }
+    
+    .monitoring-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 10px;
+    }
+    
+    .monitoring-tab {
+      padding: 12px 24px;
+      border: none;
+      background: #f8f9fa;
+      color: #666;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .monitoring-tab:hover {
+      background: #e9ecef;
+      color: #333;
+    }
+    
+    .monitoring-tab.active {
+      background: #007bff;
+      color: white;
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 20px 0;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .metric-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      border-left: 4px solid #007bff;
+    }
+    
+    .metric-card h3 {
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+    
+    .cloudwatch-section {
+      text-align: center;
+      padding: 40px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    
+    .cloudwatch-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+      color: white;
+      padding: 15px 30px;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      margin: 10px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+    
+    .cloudwatch-btn:hover {
+      background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+      color: white;
+      text-decoration: none;
+    }
+    
+    .back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 25px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    
+    .back-btn:hover {
+      background: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-decoration: none;
+      color: #333;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #28a745;
+      margin-right: 8px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    
+    .info-section {
+      background: #e3f2fd;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 4px solid #2196f3;
+    }
+    
+    .metrics-list {
+      text-align: left;
+      margin: 20px 0;
+    }
+    
+    .metrics-list ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    
+    .metrics-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .metrics-list li:before {
+      content: "📊 ";
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-btn">← Back to Coffee Shop</a>
+  
+  <div class="observability-header">
+    <h1>🔍 Agent Monitoring Dashboard</h1>
+    <p>Real-time observability and analytics for your AI agents</p>
+  </div>
+  
+  <div class="monitoring-container">
+    <div class="monitoring-tabs">
+      <button class="monitoring-tab active" onclick="showTab('overview')">Overview</button>
+      <button class="monitoring-tab" onclick="showTab('cloudwatch')">CloudWatch</button>
+      <button class="monitoring-tab" onclick="showTab('metrics')">Metrics Guide</button>
+    </div>
+    
+    <div id="overview-content" class="tab-content active">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <h3><span class="status-indicator"></span>Monitoring Status</h3>
+          <p><strong>✅ Active and Running</strong></p>
+          <p>Your AI agents are actively sending metrics to AWS CloudWatch for real-time monitoring and analysis.</p>
+        </div>
+        
+        <div class="metric-card">
+          <h3>🎯 Current Configuration</h3>
+          <p><strong>Type:</strong> AWS CloudWatch</p>
+          <p><strong>Region:</strong> eu-central-1</p>
+          <p><strong>Namespace:</strong> SPBC/Agents</p>
+        </div>
+        
+        <div class="metric-card">
+          <h3>📈 Available Dashboards</h3>
+          <p>Access your monitoring data through the CloudWatch console with pre-configured dashboards and metrics.</p>
+        </div>
+      </div>
+      
+      <div class="cloudwatch-section">
+        <h2 style="color: #007bff; margin-bottom: 20px;">🚀 Access Your Monitoring Data</h2>
+        <p style="margin-bottom: 30px; font-size: 16px;">Click below to open your CloudWatch dashboard in a new tab:</p>
+        
+        <a href="https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#dashboards:name=SPBC-Agent-Metrics" 
+           target="_blank" 
+           class="cloudwatch-btn">
+          ☁️ Open CloudWatch Dashboard
+        </a>
+        
+        <div class="info-section">
+          <h4>💡 What you'll see in CloudWatch:</h4>
+          <div class="metrics-list">
+            <ul>
+              <li>Real-time agent response latency</li>
+              <li>Token usage tracking (input/output)</li>
+              <li>Success rates and error analytics</li>
+              <li>Tool execution statistics</li>
+              <li>Performance trends over time</li>
+            </ul>
+          </div>
+          <p><small><strong>Note:</strong> Metrics may take 1-5 minutes to appear after agent interactions.</small></p>
+        </div>
+      </div>
+    </div>
+    
+    <div id="cloudwatch-content" class="tab-content">
+      <div class="cloudwatch-section">
+        <h2 style="color: #007bff;">☁️ AWS CloudWatch Integration</h2>
+        <p>Your agents are configured to send comprehensive metrics to AWS CloudWatch.</p>
+        
+        <a href="https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#dashboards:name=SPBC-Agent-Metrics" 
+           target="_blank" 
+           class="cloudwatch-btn">
+          Open CloudWatch Console
+        </a>
+        
+        <div style="margin-top: 30px; text-align: left;">
+          <h3>📊 Available Metrics:</h3>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <h4>Performance Metrics</h4>
+              <ul>
+                <li>LatencyMs - Response time</li>
+                <li>TotalCycles - Processing cycles</li>
+                <li>TotalDuration - Total execution time</li>
+              </ul>
+            </div>
+            
+            <div class="metric-card">
+              <h4>Usage Metrics</h4>
+              <ul>
+                <li>InputTokens - Tokens consumed</li>
+                <li>OutputTokens - Tokens generated</li>
+                <li>ToolCallCount - Tool invocations</li>
+              </ul>
+            </div>
+            
+            <div class="metric-card">
+              <h4>Quality Metrics</h4>
+              <ul>
+                <li>SuccessRate - Success percentage</li>
+                <li>ErrorCount - Error occurrences</li>
+                <li>SuccessCount - Successful operations</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="metrics-content" class="tab-content">
+      <h2>📚 Metrics Guide</h2>
+      
+      <div class="info-section">
+        <h3>🎯 Understanding Your Agent Metrics</h3>
+        <p>This guide explains what each metric means and how to interpret the data in your CloudWatch dashboard.</p>
+      </div>
+      
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <h4>🚀 Performance Metrics</h4>
+          <p><strong>LatencyMs:</strong> Time taken for agent to respond (lower is better)</p>
+          <p><strong>TotalDuration:</strong> Complete processing time including all operations</p>
+          <p><strong>TotalCycles:</strong> Number of reasoning cycles the agent went through</p>
+        </div>
+        
+        <div class="metric-card">
+          <h4>💰 Cost Metrics</h4>
+          <p><strong>InputTokens:</strong> Tokens sent to the model (affects cost)</p>
+          <p><strong>OutputTokens:</strong> Tokens generated by the model (affects cost)</p>
+          <p><strong>ToolCallCount:</strong> Number of external tool invocations</p>
+        </div>
+        
+        <div class="metric-card">
+          <h4>✅ Quality Metrics</h4>
+          <p><strong>SuccessRate:</strong> Percentage of successful operations (aim for >95%)</p>
+          <p><strong>ErrorCount:</strong> Number of failed operations (should be low)</p>
+          <p><strong>SuccessCount:</strong> Number of successful operations</p>
+        </div>
+      </div>
+      
+      <div class="info-section">
+        <h3>📈 Best Practices</h3>
+        <ul>
+          <li><strong>Monitor Latency:</strong> Keep response times under 5 seconds for good UX</li>
+          <li><strong>Track Token Usage:</strong> Monitor costs by watching input/output token consumption</li>
+          <li><strong>Watch Success Rates:</strong> Investigate if success rate drops below 90%</li>
+          <li><strong>Analyze Patterns:</strong> Look for trends in usage during different times</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let observabilityConfig = null;
+    let statusCheckInterval = null;
+
+    // Load observability configuration dynamically
+    async function loadObservabilityConfig() {
+      try {
+        console.log('Loading observability configuration...');
+        const response = await fetch('observability-config.json');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        observabilityConfig = await response.json();
+        console.log('Observability config loaded:', observabilityConfig);
+        
+        // Update the UI with loaded config
+        updateConfigurationDisplay();
+        updateMonitoringStatus();
+        
+        return true;
+      } catch (error) {
+        console.error('Failed to load observability config:', error);
+        updateConfigurationDisplay(true); // Show error state
+        updateMonitoringStatus(false); // Show disconnected state
+        return false;
+      }
+    }
+
+    // Update the configuration display with real data
+    function updateConfigurationDisplay(hasError = false) {
+      const configCard = document.querySelector('.metric-card:nth-child(2)');
+      
+      if (hasError || !observabilityConfig) {
+        configCard.innerHTML = `
+          <h3>🎯 Current Configuration</h3>
+          <p><strong>Status:</strong> <span style="color: #dc3545;">Configuration Error</span></p>
+          <p>Unable to load configuration. Please check your setup.</p>
+        `;
+        return;
+      }
+
+      // Update with real configuration data
+      const configType = observabilityConfig.observabilityType || 'Unknown';
+      const region = observabilityConfig.cloudwatch?.region || 'Not configured';
+      const namespace = observabilityConfig.cloudwatch?.metricsNamespace || 'Not configured';
+      
+      configCard.innerHTML = `
+        <h3>🎯 Current Configuration</h3>
+        <p><strong>Type:</strong> ${configType.charAt(0).toUpperCase() + configType.slice(1)}</p>
+        <p><strong>Region:</strong> ${region}</p>
+        <p><strong>Namespace:</strong> ${namespace}</p>
+        <p><small style="color: #666;">Last updated: ${new Date().toLocaleTimeString()}</small></p>
+      `;
+    }
+
+    // Update monitoring status with real-time checking
+    function updateMonitoringStatus(isConnected = null) {
+      const statusCard = document.querySelector('.metric-card:nth-child(1)');
+      const statusIndicator = statusCard.querySelector('.status-indicator');
+      
+      if (isConnected === null) {
+        // Check if we have valid config and it's enabled
+        isConnected = observabilityConfig && observabilityConfig.enabled === true;
+      }
+
+      if (isConnected) {
+        statusIndicator.style.background = '#28a745'; // Green
+        statusIndicator.style.animation = 'pulse 2s infinite';
+        
+        statusCard.innerHTML = `
+          <h3><span class="status-indicator" style="background: #28a745; animation: pulse 2s infinite;"></span>Monitoring Status</h3>
+          <p><strong>✅ Active and Running</strong></p>
+          <p>Your AI agents are actively sending metrics to AWS CloudWatch for real-time monitoring and analysis.</p>
+          <p><small style="color: #666;">Status checked: ${new Date().toLocaleTimeString()}</small></p>
+        `;
+      } else {
+        statusIndicator.style.background = '#dc3545'; // Red
+        statusIndicator.style.animation = 'none';
+        
+        statusCard.innerHTML = `
+          <h3><span class="status-indicator" style="background: #dc3545; animation: none;"></span>Monitoring Status</h3>
+          <p><strong>⚠️ Configuration Issue</strong></p>
+          <p>There may be an issue with your monitoring configuration. Please check your setup.</p>
+          <p><small style="color: #666;">Status checked: ${new Date().toLocaleTimeString()}</small></p>
+        `;
+      }
+    }
+
+    // Simulate connection checking (similar to main page)
+    function checkMonitoringConnection() {
+      console.log('Checking monitoring connection...');
+      
+      // Simulate checking if CloudWatch is accessible
+      // In a real implementation, this could ping CloudWatch API or check recent metrics
+      const isHealthy = observabilityConfig && 
+                       observabilityConfig.enabled && 
+                       observabilityConfig.cloudwatch && 
+                       observabilityConfig.cloudwatch.region;
+      
+      updateMonitoringStatus(isHealthy);
+    }
+
+    // Start periodic status checking
+    function startStatusChecking() {
+      // Check immediately
+      checkMonitoringConnection();
+      
+      // Then check every 30 seconds
+      statusCheckInterval = setInterval(checkMonitoringConnection, 30000);
+      console.log('Started periodic status checking (every 30 seconds)');
+    }
+
+    // Stop status checking
+    function stopStatusChecking() {
+      if (statusCheckInterval) {
+        clearInterval(statusCheckInterval);
+        statusCheckInterval = null;
+        console.log('Stopped periodic status checking');
+      }
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', async function() {
+      console.log('Observability page loaded, initializing...');
+      
+      // Show loading state initially
+      const statusCard = document.querySelector('.metric-card:nth-child(1)');
+      statusCard.innerHTML = `
+        <h3><span class="status-indicator" style="background: #ffc107; animation: pulse 2s infinite;"></span>Monitoring Status</h3>
+        <p><strong>🔄 Checking Status...</strong></p>
+        <p>Loading monitoring configuration and checking connection status...</p>
+      `;
+
+      const configCard = document.querySelector('.metric-card:nth-child(2)');
+      configCard.innerHTML = `
+        <h3>🎯 Current Configuration</h3>
+        <p><strong>Status:</strong> <span style="color: #ffc107;">Loading...</span></p>
+        <p>Fetching configuration details...</p>
+      `;
+      
+      // Load configuration and start monitoring
+      const configLoaded = await loadObservabilityConfig();
+      
+      if (configLoaded) {
+        startStatusChecking();
+      }
+    });
+
+    // Clean up when page is unloaded
+    window.addEventListener('beforeunload', function() {
+      stopStatusChecking();
+    });
+
+    function showTab(tabName) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // Remove active class from all tabs
+      document.querySelectorAll('.monitoring-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected content
+      document.getElementById(tabName + '-content').classList.add('active');
+      
+      // Add active class to clicked tab
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "logs": {
+    "metrics_collected": {
+      "application_signals": {},
+      "emf": {}
+    },
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/home/ec2-user/environment/4_monitor_and_evaluate/cloudwatchagent/logs/barista_supervisor_agents_sdk.log",
+            "log_group_name": "barista_supervisor-agent-logs",
+            "log_stream_name": "barista_supervisor-agent-application-logs"
+          },
+          {
+            "file_path": "/home/ec2-user/environment/4_monitor_and_evaluate/cloudwatchagent/logs/barista_supervisor_metrics.json",
+            "log_group_name": "barista_supervisor-agent-metrics",
+            "log_stream_name": "barista_supervisor-agent-strands-metrics"
+          }
+        ]
+      }
+    }
+  },
+  "traces": {
+    "traces_collected": {
+    "otlp": {
+      "grpc_endpoint": "127.0.0.1:4317"
+    }
+  },
+    "transit_spans_in_otlp_format": true
+  }
+}
