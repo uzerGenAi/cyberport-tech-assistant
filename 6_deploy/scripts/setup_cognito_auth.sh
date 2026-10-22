@@ -556,9 +556,12 @@ EOF
 verify_deployment() {
     print_status "Verifying deployment..."
     
+    # This script owns only cognito-config.json. agentcore-config.json is written later,
+    # by configure_runtime.py (post_deploy.sh step 2), and is validated there — so requiring
+    # it here made this step fail on a clean checkout where the runtime has not been launched
+    # yet (e.g. the CI deploy job). Verify only what this script produces.
     local required_files=(
         "cognito-config.json"
-        "agentcore-config.json"
     )
     
     local missing_files=()
@@ -583,7 +586,20 @@ verify_deployment() {
         fi
     done
     
-    print_success "All configuration files are valid JSON"
+    print_success "Cognito configuration file is present and valid JSON"
+    
+    # If the AgentCore runtime config already exists, validate it too (don't require it).
+    local agentcore_config="$WEB_APP_DIR/agentcore-config.json"
+    if [ -f "$agentcore_config" ]; then
+        if python3 -m json.tool "$agentcore_config" > /dev/null 2>&1; then
+            print_success "AgentCore configuration file is present and valid JSON"
+        else
+            print_error "Invalid JSON in agentcore-config.json"
+            return 1
+        fi
+    else
+        print_status "agentcore-config.json not present yet (written when the runtime is launched)"
+    fi
     return 0
 }
 
