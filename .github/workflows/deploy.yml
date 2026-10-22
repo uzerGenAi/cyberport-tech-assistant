@@ -161,6 +161,12 @@ jobs:
         env:
           COGNITO_ADMIN_USERNAME: ${{ vars.COGNITO_ADMIN_USERNAME }}
           COGNITO_ADMIN_PASSWORD_SECRET_ID: ${{ vars.COGNITO_ADMIN_PASSWORD_SECRET_ID }}
+          # This project creates the execution role via scripts/Terraform, not a CloudFormation
+          # stack, so configure_runtime.py resolves it by role name (default
+          # SPBC-AgentCore-ExecutionRole) instead of a stack output. Set this repo variable only
+          # to override that name or ARN; left empty, the account-agnostic by-name default is used.
+          AGENTCORE_EXECUTION_ROLE_ARN: ${{ vars.AGENTCORE_EXECUTION_ROLE_ARN }}
+          AGENTCORE_EXECUTION_ROLE_NAME: ${{ vars.AGENTCORE_EXECUTION_ROLE_NAME }}
         run: |
           set -euo pipefail
           # shellcheck source=/dev/null

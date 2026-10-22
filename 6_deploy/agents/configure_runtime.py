@@ -18,8 +18,14 @@ except ImportError:
 
 environment_variables_file = os.path.expanduser("~/environment/env.sh")
 
-STACK_NAME = "spbc-pastry-cafe-production"
-OUTPUT_NAME = "CloudAgeRoleArn"
+# The execution role can be resolved three ways, in priority order:
+#   1. AGENTCORE_EXECUTION_ROLE_ARN — an explicit ARN (what the script/Terraform path sets)
+#   2. AGENTCORE_EXECUTION_ROLE_NAME / ROLE_NAME — a role name in this account
+#   3. a CloudFormation stack output (the original lab path)
+# Only (3) needs the stack to exist. STACK_NAME/OUTPUT_NAME stay overridable by env.
+STACK_NAME = os.environ.get("AGENTCORE_STACK_NAME", "spbc-pastry-cafe-production")
+OUTPUT_NAME = os.environ.get("AGENTCORE_STACK_OUTPUT", "CloudAgeRoleArn")
+DEFAULT_EXECUTION_ROLE_NAME = "SPBC-AgentCore-ExecutionRole"
 
 # Path to the web-app config file — written automatically on successful launch
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -87,6 +93,42 @@ def get_stack_output(cf, stack_name, output_key):
         if o.get("OutputKey") == output_key:
             return o.get("OutputValue")
     raise RuntimeError(f"Output {output_key} not found in stack {stack_name}")
+
+
+def resolve_execution_role_arn(region, iam):
+    """Resolve the AgentCore execution role ARN without assuming a CloudFormation deployment.
+
+    The lab's original path reads the ARN from a CloudFormation stack output, but this project
+    is deployed with scripts/Terraform and has no such stack — so the hard dependency failed
+    with 'Stack ... does not exist'. Resolve in priority order and only touch CloudFormation
+    as a last resort.
+    """
+    # 1) Explicit ARN from the environment.
+    explicit = os.environ.get("AGENTCORE_EXECUTION_ROLE_ARN", "").strip()
+    if explicit:
+        print(f"Using execution role from AGENTCORE_EXECUTION_ROLE_ARN: {explicit}")
+        return explicit
+
+    # 2) A role name from the environment (or the project default), looked up via IAM.
+    role_name = (
+        os.environ.get("AGENTCORE_EXECUTION_ROLE_NAME")
+        or os.environ.get("ROLE_NAME")
+        or DEFAULT_EXECUTION_ROLE_NAME
+    ).strip()
+    if role_name:
+        try:
+            arn = iam.get_role(RoleName=role_name)["Role"]["Arn"]
+            print(f"Using execution role resolved by name '{role_name}': {arn}")
+            return arn
+        except ClientError as e:
+            if e.response.get("Error", {}).get("Code") != "NoSuchEntity":
+                raise
+            print(f"Role '{role_name}' not found by name; falling back to CloudFormation output.")
+
+    # 3) CloudFormation stack output (original lab path).
+    print(f"Fetching execution role from CloudFormation stack '{STACK_NAME}' output '{OUTPUT_NAME}'...")
+    cf = boto3.client("cloudformation", region_name=region)
+    return get_stack_output(cf, STACK_NAME, OUTPUT_NAME)
 
 
 def role_name_from_arn(role_arn: str) -> str:
@@ -287,11 +329,9 @@ def main():
     rt = Runtime()
     agent_name = "pastry_concierge_agent"
 
-    cf = boto3.client("cloudformation", region_name=region)
     iam = boto3.client("iam", region_name=region)
 
-    print("Fetching execution role from CloudFormation output...")
-    exec_role_arn = get_stack_output(cf, STACK_NAME, OUTPUT_NAME)
+    exec_role_arn = resolve_execution_role_arn(region, iam)
     exec_role_name = role_name_from_arn(exec_role_arn)
     print(f"Using execution role: {exec_role_arn}")
 
