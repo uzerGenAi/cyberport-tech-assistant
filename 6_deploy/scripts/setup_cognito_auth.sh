@@ -523,6 +523,19 @@ update_agentcore_config() {
     local runtime_arn=$AGENT_RUNTIME_ARN
     local account_id=$(aws sts get-caller-identity --query "Account" --output text)
 
+    # Never overwrite a good config with a blank ARN: this used to write
+    # "agentRuntimeArn": "" whenever AGENT_RUNTIME_ARN was absent from env.sh, which silently
+    # broke a web app that was working a moment earlier.
+    if [ -z "$runtime_arn" ]; then
+        if [ -s "$config_file" ] && grep -q '"agentRuntimeArn": "arn:' "$config_file"; then
+            print_warning "AGENT_RUNTIME_ARN is not in env.sh; keeping the existing $config_file"
+            return 0
+        fi
+        print_warning "AGENT_RUNTIME_ARN is not set and no runtime ARN is on file."
+        print_status  "Deploy the runtime first (./deploy_agentcore.sh step8-create-runtime), then re-run."
+        return 0
+    fi
+
     print_success "Using AgentCore runtime from env.sh: $runtime_arn"
 
     
