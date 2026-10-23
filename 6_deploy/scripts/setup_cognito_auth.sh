@@ -86,7 +86,7 @@ check_prerequisites_and_backup() {
     local backup_dir="$WEB_APP_DIR/backup_$(date +%Y%m%d_%H%M%S)"
     mkdir -p "$backup_dir"
     
-    local files_to_backup=("cognito.js" "script.js" "cognito-config.json")
+    local files_to_backup=("cognito-config.json")
     for file in "${files_to_backup[@]}"; do
         if [ -f "$WEB_APP_DIR/$file" ]; then
             cp "$WEB_APP_DIR/$file" "$backup_dir/"

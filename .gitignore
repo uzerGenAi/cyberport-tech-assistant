@@ -53,3 +53,7 @@ kubeconfig
 .env
 .env.*
 !.env.example
+
+# ── Internal workflow / tool artifacts (never project source) ──
+.agents/
+.bob/

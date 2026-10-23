@@ -14,7 +14,6 @@ set -e
 # === CONFIGURATION ===
 REGION="eu-central-1"
 WEB_APP_DIR="/home/ec2-user/environment/6_deploy/web-app"
-SCRIPT_JS_PATH="$WEB_APP_DIR/script.js"
 
 # Lambda and API Gateway Configuration
 WEBSOCKET_LAMBDA_NAME="spbcTestAgentsWebSocketFunction"

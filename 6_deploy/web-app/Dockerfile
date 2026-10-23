@@ -7,7 +7,7 @@ FROM public.ecr.aws/nginx/nginx:1.27-alpine
 
 COPY index.html login.html observability.html /usr/share/nginx/html/
 COPY style.css enhanced-styles.css /usr/share/nginx/html/
-COPY script.js script-enhanced.js cognito.js cognito-enhanced.js agentcore-client-fixed.js /usr/share/nginx/html/
+COPY script-enhanced.js cognito-enhanced.js agentcore-client-fixed.js /usr/share/nginx/html/
 COPY image.jpg /usr/share/nginx/html/
 
 # Written by post_deploy.sh (setup_cognito_auth.sh and configure_runtime.py) before the build.
