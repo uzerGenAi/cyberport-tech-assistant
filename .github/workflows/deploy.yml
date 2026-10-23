@@ -193,13 +193,14 @@ jobs:
           set -euo pipefail
           # shellcheck source=/dev/null
           source ~/environment/env.sh
+          # Build + push the web image on CodeBuild (no local Docker). The script resolves
+          # ECR_REPOSITORY_URL itself and inherits IMAGE_TAG from $GITHUB_ENV.
+          bash 6_deploy/scripts/build_webapp_image.sh
+          # deploy_blue_green.sh needs ECR_REPOSITORY_URL in its env; the script's own resolution
+          # does not leak back here, so re-export it from terraform output.
           terraform -chdir=6_deploy/infra/terraform init -input=false >/dev/null
           ECR_REPOSITORY_URL=$(terraform -chdir=6_deploy/infra/terraform output -raw ecr_repository_url)
           export ECR_REPOSITORY_URL
-          aws ecr get-login-password --region "$AWS_REGION" \
-            | docker login --username AWS --password-stdin "${ECR_REPOSITORY_URL%%/*}"
-          docker build -t "${ECR_REPOSITORY_URL}:${IMAGE_TAG}" 6_deploy/web-app
-          docker push "${ECR_REPOSITORY_URL}:${IMAGE_TAG}"
           aws eks update-kubeconfig --region "$AWS_REGION" --name "${EKS_CLUSTER_NAME:-pastrycafe-prod}"
           bash 6_deploy/scripts/deploy_blue_green.sh
 
