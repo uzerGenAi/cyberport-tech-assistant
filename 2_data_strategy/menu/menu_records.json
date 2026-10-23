@@ -1,477 +1,2493 @@
 [
   {
-    "item_id": "croissant_plain",
-    "name": "Plain Croissant",
-    "category": "viennoiserie",
-    "price_eur": 2.20,
-    "prices_by_size_eur": { "single": 2.20, "box_of_4": 7.90 },
+    "item_id": "breakfast_petit_dejeuner_pain",
+    "name": "Petit-Déjeuner with Petit Pain",
+    "category": "breakfast",
+    "price_eur": 4.0,
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
       "is_vegan": false,
+      "is_vegetarian": true,
       "is_gluten_free": false,
-      "popularity_score": 95,
-      "available_size": ["single", "box_of_4"],
-      "allergens": ["gluten", "dairy", "eggs"]
+      "popularity_score": 70,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
     }
   },
   {
-    "item_id": "croissant_almond",
-    "name": "Almond Croissant",
-    "category": "viennoiserie",
-    "price_eur": 2.80,
-    "prices_by_size_eur": { "single": 2.80, "box_of_4": 10.40 },
+    "item_id": "breakfast_petit_dejeuner_croissant",
+    "name": "Petit-Déjeuner with Croissant",
+    "category": "breakfast",
+    "price_eur": 5.0,
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
       "is_vegan": false,
+      "is_vegetarian": true,
       "is_gluten_free": false,
-      "popularity_score": 92,
-      "available_size": ["single", "box_of_4"],
-      "allergens": ["gluten", "dairy", "eggs", "nuts"]
+      "popularity_score": 72,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
     }
   },
   {
-    "item_id": "pain_au_chocolat",
-    "name": "Pain au Chocolat",
-    "category": "viennoiserie",
-    "price_eur": 2.60,
-    "prices_by_size_eur": { "single": 2.60, "box_of_4": 9.60 },
+    "item_id": "breakfast_merci",
+    "name": "Merci Breakfast",
+    "category": "breakfast",
+    "price_eur": 11.5,
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
       "is_vegan": false,
-      "is_gluten_free": false,
-      "popularity_score": 93,
-      "available_size": ["single", "box_of_4"],
-      "allergens": ["gluten", "dairy", "eggs", "soy"]
-    }
-  },
-  {
-    "item_id": "brioche_loaf",
-    "name": "Brioche Loaf",
-    "category": "breads",
-    "price_eur": 5.50,
-    "prices_by_size_eur": { "half_loaf": 3.20, "full_loaf": 5.50 },
-    "attributes_json": {
-      "is_dairy_free": false,
-      "is_sugar_free": false,
-      "is_vegan": false,
-      "is_gluten_free": false,
-      "popularity_score": 88,
-      "available_size": ["half_loaf", "full_loaf"],
-      "allergens": ["gluten", "dairy", "eggs"]
-    }
-  },
-  {
-    "item_id": "sourdough_loaf",
-    "name": "Sourdough Loaf",
-    "category": "breads",
-    "price_eur": 4.80,
-    "prices_by_size_eur": { "half_loaf": 2.80, "full_loaf": 4.80 },
-    "attributes_json": {
-      "is_dairy_free": true,
-      "is_sugar_free": true,
-      "is_vegan": true,
-      "is_gluten_free": false,
-      "popularity_score": 91,
-      "available_size": ["half_loaf", "full_loaf"],
-      "allergens": ["gluten"]
-    }
-  },
-  {
-    "item_id": "rye_bread",
-    "name": "Dark Rye Bread",
-    "category": "breads",
-    "price_eur": 4.50,
-    "prices_by_size_eur": { "half_loaf": 2.60, "full_loaf": 4.50 },
-    "attributes_json": {
-      "is_dairy_free": true,
-      "is_sugar_free": true,
-      "is_vegan": true,
-      "is_gluten_free": false,
-      "popularity_score": 82,
-      "available_size": ["half_loaf", "full_loaf"],
-      "allergens": ["gluten"]
-    }
-  },
-  {
-    "item_id": "eclair_chocolate",
-    "name": "Chocolate Éclair",
-    "category": "patisserie",
-    "price_eur": 3.80,
-    "prices_by_size_eur": { "single": 3.80 },
-    "attributes_json": {
-      "is_dairy_free": false,
-      "is_sugar_free": false,
-      "is_vegan": false,
-      "is_gluten_free": false,
-      "popularity_score": 90,
-      "available_size": ["single"],
-      "allergens": ["gluten", "dairy", "eggs"]
-    }
-  },
-  {
-    "item_id": "eclair_vanilla",
-    "name": "Vanilla Éclair",
-    "category": "patisserie",
-    "price_eur": 3.80,
-    "prices_by_size_eur": { "single": 3.80 },
-    "attributes_json": {
-      "is_dairy_free": false,
-      "is_sugar_free": false,
-      "is_vegan": false,
-      "is_gluten_free": false,
-      "popularity_score": 87,
-      "available_size": ["single"],
-      "allergens": ["gluten", "dairy", "eggs"]
-    }
-  },
-  {
-    "item_id": "fruit_tart",
-    "name": "Fresh Fruit Tart",
-    "category": "patisserie",
-    "price_eur": 4.20,
-    "prices_by_size_eur": { "individual": 4.20, "large_6inch": 22.00 },
-    "attributes_json": {
-      "is_dairy_free": false,
-      "is_sugar_free": false,
-      "is_vegan": false,
-      "is_gluten_free": false,
-      "popularity_score": 89,
-      "available_size": ["individual", "large_6inch"],
-      "allergens": ["gluten", "dairy", "eggs"]
-    }
-  },
-  {
-    "item_id": "lemon_tart",
-    "name": "Lemon Tart",
-    "category": "patisserie",
-    "price_eur": 4.00,
-    "prices_by_size_eur": { "individual": 4.00, "large_6inch": 21.00 },
-    "attributes_json": {
-      "is_dairy_free": false,
-      "is_sugar_free": false,
-      "is_vegan": false,
-      "is_gluten_free": false,
-      "popularity_score": 86,
-      "available_size": ["individual", "large_6inch"],
-      "allergens": ["gluten", "dairy", "eggs"]
-    }
-  },
-  {
-    "item_id": "macaron_assorted",
-    "name": "Macaron (Assorted Flavours)",
-    "category": "patisserie",
-    "price_eur": 2.00,
-    "prices_by_size_eur": { "single": 2.00, "box_of_6": 11.00, "box_of_12": 20.00 },
-    "attributes_json": {
-      "is_dairy_free": false,
-      "is_sugar_free": false,
-      "is_vegan": false,
-      "is_gluten_free": true,
-      "popularity_score": 94,
-      "available_size": ["single", "box_of_6", "box_of_12"],
-      "allergens": ["dairy", "eggs", "nuts"]
-    }
-  },
-  {
-    "item_id": "opera_cake_slice",
-    "name": "Opéra Cake Slice",
-    "category": "cakes",
-    "price_eur": 5.50,
-    "prices_by_size_eur": { "slice": 5.50 },
-    "attributes_json": {
-      "is_dairy_free": false,
-      "is_sugar_free": false,
-      "is_vegan": false,
+      "is_vegetarian": false,
       "is_gluten_free": false,
       "popularity_score": 85,
-      "available_size": ["slice"],
-      "allergens": ["gluten", "dairy", "eggs", "nuts"]
+      "allergens": [
+        "gluten",
+        "eggs",
+        "soy",
+        "dairy",
+        "nuts"
+      ]
     }
   },
   {
-    "item_id": "black_forest_slice",
-    "name": "Black Forest Cake Slice",
-    "category": "cakes",
-    "price_eur": 5.20,
-    "prices_by_size_eur": { "slice": 5.20 },
+    "item_id": "breakfast_all_cheese",
+    "name": "All Cheese & More Breakfast",
+    "category": "breakfast",
+    "price_eur": 12.0,
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
       "is_vegan": false,
-      "is_gluten_free": false,
-      "popularity_score": 88,
-      "available_size": ["slice"],
-      "allergens": ["gluten", "dairy", "eggs"]
-    }
-  },
-  {
-    "item_id": "custom_celebration_cake",
-    "name": "Custom Celebration Cake",
-    "category": "cakes",
-    "price_eur": 38.00,
-    "prices_by_size_eur": { "6inch": 38.00, "8inch": 52.00, "10inch": 68.00 },
-    "attributes_json": {
-      "is_dairy_free": false,
-      "is_sugar_free": false,
-      "is_vegan": false,
-      "is_gluten_free": false,
-      "popularity_score": 96,
-      "available_size": ["6inch", "8inch", "10inch"],
-      "allergens": ["gluten", "dairy", "eggs"],
-      "requires_advance_order_days": 3
-    }
-  },
-  {
-    "item_id": "quiche_lorraine",
-    "name": "Quiche Lorraine",
-    "category": "savoury",
-    "price_eur": 4.60,
-    "prices_by_size_eur": { "slice": 4.60, "whole_8inch": 24.00 },
-    "attributes_json": {
-      "is_dairy_free": false,
-      "is_sugar_free": true,
-      "is_vegan": false,
-      "is_gluten_free": false,
-      "popularity_score": 83,
-      "available_size": ["slice", "whole_8inch"],
-      "allergens": ["gluten", "dairy", "eggs"]
-    }
-  },
-  {
-    "item_id": "spinach_feta_pastry",
-    "name": "Spinach & Feta Pastry",
-    "category": "savoury",
-    "price_eur": 3.60,
-    "prices_by_size_eur": { "single": 3.60 },
-    "attributes_json": {
-      "is_dairy_free": false,
-      "is_sugar_free": true,
-      "is_vegan": false,
+      "is_vegetarian": true,
       "is_gluten_free": false,
       "popularity_score": 80,
-      "available_size": ["single"],
-      "allergens": ["gluten", "dairy", "eggs"]
+      "allergens": [
+        "gluten",
+        "eggs",
+        "soy",
+        "dairy",
+        "nuts"
+      ]
     }
   },
   {
-    "item_id": "espresso",
-    "name": "Espresso",
-    "category": "coffee",
-    "price_eur": 2.20,
-    "prices_by_size_eur": { "single": 2.20, "double": 2.80 },
-    "attributes_json": {
-      "is_dairy_free": true,
-      "is_sugar_free": true,
-      "popularity_score": 90,
-      "caffeine_mg": 90,
-      "can_be_offered_in_cold": false,
-      "can_be_offered_in_hot": true,
-      "available_size": ["single", "double"]
-    }
-  },
-  {
-    "item_id": "cappuccino",
-    "name": "Cappuccino",
-    "category": "coffee",
-    "price_eur": 3.40,
-    "prices_by_size_eur": { "small": 3.40, "large": 4.10 },
+    "item_id": "breakfast_kronberger_cello",
+    "name": "Kronberger Cello (Salmon Rolls)",
+    "category": "breakfast",
+    "price_eur": 11.5,
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
-      "popularity_score": 91,
-      "caffeine_mg": 120,
-      "can_be_offered_in_cold": false,
-      "can_be_offered_in_hot": true,
-      "available_size": ["small", "large"]
-    }
-  },
-  {
-    "item_id": "flat_white",
-    "name": "Flat White",
-    "category": "coffee",
-    "price_eur": 3.60,
-    "prices_by_size_eur": { "small": 3.60, "large": 4.30 },
-    "attributes_json": {
-      "is_dairy_free": false,
-      "is_sugar_free": false,
-      "popularity_score": 89,
-      "caffeine_mg": 130,
-      "can_be_offered_in_cold": false,
-      "can_be_offered_in_hot": true,
-      "available_size": ["small", "large"]
-    }
-  },
-  {
-    "item_id": "filter_coffee",
-    "name": "Filter Coffee",
-    "category": "coffee",
-    "price_eur": 2.80,
-    "prices_by_size_eur": { "small": 2.80, "medium": 3.20, "large": 3.60 },
-    "attributes_json": {
-      "is_dairy_free": true,
-      "is_sugar_free": true,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
       "popularity_score": 78,
-      "caffeine_mg": 110,
-      "can_be_offered_in_cold": false,
-      "can_be_offered_in_hot": true,
-      "available_size": ["small", "medium", "large"]
+      "allergens": [
+        "gluten",
+        "fish",
+        "dairy"
+      ]
     }
   },
   {
-    "item_id": "latte",
-    "name": "Café Latte",
-    "category": "coffee",
-    "price_eur": 3.80,
-    "prices_by_size_eur": { "small": 3.80, "medium": 4.20, "large": 4.60 },
+    "item_id": "breakfast_hundertwasser",
+    "name": "Hundertwasser Breakfast",
+    "category": "breakfast",
+    "price_eur": 13.5,
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
+      "popularity_score": 82,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy",
+        "nuts"
+      ]
+    }
+  },
+  {
+    "item_id": "breakfast_sasis",
+    "name": "Sa'SIS Breakfast",
+    "category": "breakfast",
+    "price_eur": 19.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
       "popularity_score": 88,
-      "caffeine_mg": 150,
-      "can_be_offered_in_cold": true,
-      "can_be_offered_in_hot": true,
-      "available_size": ["small", "medium", "large"]
+      "allergens": [
+        "gluten",
+        "eggs",
+        "fish",
+        "soy",
+        "dairy",
+        "nuts",
+        "sulphites"
+      ]
     }
   },
   {
-    "item_id": "hot_chocolate",
-    "name": "Hot Chocolate",
-    "category": "hot_drinks",
-    "price_eur": 3.60,
-    "prices_by_size_eur": { "small": 3.60, "large": 4.30 },
+    "item_id": "breakfast_parkhotel",
+    "name": "Parkhotel Breakfast",
+    "category": "breakfast",
+    "price_eur": 20.0,
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
+      "popularity_score": 86,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "fish",
+        "dairy",
+        "nuts",
+        "sulphites"
+      ]
+    }
+  },
+  {
+    "item_id": "breakfast_pancakes_bacon",
+    "name": "Pancakes with Maple Syrup, Butter & Bacon",
+    "category": "breakfast",
+    "price_eur": 13.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
       "popularity_score": 84,
-      "caffeine_mg": 10,
-      "can_be_offered_in_cold": false,
-      "can_be_offered_in_hot": true,
-      "available_size": ["small", "large"]
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
     }
   },
   {
-    "item_id": "chai_latte",
-    "name": "Chai Latte",
-    "category": "hot_drinks",
-    "price_eur": 3.80,
-    "prices_by_size_eur": { "small": 3.80, "large": 4.40 },
-    "attributes_json": {
-      "is_dairy_free": false,
-      "is_sugar_free": false,
-      "popularity_score": 79,
-      "caffeine_mg": 60,
-      "can_be_offered_in_cold": true,
-      "can_be_offered_in_hot": true,
-      "available_size": ["small", "large"]
-    }
-  },
-  {
-    "item_id": "matcha_latte",
-    "name": "Matcha Latte",
-    "category": "hot_drinks",
-    "price_eur": 4.20,
-    "prices_by_size_eur": { "small": 4.20, "large": 4.80 },
-    "attributes_json": {
-      "is_dairy_free": false,
-      "is_sugar_free": false,
-      "popularity_score": 81,
-      "caffeine_mg": 45,
-      "can_be_offered_in_cold": true,
-      "can_be_offered_in_hot": true,
-      "available_size": ["small", "large"]
-    }
-  },
-  {
-    "item_id": "stollen_slice",
-    "name": "Christmas Stollen Slice",
-    "category": "seasonal_pastry",
-    "price_eur": 3.50,
-    "prices_by_size_eur": { "slice": 3.50 },
+    "item_id": "breakfast_pancakes_berries",
+    "name": "Pancakes with Fresh Berries, Maple Syrup & Cream",
+    "category": "breakfast",
+    "price_eur": 12.9,
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
       "is_vegan": false,
+      "is_vegetarian": true,
       "is_gluten_free": false,
-      "popularity_score": 93,
-      "available_size": ["slice"],
-      "allergens": ["gluten", "dairy", "eggs", "nuts"],
-      "seasonal": true,
-      "season_months": [11, 12]
+      "popularity_score": 86,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
     }
   },
   {
-    "item_id": "hot_cross_bun",
-    "name": "Hot Cross Bun",
-    "category": "seasonal_pastry",
-    "price_eur": 2.40,
-    "prices_by_size_eur": { "single": 2.40, "box_of_6": 13.00 },
+    "item_id": "breakfast_yogurt_fruit_muesli",
+    "name": "Yogurt, Fruit & Muesli",
+    "category": "breakfast",
+    "price_eur": 8.5,
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
       "is_vegan": false,
+      "is_vegetarian": true,
       "is_gluten_free": false,
-      "popularity_score": 90,
-      "available_size": ["single", "box_of_6"],
-      "allergens": ["gluten", "dairy", "eggs"],
-      "seasonal": true,
-      "season_months": [3, 4]
+      "popularity_score": 75,
+      "allergens": [
+        "gluten",
+        "dairy",
+        "nuts"
+      ]
     }
   },
   {
-    "item_id": "galette_des_rois",
-    "name": "Galette des Rois",
-    "category": "seasonal_pastry",
-    "price_eur": 4.50,
-    "prices_by_size_eur": { "slice": 4.50, "whole_8inch": 28.00 },
+    "item_id": "breakfast_granola",
+    "name": "Homemade Granola with Greek Yogurt & Berries",
+    "category": "breakfast",
+    "price_eur": 10.5,
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
       "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 80,
+      "allergens": [
+        "gluten",
+        "dairy",
+        "nuts"
+      ]
+    }
+  },
+  {
+    "item_id": "breakfast_porridge",
+    "name": "Porridge with Fresh Fruit, Walnuts & Almond Milk",
+    "category": "breakfast",
+    "price_eur": 9.5,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 74,
+      "allergens": [
+        "gluten",
+        "nuts"
+      ]
+    }
+  },
+  {
+    "item_id": "breakfast_avocado_toast",
+    "name": "Avocado Toast on Sourdough",
+    "category": "breakfast",
+    "price_eur": 10.9,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
       "is_gluten_free": false,
       "popularity_score": 88,
-      "available_size": ["slice", "whole_8inch"],
-      "allergens": ["gluten", "dairy", "eggs", "nuts"],
-      "seasonal": true,
-      "season_months": [1]
+      "allergens": [
+        "gluten"
+      ]
     }
   },
   {
-    "item_id": "strawberry_mille_feuille",
-    "name": "Strawberry Mille-Feuille",
-    "category": "seasonal_pastry",
-    "price_eur": 4.60,
-    "prices_by_size_eur": { "individual": 4.60 },
+    "item_id": "breakfast_eggsciting_bagel",
+    "name": "Eggs-Citing Bagel (Avocado, Tomato Salsa, Scrambled Egg)",
+    "category": "breakfast",
+    "price_eur": 12.9,
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
       "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 85,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "breakfast_benedict_bacon",
+    "name": "Eggs Benedict with Bacon",
+    "category": "breakfast",
+    "price_eur": 12.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
+      "popularity_score": 86,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy",
+        "mustard"
+      ]
+    }
+  },
+  {
+    "item_id": "breakfast_benedict_salmon",
+    "name": "Eggs Benedict with Smoked Salmon",
+    "category": "breakfast",
+    "price_eur": 14.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
+      "popularity_score": 85,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "fish",
+        "dairy",
+        "mustard"
+      ]
+    }
+  },
+  {
+    "item_id": "breakfast_benedict_florentine",
+    "name": "Eggs Benedict Florentine (Baby Spinach)",
+    "category": "breakfast",
+    "price_eur": 12.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 80,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy",
+        "mustard"
+      ]
+    }
+  },
+  {
+    "item_id": "breakfast_croissant_benedict",
+    "name": "Smashed Croissant Benedict",
+    "category": "breakfast",
+    "price_eur": 14.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
+      "popularity_score": 84,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "fish",
+        "dairy",
+        "mustard"
+      ]
+    }
+  },
+  {
+    "item_id": "breakfast_croissant_salmon",
+    "name": "Smashed Croissant with Salmon",
+    "category": "breakfast",
+    "price_eur": 12.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "popularity_score": 83,
+      "allergens": [
+        "eggs",
+        "dairy",
+        "fish"
+      ]
+    }
+  },
+  {
+    "item_id": "breakfast_wrap",
+    "name": "Breakfast Wrap (Scrambled Egg, Cheddar, Jalapeños, Bacon, Avocado)",
+    "category": "breakfast",
+    "price_eur": 11.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
+      "popularity_score": 82,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_scrambled_plain",
+    "name": "Scrambled Eggs",
+    "category": "eggs",
+    "price_eur": 6.0,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 76,
+      "allergens": [
+        "eggs"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_scrambled_bacon",
+    "name": "Scrambled Eggs with Bacon",
+    "category": "eggs",
+    "price_eur": 8.0,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "popularity_score": 80,
+      "allergens": [
+        "eggs"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_scrambled_cheese_ham",
+    "name": "Scrambled Eggs with Cheese & Ham",
+    "category": "eggs",
+    "price_eur": 8.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "popularity_score": 79,
+      "allergens": [
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_scrambled_parma",
+    "name": "Scrambled Eggs with Parma Ham, Tomato & Mozzarella",
+    "category": "eggs",
+    "price_eur": 9.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "popularity_score": 78,
+      "allergens": [
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_scrambled_feta",
+    "name": "Scrambled Eggs with Tomato & Feta",
+    "category": "eggs",
+    "price_eur": 8.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 75,
+      "allergens": [
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_scrambled_herbs",
+    "name": "Scrambled Eggs with Herbs of Provence",
+    "category": "eggs",
+    "price_eur": 7.0,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 72,
+      "allergens": [
+        "eggs"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_fried_bacon",
+    "name": "Two Fried Eggs with Bacon",
+    "category": "eggs",
+    "price_eur": 7.0,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "popularity_score": 74,
+      "allergens": [
+        "eggs"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_fried_cheese_ham",
+    "name": "Two Fried Eggs with Cheese & Ham",
+    "category": "eggs",
+    "price_eur": 7.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "popularity_score": 73,
+      "allergens": [
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_omelette_merci",
+    "name": "Omelette Merci (Cheese, Ham, Tomato, Gherkins)",
+    "category": "eggs",
+    "price_eur": 11.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "popularity_score": 77,
+      "allergens": [
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_omelette_herbs",
+    "name": "Omelette with Herbs of Provence",
+    "category": "eggs",
+    "price_eur": 8.0,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 71,
+      "allergens": [
+        "eggs"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_omelette_feta",
+    "name": "Omelette with Tomato & Feta",
+    "category": "eggs",
+    "price_eur": 9.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 73,
+      "allergens": [
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_omelette_farmer",
+    "name": "Farmer's Omelette (Potato, Bacon, Gherkins)",
+    "category": "eggs",
+    "price_eur": 11.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "popularity_score": 75,
+      "allergens": [
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_boiled",
+    "name": "Soft-Boiled Organic Egg",
+    "category": "eggs",
+    "price_eur": 2.0,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 60,
+      "allergens": [
+        "eggs"
+      ]
+    }
+  },
+  {
+    "item_id": "eggs_in_glass",
+    "name": "Organic Egg in a Glass",
+    "category": "eggs",
+    "price_eur": 2.3,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 58,
+      "allergens": [
+        "eggs"
+      ]
+    }
+  },
+  {
+    "item_id": "savoury_croque_sasis",
+    "name": "Croque Sa'SIS (Turkey, Cheese, Fried Egg, Side Salad)",
+    "category": "savoury",
+    "price_eur": 14.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
+      "popularity_score": 86,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy",
+        "mustard"
+      ]
+    }
+  },
+  {
+    "item_id": "savoury_croque_monfrere",
+    "name": "Croque Mon Frère (Ham, Cheese, Side Salad)",
+    "category": "savoury",
+    "price_eur": 12.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
+      "popularity_score": 84,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy",
+        "mustard"
+      ]
+    }
+  },
+  {
+    "item_id": "savoury_baked_camembert",
+    "name": "Baked Camembert",
+    "category": "savoury",
+    "price_eur": 12.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 80,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "savoury_smashburger",
+    "name": "Sa'SIS Smashburger with Fries",
+    "category": "savoury",
+    "price_eur": 15.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
       "is_gluten_free": false,
       "popularity_score": 92,
-      "available_size": ["individual"],
-      "allergens": ["gluten", "dairy", "eggs"],
-      "seasonal": true,
-      "season_months": [5, 6, 7]
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy",
+        "mustard"
+      ]
     }
   },
   {
-    "item_id": "pumpkin_spice_brioche",
-    "name": "Pumpkin Spice Brioche",
-    "category": "seasonal_pastry",
-    "price_eur": 3.20,
-    "prices_by_size_eur": { "single": 3.20, "box_of_4": 11.50 },
+    "item_id": "salad_merci",
+    "name": "Salad Merci (Emmental, Ham, Egg)",
+    "category": "salads",
+    "price_eur": 12.5,
     "attributes_json": {
       "is_dairy_free": false,
       "is_sugar_free": false,
       "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "popularity_score": 78,
+      "allergens": [
+        "eggs",
+        "dairy",
+        "mustard"
+      ]
+    }
+  },
+  {
+    "item_id": "salad_turkey",
+    "name": "Mixed Salad with Turkey Breast",
+    "category": "salads",
+    "price_eur": 13.9,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "popularity_score": 80,
+      "allergens": [
+        "mustard"
+      ]
+    }
+  },
+  {
+    "item_id": "salad_nicoise",
+    "name": "Salad Niçoise (Tuna, Egg, Red Onion)",
+    "category": "salads",
+    "price_eur": 13.5,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "popularity_score": 79,
+      "allergens": [
+        "eggs",
+        "fish",
+        "mustard"
+      ]
+    }
+  },
+  {
+    "item_id": "salad_greek",
+    "name": "Greek Salad (Feta, Tomato, Cucumber, Onion, Olives)",
+    "category": "salads",
+    "price_eur": 13.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 82,
+      "allergens": [
+        "dairy",
+        "mustard"
+      ]
+    }
+  },
+  {
+    "item_id": "salad_goat_cheese",
+    "name": "Goat Cheese Salad (Baked Honey Goat Cheese)",
+    "category": "salads",
+    "price_eur": 13.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 81,
+      "allergens": [
+        "dairy",
+        "mustard"
+      ]
+    }
+  },
+  {
+    "item_id": "savoury_steak_sandwich",
+    "name": "Elli's Favourite Steak Sandwich with Fries",
+    "category": "savoury",
+    "price_eur": 16.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
       "is_gluten_free": false,
-      "popularity_score": 87,
-      "available_size": ["single", "box_of_4"],
-      "allergens": ["gluten", "dairy", "eggs"],
-      "seasonal": true,
-      "season_months": [9, 10, 11]
+      "popularity_score": 88,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy",
+        "mustard",
+        "sesame"
+      ]
+    }
+  },
+  {
+    "item_id": "small_frankfurter",
+    "name": "Two Frankfurter Sausages with Farmhouse Bread & Mustard",
+    "category": "small_plates",
+    "price_eur": 9.5,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
+      "popularity_score": 74,
+      "allergens": [
+        "gluten",
+        "mustard"
+      ]
+    }
+  },
+  {
+    "item_id": "small_frites_gourmandes",
+    "name": "Frites Gourmandes (Guacamole, Sour Cream, Salsa, Cheddar)",
+    "category": "small_plates",
+    "price_eur": 11.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 82,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "small_tarte_flambee_bacon",
+    "name": "Tarte Flambée Alsatian Style (Bacon & Onion)",
+    "category": "small_plates",
+    "price_eur": 10.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
+      "popularity_score": 83,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "small_tarte_flambee_veg",
+    "name": "Tarte Flambée Vegetarian (Cherry Tomato, Feta, Rocket)",
+    "category": "small_plates",
+    "price_eur": 11.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 82,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "small_quiche_tomato_mozzarella",
+    "name": "Quiche Tomato & Mozzarella",
+    "category": "small_plates",
+    "price_eur": 5.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 76,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "small_quiche_feta_olive",
+    "name": "Quiche Feta & Olive",
+    "category": "small_plates",
+    "price_eur": 5.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 74,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "small_quiche_lorraine",
+    "name": "Quiche Lorraine (Cheese & Ham)",
+    "category": "small_plates",
+    "price_eur": 5.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
+      "popularity_score": 80,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_croissant",
+    "name": "Croissant",
+    "category": "viennoiserie",
+    "price_eur": 3.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 95,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ],
+      "available_size": [
+        "single",
+        "box_of_4"
+      ]
+    },
+    "prices_by_size_eur": {
+      "single": 3.0,
+      "box_of_4": 11.0
+    }
+  },
+  {
+    "item_id": "vienn_mini_croissant",
+    "name": "Mini Croissant",
+    "category": "viennoiserie",
+    "price_eur": 2.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 84,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_croissant_amandes",
+    "name": "Almond Croissant",
+    "category": "viennoiserie",
+    "price_eur": 4.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 92,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy",
+        "nuts"
+      ],
+      "available_size": [
+        "single",
+        "box_of_4"
+      ]
+    },
+    "prices_by_size_eur": {
+      "single": 4.9,
+      "box_of_4": 18.0
+    }
+  },
+  {
+    "item_id": "vienn_croissant_pommes",
+    "name": "Apple Croissant",
+    "category": "viennoiserie",
+    "price_eur": 4.2,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 85,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_mini_croissant_pommes",
+    "name": "Mini Apple Croissant",
+    "category": "viennoiserie",
+    "price_eur": 3.4,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 78,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_pain_au_chocolat",
+    "name": "Pain au Chocolat",
+    "category": "viennoiserie",
+    "price_eur": 3.7,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 93,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ],
+      "available_size": [
+        "single",
+        "box_of_4"
+      ]
+    },
+    "prices_by_size_eur": {
+      "single": 3.7,
+      "box_of_4": 13.8
+    }
+  },
+  {
+    "item_id": "vienn_mini_pain_au_chocolat",
+    "name": "Mini Pain au Chocolat",
+    "category": "viennoiserie",
+    "price_eur": 2.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 80,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_pain_aux_raisins",
+    "name": "Pain aux Raisins",
+    "category": "viennoiserie",
+    "price_eur": 3.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 82,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy",
+        "nuts"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_tartelette",
+    "name": "Tartelette",
+    "category": "viennoiserie",
+    "price_eur": 5.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 84,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_fruit_petit_four",
+    "name": "Fruit Petit Four",
+    "category": "viennoiserie",
+    "price_eur": 3.3,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 76,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_petit_four",
+    "name": "Petit Four",
+    "category": "viennoiserie",
+    "price_eur": 4.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 77,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_tarte",
+    "name": "Tarte (Slice)",
+    "category": "viennoiserie",
+    "price_eur": 4.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 80,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_cream_cake",
+    "name": "Cream / Gateau Slice",
+    "category": "viennoiserie",
+    "price_eur": 5.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 83,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_brioche_nature",
+    "name": "Brioche Nature",
+    "category": "viennoiserie",
+    "price_eur": 3.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 78,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_brioche_sucre",
+    "name": "Brioche au Sucre",
+    "category": "viennoiserie",
+    "price_eur": 3.8,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 76,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_brioche_chocolat",
+    "name": "Brioche au Chocolat",
+    "category": "viennoiserie",
+    "price_eur": 3.8,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 80,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_brioche_raisins",
+    "name": "Brioche aux Raisins",
+    "category": "viennoiserie",
+    "price_eur": 3.8,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 75,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy",
+        "nuts"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_cheese_ham_croissant",
+    "name": "Cheese & Ham Croissant",
+    "category": "viennoiserie",
+    "price_eur": 2.8,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": false,
+      "popularity_score": 85,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_feta_olive_croissant",
+    "name": "Feta & Olive Croissant",
+    "category": "viennoiserie",
+    "price_eur": 2.8,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 79,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_cinnamon_roll",
+    "name": "Cinnamon Roll",
+    "category": "viennoiserie",
+    "price_eur": 3.8,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 86,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_chocolate_roll",
+    "name": "Chocolate Roll",
+    "category": "viennoiserie",
+    "price_eur": 3.8,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 84,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_fruit_danish",
+    "name": "Fruit Danish",
+    "category": "viennoiserie",
+    "price_eur": 4.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 80,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy",
+        "nuts"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_pretzel_croissant",
+    "name": "Pretzel Croissant",
+    "category": "viennoiserie",
+    "price_eur": 2.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 78,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_pretzel_corner",
+    "name": "Pretzel Corner",
+    "category": "viennoiserie",
+    "price_eur": 2.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 74,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_petit_gateau",
+    "name": "Petit Gâteau",
+    "category": "viennoiserie",
+    "price_eur": 5.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 82,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_french_slice",
+    "name": "French Pâtisserie Slice",
+    "category": "viennoiserie",
+    "price_eur": 5.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 83,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "vienn_eclair",
+    "name": "Éclair",
+    "category": "viennoiserie",
+    "price_eur": 4.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "popularity_score": 88,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "coffee_pot",
+    "name": "Pot of Coffee",
+    "category": "coffee",
+    "price_eur": 3.3,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 80,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "coffee_small_pot",
+    "name": "Small Pot of Coffee",
+    "category": "coffee",
+    "price_eur": 5.2,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 70,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "coffee_schumli",
+    "name": "Schümli Coffee",
+    "category": "coffee",
+    "price_eur": 3.8,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 72,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "coffee_espresso",
+    "name": "Espresso",
+    "category": "coffee",
+    "price_eur": 2.5,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 90,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "coffee_doppio",
+    "name": "Doppio",
+    "category": "coffee",
+    "price_eur": 3.8,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 78,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "coffee_doppio_macchiato",
+    "name": "Doppio Macchiato",
+    "category": "coffee",
+    "price_eur": 4.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 74,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "coffee_espresso_macchiato",
+    "name": "Espresso Macchiato",
+    "category": "coffee",
+    "price_eur": 2.7,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 76,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "coffee_latte_macchiato",
+    "name": "Latte Macchiato",
+    "category": "coffee",
+    "price_eur": 4.1,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 88,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "coffee_cappuccino",
+    "name": "Cappuccino",
+    "category": "coffee",
+    "price_eur": 3.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 91,
+      "allergens": [
+        "dairy"
+      ],
+      "available_size": [
+        "regular",
+        "with_cream"
+      ]
+    },
+    "prices_by_size_eur": {
+      "regular": 3.5,
+      "with_cream": 3.8
+    }
+  },
+  {
+    "item_id": "coffee_cafe_au_lait",
+    "name": "Café au Lait",
+    "category": "coffee",
+    "price_eur": 4.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 84,
+      "allergens": [
+        "dairy"
+      ],
+      "available_size": [
+        "regular",
+        "grand"
+      ]
+    },
+    "prices_by_size_eur": {
+      "regular": 4.0,
+      "grand": 6.2
+    }
+  },
+  {
+    "item_id": "coffee_flat_white",
+    "name": "Flat White",
+    "category": "coffee",
+    "price_eur": 4.1,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 89,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "coffee_pumpkin_spice",
+    "name": "Pumpkin Spice Latte",
+    "category": "coffee",
+    "price_eur": 4.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 82,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "coffee_vanilla_latte",
+    "name": "Vanilla Latte",
+    "category": "coffee",
+    "price_eur": 4.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 85,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "coffee_caramel_latte",
+    "name": "Caramel Latte",
+    "category": "coffee",
+    "price_eur": 4.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 85,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "coffee_cold_brew",
+    "name": "Cold Brew (15h brewed)",
+    "category": "coffee",
+    "price_eur": 4.9,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 83,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "coffee_cortado",
+    "name": "Cortado",
+    "category": "coffee",
+    "price_eur": 4.1,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 78,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "coffee_iced_vanilla_latte",
+    "name": "Iced Vanilla Latte",
+    "category": "coffee",
+    "price_eur": 5.3,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 84,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "coffee_iced_caramel_latte",
+    "name": "Iced Caramel Latte",
+    "category": "coffee",
+    "price_eur": 5.3,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 84,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "hot_hot_chocolate",
+    "name": "Hot Chocolate",
+    "category": "hot_drinks",
+    "price_eur": 4.1,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 85,
+      "allergens": [
+        "dairy"
+      ],
+      "available_size": [
+        "regular",
+        "with_cream"
+      ]
+    },
+    "prices_by_size_eur": {
+      "regular": 4.1,
+      "with_cream": 5.6
+    }
+  },
+  {
+    "item_id": "hot_pot_chocolate",
+    "name": "Pot of Hot Chocolate",
+    "category": "hot_drinks",
+    "price_eur": 5.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 72,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "hot_chai_latte",
+    "name": "Chai Latte",
+    "category": "hot_drinks",
+    "price_eur": 4.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 82,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "hot_matcha_latte",
+    "name": "Matcha Latte",
+    "category": "hot_drinks",
+    "price_eur": 4.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 81,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "hot_iced_chai_latte",
+    "name": "Iced Chai Latte",
+    "category": "hot_drinks",
+    "price_eur": 5.3,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 80,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "hot_iced_matcha_latte",
+    "name": "Iced Matcha Latte",
+    "category": "hot_drinks",
+    "price_eur": 5.3,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 80,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "tea_hot_lemon",
+    "name": "Hot Lemon",
+    "category": "tea",
+    "price_eur": 4.5,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 68,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "tea_fresh_mint",
+    "name": "Fresh Mint Tea",
+    "category": "tea",
+    "price_eur": 4.9,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 74,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "tea_mint_ginger",
+    "name": "Mint & Ginger Tea",
+    "category": "tea",
+    "price_eur": 5.3,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 72,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "tea_fresh_ginger",
+    "name": "Fresh Ginger Tea",
+    "category": "tea",
+    "price_eur": 4.9,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 70,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "tea_black_pot",
+    "name": "Pot of Black Tea (English Breakfast, Earl Grey, Assam...)",
+    "category": "tea",
+    "price_eur": 6.5,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 78,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "tea_cup",
+    "name": "Cup of Tea",
+    "category": "tea",
+    "price_eur": 3.5,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 75,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "tea_herbal_pot",
+    "name": "Pot of Herbal/Fruit Tea (Peppermint, Camomile, Rooibos...)",
+    "category": "tea",
+    "price_eur": 6.5,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 76,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_water_still_025",
+    "name": "Still Water (0.25 l)",
+    "category": "cold_drinks",
+    "price_eur": 3.3,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 70,
+      "allergens": [],
+      "available_size": [
+        "0.25l",
+        "0.75l"
+      ]
+    },
+    "prices_by_size_eur": {
+      "0.25l": 3.3,
+      "0.75l": 6.5
+    }
+  },
+  {
+    "item_id": "cold_water_sparkling_025",
+    "name": "Sparkling Water (0.25 l)",
+    "category": "cold_drinks",
+    "price_eur": 3.3,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 70,
+      "allergens": [],
+      "available_size": [
+        "0.25l",
+        "0.75l"
+      ]
+    },
+    "prices_by_size_eur": {
+      "0.25l": 3.3,
+      "0.75l": 6.5
+    }
+  },
+  {
+    "item_id": "cold_cola",
+    "name": "Cola (Light, Zero, Original, 0.33 l)",
+    "category": "cold_drinks",
+    "price_eur": 3.9,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 78,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_sprite_fanta",
+    "name": "Sprite / Fanta / Mezzo Mix (0.33 l)",
+    "category": "cold_drinks",
+    "price_eur": 3.9,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 76,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_orangina",
+    "name": "Orangina (0.2 l)",
+    "category": "cold_drinks",
+    "price_eur": 3.5,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 72,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_bitter_lemon",
+    "name": "Bitter Lemon",
+    "category": "cold_drinks",
+    "price_eur": 3.4,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 66,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_ginger_ale",
+    "name": "Ginger Ale",
+    "category": "cold_drinks",
+    "price_eur": 3.4,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 66,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_tonic",
+    "name": "Tonic Water",
+    "category": "cold_drinks",
+    "price_eur": 3.4,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 66,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_apple_juice",
+    "name": "Apple Juice",
+    "category": "cold_drinks",
+    "price_eur": 3.4,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 74,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_orange_juice",
+    "name": "Orange Juice",
+    "category": "cold_drinks",
+    "price_eur": 3.4,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 76,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_blackcurrant_juice",
+    "name": "Blackcurrant Juice",
+    "category": "cold_drinks",
+    "price_eur": 3.4,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 68,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_passionfruit_juice",
+    "name": "Passionfruit Juice",
+    "category": "cold_drinks",
+    "price_eur": 3.4,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 70,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_fresh_orange_juice",
+    "name": "Freshly Squeezed Orange Juice",
+    "category": "cold_drinks",
+    "price_eur": 4.9,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 84,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_rhubarb_mint_spritzer",
+    "name": "Rhubarb-Mint Spritzer",
+    "category": "cold_drinks",
+    "price_eur": 5.9,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 78,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_blackcurrant_mint_spritzer",
+    "name": "Blackcurrant-Mint Spritzer",
+    "category": "cold_drinks",
+    "price_eur": 5.9,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 76,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_passionfruit_mint_spritzer",
+    "name": "Passionfruit-Mint Spritzer",
+    "category": "cold_drinks",
+    "price_eur": 5.9,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 76,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "cold_classic_lemonade",
+    "name": "Classic Lemonade",
+    "category": "cold_drinks",
+    "price_eur": 4.9,
+    "attributes_json": {
+      "is_dairy_free": true,
+      "is_sugar_free": false,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 80,
+      "allergens": []
+    }
+  },
+  {
+    "item_id": "dessert_strawberry_sundae",
+    "name": "Strawberry Sundae (3 scoops, cream, fresh strawberries)",
+    "category": "desserts",
+    "price_eur": 12.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 84,
+      "allergens": [
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "dessert_merci_sundae",
+    "name": "Merci Sundae (3 scoops, meringue, cream, fresh fruit)",
+    "category": "desserts",
+    "price_eur": 12.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 82,
+      "allergens": [
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "dessert_chocolate_sundae",
+    "name": "Chocolate Sundae (3 scoops chocolate, sauce, cream)",
+    "category": "desserts",
+    "price_eur": 10.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 85,
+      "allergens": [
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "dessert_amarena_sundae",
+    "name": "Amarena Sundae (3 scoops, amarena cherries & sauce, cream)",
+    "category": "desserts",
+    "price_eur": 11.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 80,
+      "allergens": [
+        "eggs",
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "dessert_mixed_ice",
+    "name": "Mixed Ice Cream (3 scoops)",
+    "category": "desserts",
+    "price_eur": 7.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 82,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "dessert_mixed_ice_cream",
+    "name": "Mixed Ice Cream with Cream (3 scoops)",
+    "category": "desserts",
+    "price_eur": 9.0,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 80,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "dessert_milkshake",
+    "name": "Milkshake (flavour of your choice)",
+    "category": "desserts",
+    "price_eur": 5.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 86,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "dessert_iced_coffee",
+    "name": "Iced Coffee",
+    "category": "desserts",
+    "price_eur": 6.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 85,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "dessert_iced_chocolate",
+    "name": "Iced Chocolate",
+    "category": "desserts",
+    "price_eur": 6.9,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 84,
+      "allergens": [
+        "dairy"
+      ]
+    }
+  },
+  {
+    "item_id": "dessert_ice_scoop",
+    "name": "Ice Cream (per scoop)",
+    "category": "desserts",
+    "price_eur": 2.5,
+    "attributes_json": {
+      "is_dairy_free": false,
+      "is_sugar_free": false,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "popularity_score": 80,
+      "allergens": [
+        "dairy"
+      ]
     }
   }
 ]
