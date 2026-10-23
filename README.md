@@ -19,9 +19,9 @@ graph TB
         IdentityPool["Cognito Identity Pool\nSPBCIdentityPool"]
     end
 
-    subgraph Backend["Backend — EKS (eu-central-1, 3 AZs)"]
+    subgraph Backend["Agent runtime — Bedrock AgentCore (serverless, eu-central-1)"]
         direction TB
-        AgentCore["Bedrock AgentCore\npastry_concierge_agent"]
+        AgentCore["Bedrock AgentCore\npastry_concierge_agent\n(container artifact, built by CodeBuild)"]
         subgraph Agents["Strands Agents"]
             Supervisor["Pastry Concierge\n(Orchestrator)"]
             MenuA["Menu Agent"]
@@ -62,10 +62,16 @@ graph TB
         Guardrail["Bedrock Guardrail\n/SPBC/guardrail/*"]
     end
 
+    subgraph CICD["CI/CD — all AWS-native (Terraform: 6_deploy/infra/codepipeline)"]
+        CC["CodeCommit\nspbc-pastry-concierge"]
+        CP["CodePipeline (V2)\nSource → Validate → Approve → Deploy"]
+        CB["CodeBuild\nruns the deploy + builds images"]
+        CC --> CP --> CB
+    end
+
     subgraph Infra["Infrastructure (Terraform)"]
-        VPC["VPC 10.10.0.0/16\n3 AZs · 3 NAT GWs"]
-        ECR["ECR\npastrycafe-prod"]
-        IRSA["IRSA Role\nCluster Autoscaler"]
+        ECR["ECR\npastrycafe-prod (web image)\n+ bedrock-agentcore-* (runtime)"]
+        EKSOpt["EKS pastrycafe-prod\n(optional web-hosting tier)"]
     end
 
     Browser -->|"HTTPS login"| Amplify
@@ -86,10 +92,16 @@ graph TB
     Agents -->|"FM inference"| Model
     Supervisor --> Guardrail
     Agents --> CW
-    Backend --> VPC
-    ECR -->|"Container image"| AgentCore
-    IRSA -->|"Node autoscaling"| Backend
+    CB -->|"build + push runtime container"| ECR
+    ECR -->|"container image"| AgentCore
+    CB -->|"deploy"| AgentCore
 ```
+
+> **Agent runtime hosting:** the five-agents-in-one Pastry Concierge runs as a **single Bedrock
+> AgentCore runtime** (Strands "agents as tools" — one orchestrator calling five specialists as
+> in-process tools), packaged as a **linux/arm64 container built by CodeBuild** (no local Docker).
+> EKS is an **optional** alternate hosting tier for the static web app, not where the agents run;
+> the primary frontend path is AWS Amplify.
 
 ---
 
@@ -100,9 +112,11 @@ graph TB
 | Frontend | Web app | AWS Amplify Hosting | `spbc-pastry-cafe` |
 | Auth | User Pool | Amazon Cognito | `spbcuserpool` |
 | Auth | Identity Pool | Amazon Cognito | `SPBCIdentityPool` |
-| Agent runtime | Orchestrator | Bedrock AgentCore | `pastry_concierge_agent` |
-| Compute | EKS cluster | Amazon EKS | `pastrycafe-prod` |
-| Compute | Container registry | Amazon ECR | `pastrycafe-prod` |
+| Agent runtime | Orchestrator + 5 specialists (one runtime) | Bedrock AgentCore (container artifact, built by CodeBuild) | `pastry_concierge_agent` |
+| CI/CD | Source repository | AWS CodeCommit | `spbc-pastry-concierge` |
+| CI/CD | Pipeline (Source → Validate → Approve → Deploy) | AWS CodePipeline (V2) + CodeBuild | `6_deploy/infra/codepipeline` |
+| Compute *(optional)* | EKS cluster — alternate static-web hosting tier, not the agent runtime | Amazon EKS | `pastrycafe-prod` |
+| Compute | Container registry | Amazon ECR | `pastrycafe-prod` (web image), `bedrock-agentcore-*` (runtime) |
 | Data | Orders store | DynamoDB (PITR) | `spbc-orders-table` |
 | Data | Sessions store | DynamoDB (PITR) | `spbc-sessions-table` |
 | Data | Store locations | Aurora MySQL Serverless v2, read through the RDS Data API (`6_deploy/infra/agentcore-backends`) | `spbc-aurora-cluster`, read-only secret `spbc-stores-db-reader` |
@@ -111,7 +125,7 @@ graph TB
 | AI | Foundation model | Amazon Bedrock | Nova Pro via EU inference profile `eu.amazon.nova-pro-v1:0` (no in-Region on-demand in eu-central-1) |
 | Security | Content guardrail | Bedrock Guardrail | `/SPBC/guardrail/*` (SSM) |
 | Observability | Metrics dashboard | CloudWatch | `SPBC-Agent-Metrics` |
-| IaC state | Remote state | S3 (EKS stack: DynamoDB lock; agentcore-backends: S3 lock file) | `spbc-tfstate-eu-central-1` |
+| IaC state | Remote state for all three Terraform stacks (`terraform`/EKS, `agentcore-backends`, `codepipeline`) | S3 bucket + DynamoDB lock | `spbc-tfstate-eu-central-1`, `spbc-tfstate-lock` |
 
 ---
 
@@ -120,7 +134,7 @@ graph TB
 ```mermaid
 flowchart LR
     S1["① make backend-setup\n────────────────\n• Create S3 state bucket\n• Create DynamoDB lock\n• Auto-detect outbound IP\n• Write terraform.tfvars"]
-    S2["② make ci\n────────────────\n• Python compileall\n• terraform fmt + validate\n• terraform test (backends)"]
+    S2["② make ci\n────────────────\n• Python compileall\n• fmt + validate (3 stacks)\n• terraform test (backends;\n  skips only on the known\n  TF engine panic)"]
     S3["③ make provision\n────────────────\n• VPC · 3 AZs · NAT GWs\n• EKS cluster\n• ECR repo\n• DynamoDB tables\n• IRSA role\n• Cluster Autoscaler"]
     S3B["③b make backends\n────────────────\n• Aurora Serverless v2\n  + Data API\n• Promotions HTTP API\n• make seed-stores\n• make backends-check"]
     S4["④ export ECR_URL\n────────────────\n• terraform output\n  ecr_repository_url"]
@@ -158,8 +172,18 @@ bash 6_deploy/scripts/terraform_backend_setup.sh --extra-cidr <CI_RUNNER_IP>/32
 make ci
 ```
 
-Runs `python3 -m compileall` on the Python code, `terraform fmt -check` + `terraform validate` on both
-Terraform stacks, and the mocked `terraform test` suite of `6_deploy/infra/agentcore-backends` (no AWS calls).
+Runs `python3 -m compileall` on the Python code and `terraform fmt -check` (tracked files only) +
+`terraform validate` on all **three** Terraform stacks — `terraform` (EKS), `agentcore-backends`,
+and `codepipeline` — plus the mocked `terraform test` suite of `6_deploy/infra/agentcore-backends`
+(no AWS calls).
+
+> **Known limitation — `terraform test`:** the installed Terraform (1.16.x and 1.17.0) hits an
+> engine bug that **panics** marshalling a marked/sensitive value to JSON while rendering a test
+> diagnostic (`value has marks, so it cannot be serialized as JSON`). `ci_checks.sh` detects that
+> **exact panic signature** and prints a visible `WARNING: SKIPPING 'terraform test'` instead of
+> failing the whole suite — `fmt` + `validate` for that stack are still enforced, and any *other*
+> non-zero exit (a real assertion failure) still fails CI. This is the only permitted skip; it is
+> clearly labelled in the output. The stack configuration itself is valid.
 
 ### Step 3 — Provision infrastructure
 
@@ -213,22 +237,27 @@ Then run `source setup_env.sh`: it writes the four values into `~/environment/en
 `make post-deploy` skips the AgentCore launch when `agentcore-config.json` already holds a runtime ARN, so for an
 existing runtime apply the new settings with `cd 6_deploy/agents && python3 configure_runtime.py`.
 
-### Step 4 — Deploy the agent backend
+### Step 4 — *(optional)* EKS-hosted web tier
+
+> **Optional.** The agents do **not** run on EKS — they run in the Bedrock AgentCore runtime
+> provisioned in Step 5. This step only matters if you also want to serve the **static web app**
+> from EKS instead of (or in addition to) Amplify. Skip it for the standard Amplify-only path.
 
 ```bash
 make deploy
 ```
 
-Builds the web image ([6_deploy/web-app/Dockerfile](6_deploy/web-app/Dockerfile)), pushes it to
-ECR, performs a **blue/green Kubernetes rollout**, and runs the smoke test.
-
-Internally runs:
+Performs a **blue/green Kubernetes rollout** of the web image and runs the smoke test:
 
 ```
 end_to_end.sh --deploy-only
   └─ deploy_blue_green.sh   (deploys the idle colour, then moves the Service to it)
   └─ smoke_test.sh          (asserts the served page is this app)
 ```
+
+The web container image itself is built on **AWS CodeBuild** (no local Docker) by
+[6_deploy/scripts/build_webapp_image.sh](6_deploy/scripts/build_webapp_image.sh) — this is wired
+into the CI pipeline's Deploy buildspec. `make deploy` expects the image already pushed to ECR.
 
 The Service selects one colour at a time. A deploy goes to whichever colour is *not* live and
 moves production only once the new pods are healthy, so a failed rollout leaves traffic where it
@@ -259,7 +288,7 @@ This **single command** completes the system end-to-end — no manual steps:
 flowchart TD
     PD["make post-deploy"]
     C1["1 · setup_cognito_auth.sh\n──────────────────────\nCreate User Pool spbcuserpool\nCreate Identity Pool SPBCIdentityPool\nCreate IAM auth role\nWrite cognito-config.json ✓"]
-    C2["2 · configure_runtime.py\n──────────────────────\nEnsure bedrock-agentcore trust policy\nLaunch pastry_concierge_agent\nWait for READY status\nWrite agentcore-config.json ✓\nAppend AGENT_RUNTIME_ARN → env.sh ✓"]
+    C2["2 · configure_runtime.py\n──────────────────────\nEnsure bedrock-agentcore trust policy\nBuild linux/arm64 container via CodeBuild\n(no local Docker) → push to ECR\nCreate/launch pastry_concierge_agent\nEnforce MMDSv2 · wait for READY\nWrite agentcore-config.json ✓\nAppend AGENT_RUNTIME_ARN → env.sh ✓"]
     C3["3 · amplify-deploy.sh\n──────────────────────\nCreate/reuse Amplify app\nZip 6_deploy/web-app/\nUpload + start deployment\nPoll until SUCCEED ✓\nPrint live URL ✓"]
     DONE["🟢 System live\nOpen Amplify URL · Sign in · Chat"]
 
@@ -268,6 +297,12 @@ flowchart TD
 
 The script is **idempotent** — each sub-step checks whether the config file is already
 populated before re-running, so it is safe to re-run after partial failures.
+
+> **Runtime artifact type.** The canonical runtime is a **container** built by CodeBuild;
+> `deploy_agentcore.sh` now defaults `ARTIFACT_TYPE=container` to match. A `zip` (direct-code)
+> runtime is still available as a Docker-free fallback via `ARTIFACT_TYPE=zip`, but do not mix the
+> two on the same runtime name — AWS cannot change an existing runtime's artifact type, so switching
+> requires deleting the runtime first (`deploy_agentcore.sh teardown`).
 
 ---
 
@@ -389,27 +424,33 @@ never `latest`.
 │   │   ├── stores_agents.py
 │   │   ├── promos_agents.py
 │   │   ├── place_order.py
-│   │   ├── configure_runtime.py          Launches AgentCore + writes configs
-│   │   ├── Dockerfile                    linux/arm64 runtime image (console/CLI container path)
+│   │   ├── configure_runtime.py          Builds the container via CodeBuild, launches AgentCore, writes configs
+│   │   ├── Dockerfile                    linux/arm64 runtime image (built by CodeBuild)
 │   │   ├── requirements.txt              Pinned runtime dependencies (shipped to AgentCore)
 │   │   └── requirements-deploy.txt       + starter toolkit, for running configure_runtime.py
-│   ├── infra/terraform/        Terraform IaC (VPC, EKS, ECR, DynamoDB, IRSA)
+│   ├── infra/terraform/        Terraform IaC (VPC, EKS, ECR, DynamoDB, IRSA) — optional web-hosting tier
 │   ├── infra/agentcore-backends/  Terraform: Aurora stores DB (Data API) + promotions API (+ optional orders table)
 │   │   ├── lambda/promotions/handler.py  GET /promotions (today's promotions)
 │   │   └── tests/backends.tftest.hcl     Mocked plan/apply tests (terraform test)
-│   ├── k8s/                    Kubernetes manifests (namespace, service, ingress)
+│   ├── infra/codepipeline/     Terraform: CodeCommit + CodePipeline + CodeBuild (the all-AWS CI/CD) + README
+│   ├── codepipeline/           CI/CD buildspecs
+│   │   ├── buildspec-ci.yml              Validate stage → make ci
+│   │   └── buildspec-deploy.yml          Deploy stage → the phased deploy, gated by TOGGLE_* vars
+│   ├── k8s/                    Kubernetes manifests (namespace, service, ingress) — optional EKS web tier
 │   │                           Per-colour Deployments are generated by deploy_blue_green.sh
 │   ├── scripts/
 │   │   ├── terraform_backend_setup.sh   ← Step 1 (make backend-setup)
-│   │   ├── end_to_end.sh                ← Steps 3–4 (make provision / deploy)
-│   │   ├── agentcore_backends.sh        ← Step 3b (make backends / seed-stores / backends-check)
+│   │   ├── end_to_end.sh                ← make provision / deploy
+│   │   ├── agentcore_backends.sh        ← make backends / seed-stores / backends-check
+│   │   ├── build_webapp_image.sh        Builds the web image on CodeBuild (Docker-free)
 │   │   ├── deploy_blue_green.sh
-│   │   ├── post_deploy.sh               ← Step 5 (make post-deploy)
+│   │   ├── post_deploy.sh               ← make post-deploy (Cognito + AgentCore + Amplify)
 │   │   ├── amplify-deploy.sh
 │   │   ├── setup_cognito_auth.sh
 │   │   ├── smoke_test.sh
 │   │   └── rollback.sh
-│   └── web-app/                Static frontend (HTML/JS/CSS)
+│   └── web-app/                Static frontend (index/login/observability HTML, *-enhanced.js,
+│                               cognito-enhanced.js, agentcore-client-fixed.js, style + enhanced CSS)
 ├── amplify.yml                 Amplify build spec
 ├── Makefile                    All deployment targets
 ├── setup_env.sh                Discovers + exports AWS resource IDs
@@ -443,4 +484,6 @@ Before running `make provision` for the first time, verify:
 - **Stores DB access:** the agents use the RDS Data API with a SELECT-only user, so the AgentCore runtime needs no VPC path to Aurora; the master secret is only used by the loader
 - **Promotions API:** IAM-authorized (SigV4); unsigned requests get 403. Edit `2_data_strategy/promos/promos_records.json` and `make backends` to change promotions
 - **Backends teardown:** `bash 6_deploy/scripts/agentcore_backends.sh apply -var aurora_deletion_protection=false`, then `... destroy` (guarded; keeps the final snapshot)
+- **CI/CD is all AWS-native:** CodeCommit + CodePipeline + CodeBuild. GitHub Actions and the GitHub OIDC deploy role have been **retired** — there is no `.github/` workflow directory and no `6_deploy/infra/github-oidc` stack. See [6_deploy/infra/codepipeline/README.md](6_deploy/infra/codepipeline/README.md) to stand the pipeline up and push the repo to CodeCommit.
+- **Terraform:** three independent stacks (`terraform`/EKS, `agentcore-backends`, `codepipeline`), each with its own state key in `spbc-tfstate-eu-central-1`. `make backend-setup` must create that bucket before any `terraform init`. Tested with Terraform 1.17.0 (constraints are `>= 1.10`).
 - **`deploy_frontend.sh`** (EKS + CloudFront VPC Origin path) is retained for reference — the primary frontend path is `make amplify`
