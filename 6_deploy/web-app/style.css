@@ -372,35 +372,9 @@ header {
   }
 }
 
-/* Main content area with background image */
-main {
-  max-width: 900px; /* Increased width to accommodate larger chatbot */
-  margin: 2rem auto;
-  background: url('image.jpg') center center / cover no-repeat, #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  padding: 2rem;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Overlay for readability */
-main::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0.7); /* Adjust opacity as needed */
-  border-radius: 12px;
-  z-index: 0;
-}
-
-/* Ensure all content is above the overlay */
-.chatbot-main-section,
-.products,
-.products * {
-  position: relative;
-  z-index: 1;
-}
+/* The café photo is rendered as a hero <img> in index.html (.hero-image), not as a
+   background here. The old `main { background: url('image.jpg') ... }` rule targeted a
+   <main> element the redesigned page no longer has, so the image never showed. Removed. */
 
 /* Menu section styling when positioned below chatbot */
 .products {
