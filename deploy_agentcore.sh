@@ -1256,15 +1256,17 @@ step9_test_runtime() {
         # and v2 treats base64 as the default blob format. No --cli-binary-format, so the call is
         # portable across CLI versions.
         payload_b64=$(jq -cn --arg p "$prompt" '{prompt: $p}' | base64 | tr -d '\n')
+        # Capture stdout+stderr together: some CLI builds print the API error to stdout, which
+        # made "invocation failed:" show an empty reason. Keep the JSON response body in out_file.
         if ! aws bedrock-agentcore invoke-agent-runtime \
             --region "$REGION" \
             --agent-runtime-arn "$RUNTIME_ARN" \
             --runtime-session-id "$session_id" \
             --content-type application/json \
             --payload "$payload_b64" \
-            "$out_file" >/dev/null 2>"$err_file"; then
+            "$out_file" >"$err_file" 2>&1; then
             failures=$((failures + 1))
-            err "[${domain}] invocation failed: $(cat "$err_file")"
+            err "[${domain}] invocation failed: $(tr -d '\r' < "$err_file" | tail -3)"
             continue
         fi
 
