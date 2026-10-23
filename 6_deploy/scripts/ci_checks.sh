@@ -29,4 +29,12 @@ echo "Validating and testing Terraform files (AgentCore backends; mocked provide
     terraform test >/dev/null
 )
 
+echo "Validating Terraform files (CodePipeline stack)"
+(
+    cd 6_deploy/infra/codepipeline
+    terraform fmt -check -recursive
+    terraform init -backend=false >/dev/null
+    terraform validate >/dev/null
+)
+
 echo "CI checks passed"

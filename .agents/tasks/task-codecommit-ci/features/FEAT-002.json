@@ -1,0 +1,21 @@
+{
+  "id": "FEAT-002",
+  "type": "test",
+  "description": "Extend the CI validation scope so `make ci` (6_deploy/scripts/ci_checks.sh) also validates the new 6_deploy/infra/codepipeline stack offline, making the Validate pipeline stage authoritative over the stack that manages the pipeline. Depends on FEAT-001 (the stack must exist and pass fmt/validate for the extended ci_checks.sh to go green). Small, single-file change.",
+  "status": "completed",
+  "steps": [
+    "Read 6_deploy/scripts/ci_checks.sh. After the existing agentcore-backends validation block (the one ending with `terraform test`), add a THIRD block mirroring the EKS-stack block (offline, no credentials, NO terraform test since this stack has no test suite):\n```bash\necho \"Validating Terraform files (CodePipeline stack)\"\n(\n    cd 6_deploy/infra/codepipeline\n    terraform fmt -check -recursive\n    terraform init -backend=false >/dev/null\n    terraform validate >/dev/null\n)\n```\nPlace it before the final `echo \"CI checks passed\"`.",
+    "ALWAYS `export PATH=\"$HOME/.spbc-deploy/bin:/opt/homebrew/bin:$PATH\"` before running make ci.",
+    "Do not change any other validation block. Do not add a terraform test for this stack.",
+    "After verifying, set this FEAT's status to completed, record findings if useful, and git add 6_deploy/scripts/ci_checks.sh and commit locally on the worktree branch (do not push)."
+  ],
+  "acceptance_criteria": [
+    "`export PATH=\"$HOME/.spbc-deploy/bin:/opt/homebrew/bin:$PATH\"; make ci` from the repo root runs green end to end, including a 'Validating Terraform files (CodePipeline stack)' step that fmt/init(-backend=false)/validates 6_deploy/infra/codepipeline.",
+    "ci_checks.sh still validates the EKS stack and the agentcore-backends stack (with terraform test) exactly as before — only an additional block was appended."
+  ],
+  "verification": [
+    "export PATH=\"$HOME/.spbc-deploy/bin:/opt/homebrew/bin:$PATH\"; cd /Users/cloudageglobal/Desktop/Ai_ML_GenAI_GenBI_AgenticAi_MultiAgentAi_HarnessEngineering/AgenticAI/Harness_project/.worktrees/codecommit-ci && make ci   # expect 'CI checks passed' and the new CodePipeline-stack validation line"
+  ],
+  "blocked_reason": null,
+  "findings": "Implemented as a single-block append to 6_deploy/scripts/ci_checks.sh. Added a third Terraform validation block immediately after the agentcore-backends block (the one ending in `terraform test`) and before the final `echo \"CI checks passed\"`:\n```bash\necho \"Validating Terraform files (CodePipeline stack)\"\n(\n    cd 6_deploy/infra/codepipeline\n    terraform fmt -check -recursive\n    terraform init -backend=false >/dev/null\n    terraform validate >/dev/null\n)\n```\nNo terraform test added for this stack (it has no test suite). The EKS and agentcore-backends blocks were left unchanged. No other files touched.\n\nVerification command run (from worktree root, Terraform 1.16.6 on PATH via the .spbc-deploy export; AWS_REGION=eu-central-1, AWS_PAGER=\"\"):\n`export PATH=\"$HOME/.spbc-deploy/bin:/opt/homebrew/bin:$PATH\"; make ci`\nResult: exit 0. Output (in order): 'Running CI validations' -> 'Validating Terraform files (EKS stack)' -> 'Validating and testing Terraform files (AgentCore backends; mocked providers)' -> 'Validating Terraform files (CodePipeline stack)' -> 'CI checks passed'. The new CodePipeline-stack validation line appears and the run is green end to end.\n\nAll validation was static/offline (-backend=false, no AWS calls, no terraform apply, no create-repository). terraform init created .terraform/ and .terraform.lock.hcl locally; `git status` confirmed these are gitignored and NOT staged. Only 6_deploy/scripts/ci_checks.sh was committed."
+}
