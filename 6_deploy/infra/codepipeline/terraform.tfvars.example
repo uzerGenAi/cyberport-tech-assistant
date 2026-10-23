@@ -1,0 +1,22 @@
+# Copy to terraform.tfvars and edit for your account/repo.
+
+aws_region  = "eu-central-1"
+environment = "production"
+
+# The CodeCommit repository name and the pipeline source.
+repository_name = "spbc-pastry-concierge"
+
+# Optional sign-in user for the agent deploy. Leave both empty to pass --skip-user to
+# post_deploy.sh. cognito_admin_password_secret_id is a Secrets Manager id, not the password.
+# cognito_admin_username           = "admin@example.com"
+# cognito_admin_password_secret_id = "spbc/admin-password"
+
+# Optional frontend smoke test. Only runs when toggle_smoke is true AND this is set.
+# smoke_test_url = "https://app.example.com"
+
+# Optional email subscribed to the manual-approval SNS topic.
+# approval_email = "ops@example.com"
+
+# execution_role_name_patterns rarely needs overriding; the default covers every role the
+# deploy path creates/updates/passes (SPBC-*, Cognito_*, the Bedrock KB execution role, the
+# EKS stack roles, and the AgentCore starter-toolkit role).
