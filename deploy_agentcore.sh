@@ -1250,14 +1250,18 @@ step9_test_runtime() {
 
         echo ""
         info "[${domain}] \"${prompt}\""
-        payload=$(jq -cn --arg p "$prompt" '{prompt: $p}')
+        # The --payload blob must be base64. AWS CLI v2 accepts raw JSON only with
+        # --cli-binary-format raw-in-base64-out, a flag CLI v1 doesn't know (it prints "usage:"
+        # and exits non-zero). Base64-encoding the JSON ourselves works on both: v1 requires it,
+        # and v2 treats base64 as the default blob format. No --cli-binary-format, so the call is
+        # portable across CLI versions.
+        payload_b64=$(jq -cn --arg p "$prompt" '{prompt: $p}' | base64 | tr -d '\n')
         if ! aws bedrock-agentcore invoke-agent-runtime \
             --region "$REGION" \
             --agent-runtime-arn "$RUNTIME_ARN" \
             --runtime-session-id "$session_id" \
             --content-type application/json \
-            --cli-binary-format raw-in-base64-out \
-            --payload "$payload" \
+            --payload "$payload_b64" \
             "$out_file" >/dev/null 2>"$err_file"; then
             failures=$((failures + 1))
             err "[${domain}] invocation failed: $(cat "$err_file")"
