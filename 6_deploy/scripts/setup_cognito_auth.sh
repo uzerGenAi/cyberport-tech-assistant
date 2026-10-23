@@ -521,7 +521,10 @@ update_agentcore_config() {
     # Source environment file for AGENT_RUNTIME_ARN and REGION
     source ~/environment/env.sh
 
-    local runtime_arn=$AGENT_RUNTIME_ARN
+    # Default to empty: on a first deploy the runtime has not launched yet, so env.sh has no
+    # AGENT_RUNTIME_ARN. Under `set -u` a bare reference would abort before the empty-check
+    # below (which is written precisely to handle "no runtime yet") could run.
+    local runtime_arn="${AGENT_RUNTIME_ARN:-}"
     local account_id=$(aws sts get-caller-identity --query "Account" --output text)
 
     # Never overwrite a good config with a blank ARN: this used to write
