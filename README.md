@@ -237,6 +237,33 @@ Then run `source setup_env.sh`: it writes the four values into `~/environment/en
 `make post-deploy` skips the AgentCore launch when `agentcore-config.json` already holds a runtime ARN, so for an
 existing runtime apply the new settings with `cd 6_deploy/agents && python3 configure_runtime.py`.
 
+### Step 3c — Knowledge bases + the two clean-account prerequisites
+
+On a **clean account** (or after a full teardown) two prerequisites must exist before the
+knowledge bases and the runtime launch — both verified during the live eu-central-1 deploy:
+
+```bash
+# (a) KB documents bucket — bootstrap_vector_store.sh REQUIRES it to already exist.
+#     Creates spbc-kb-docs-<account> and uploads the bakery_<domain>/ FAQ docs + menu_records.json.
+./deploy_agentcore.sh step3-s3-bucket
+source setup_env.sh                  # re-discover so S3_BUCKET_NAME / OPENSEARCH_S3_BUCKET_ARN are set
+
+# (b) Vector store + all five knowledge bases (creates the OpenSearch Serverless
+#     collection — the dominant ~$350/mo cost). Each sync is verified non-zero.
+source ~/environment/env.sh          # make knowledge-bases needs the bucket vars in its env
+make knowledge-bases
+source setup_env.sh                  # pick up the five new KB IDs
+
+# (c) AgentCore execution role — configure_runtime.py resolves SPBC-AgentCore-ExecutionRole
+#     by name; without it, it falls back to a CloudFormation stack that does not exist and fails.
+./deploy_agentcore.sh step2-iam-role
+```
+
+> **Why these are separate steps.** `make knowledge-bases` fails fast if the docs bucket is
+> absent (it does not create it), and `make post-deploy` fails in `configure_runtime.py` if the
+> execution role is absent. A teardown removes both the bucket and the role, so a fresh deploy
+> must recreate them here. On an account where they already exist, these steps are safe no-ops.
+
 ### Step 4 — *(optional)* EKS-hosted web tier
 
 > **Optional.** The agents do **not** run on EKS — they run in the Bedrock AgentCore runtime
@@ -327,12 +354,16 @@ make deploy
 AUTO_APPROVE=1 make backends         # Aurora + promotions API, applies the reviewed plan
 make seed-stores
 make backends-check
+./deploy_agentcore.sh step3-s3-bucket   # clean-account prereq: KB docs bucket (make knowledge-bases needs it)
 source setup_env.sh                  # discovers buckets, KBs, STORES_DB_*, PROMOS_API_URL
+source ~/environment/env.sh          # make knowledge-bases reads the bucket vars from its env
 make knowledge-bases                 # vector store + all five KBs, each sync verified
+source setup_env.sh                  # pick up the five new KB IDs
 
 # 4. Cognito, AgentCore runtime, frontend
+./deploy_agentcore.sh step2-iam-role    # clean-account prereq: SPBC-AgentCore-ExecutionRole (configure_runtime.py needs it)
 export COGNITO_ADMIN_USERNAME=concierge
-export COGNITO_ADMIN_PASSWORD_SECRET_ID=spbc/cognito-admin   # or --skip-user
+export COGNITO_ADMIN_PASSWORD_SECRET_ID=spbc/cognito-admin   # or --skip-user; create this secret first on a clean account
 make post-deploy-force               # --force: plain post-deploy skips the launch when a runtime exists
 
 # 5. Verify
@@ -465,12 +496,13 @@ Before running `make provision` for the first time, verify:
 
 - [ ] `aws sts get-caller-identity` succeeds with the correct account
 - [ ] `make backend-setup` has been run (creates state bucket + writes `terraform.tfvars`, including the required `eks_public_access_cidrs`)
-- [ ] `make knowledge-bases` has been run, or the five KB IDs are already in `~/environment/env.sh`
 - [ ] Nova Pro answers through the EU inference profile (listing foundation models isn't enough — the bare `amazon.nova-pro-v1:0` ID can't be invoked on-demand in eu-central-1):
   `aws bedrock-runtime converse --region eu-central-1 --model-id eu.amazon.nova-pro-v1:0 --messages '[{"role":"user","content":[{"text":"Reply with OK"}]}]'`
-- [ ] `ECR_REPOSITORY_URL` is exported (after Step 3)
 - [ ] `make backends-check` passes and `STORES_DB_CLUSTER_ARN`, `STORES_DB_SECRET_ARN`, `PROMOS_API_URL` are exported (after Step 3b)
-- [ ] Knowledge-base IDs are in `~/environment/env.sh` (required by `configure_runtime.py`)
+- [ ] **Clean-account prereq:** KB docs bucket exists (`./deploy_agentcore.sh step3-s3-bucket`) **before** `make knowledge-bases` — it does not create the bucket itself
+- [ ] `make knowledge-bases` has been run and the five KB IDs are in `~/environment/env.sh` (required by `configure_runtime.py`)
+- [ ] **Clean-account prereq:** the AgentCore execution role exists (`./deploy_agentcore.sh step2-iam-role`) **before** `make post-deploy` — `configure_runtime.py` resolves `SPBC-AgentCore-ExecutionRole` by name
+- [ ] `ECR_REPOSITORY_URL` is exported (only needed for the optional EKS web tier, Step 4)
 
 ---
 
