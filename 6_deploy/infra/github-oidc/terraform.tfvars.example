@@ -1,0 +1,16 @@
+# Copy to terraform.tfvars and edit for your account/repo.
+
+aws_region  = "eu-central-1"
+environment = "production"
+
+# The GitHub org/user and repository the deploy role trusts.
+github_owner = "huraisturkey-lang"
+github_repo  = "spbc-pastry-concierge"
+
+# Leave github_sub_claim unset to derive repo:<owner>*/<repo>*:* (tolerant of GitHub's
+# numeric ids). For production, pin it to your account's exact claim, e.g.:
+# github_sub_claim = "repo:huraisturkey-lang@277442410/spbc-pastry-concierge@1430159845:*"
+
+# If the account already has a GitHub OIDC provider managed elsewhere, don't create another:
+# manage_oidc_provider       = false
+# existing_oidc_provider_arn = "arn:aws:iam::<account-id>:oidc-provider/token.actions.githubusercontent.com"
