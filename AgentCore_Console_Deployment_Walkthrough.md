@@ -589,7 +589,7 @@ If you created a NAT gateway only for this, delete it too; it bills hourly.
 | Step 5 guardrail | `step6-guardrail` | `5_security_rai/create_and_store_guardrail.sh` |
 | Step 6 artifact | `step7-package-zip` (A) / `step7-ecr-build-push` (B) | `rt.configure(...)` + `rt.launch(...)` (CodeBuild arm64) |
 | Step 7 runtime + MMDSv2 | `step8-create-runtime` (create or update, then MMDSv2) | `rt.launch(...)` + `ensure_mmdsv2()` |
-| Appendix A role | `step2-iam-role` | Role from stack `spbc-pastry-cafe-production` + `ensure_agentcore_in_trust_policy()` |
+| Appendix A role | `step2-iam-role` | `configure_runtime.py` resolves the execution role by ARN/name (`AGENTCORE_EXECUTION_ROLE_ARN` / `AGENTCORE_EXECUTION_ROLE_NAME`, default `SPBC-AgentCore-ExecutionRole`), falling back to a CloudFormation stack output only if neither is set; then `ensure_agentcore_in_trust_policy()` |
 | Step 8 test | `step9-test-runtime` | `6_deploy/agents/run_agents.py` |
 | Step 9 config | `step10-generate-config` | `write_agentcore_config()` |
 
