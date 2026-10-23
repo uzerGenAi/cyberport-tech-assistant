@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # post_deploy.sh — Specialty Bakeries & Pastry Cafés
 #
 # Runs every step required after `make deploy` to make the system fully live:

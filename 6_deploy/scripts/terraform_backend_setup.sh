@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # terraform_backend_setup.sh
 # Creates the S3 state bucket + DynamoDB lock table for the Terraform remote backend and
 # writes terraform.tfvars, so eks_public_access_cidrs names specific CIDRs, never 0.0.0.0/0.

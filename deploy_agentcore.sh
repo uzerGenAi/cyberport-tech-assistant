@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 ###############################################################################
 # deploy_agentcore.sh — AWS CLI equivalent of AgentCore_Console_Deployment_Walkthrough.md
 #
@@ -56,8 +57,13 @@ ECR_REPO_NAME="${ECR_REPO_NAME:-spbc-pastry-concierge}"
 RUNTIME_NAME="${RUNTIME_NAME:-pastry_concierge_agent}"
 GUARDRAIL_NAME="${GUARDRAIL_NAME:-SPBC-Guardrail}"
 
-# Artifact: "zip" (direct code deployment, no Docker) or "container" (ECR image)
-ARTIFACT_TYPE="${ARTIFACT_TYPE:-zip}"
+# Artifact: "container" (ECR image) or "zip" (direct code deployment, no Docker).
+# Default to container: it is the canonical path for both CI and manual deploys
+# (post_deploy.sh / configure_runtime.py). AWS forbids changing a runtime's artifact
+# type after creation, so a manual `deploy-all` defaulting to zip would create a zip
+# runtime conflicting with the canonical container one. zip stays available as the
+# Docker-free fallback via `ARTIFACT_TYPE=zip` or the step7-package-zip subcommand.
+ARTIFACT_TYPE="${ARTIFACT_TYPE:-container}"
 PYTHON_VERSION="3.11"
 PYTHON_RUNTIME="PYTHON_3_11"
 ENTRYPOINT_FILE="barista_supervisor_agent.py"
@@ -1498,7 +1504,7 @@ usage() {
     echo "  BUCKET_NAME         (default: spbc-kb-docs-<account-id>)"
     echo "  ECR_REPO_NAME       (default: spbc-pastry-concierge)"
     echo "  RUNTIME_NAME        (default: pastry_concierge_agent)"
-    echo "  ARTIFACT_TYPE       zip | container (default: zip)"
+    echo "  ARTIFACT_TYPE       container | zip (default: container)"
     echo "  CODE_S3_KEY / IMAGE_URI   artifact to deploy (default: latest uploaded/pushed)"
     echo "  SUBNET_IDS, SECURITY_GROUP_IDS   comma-separated; enables VPC mode"
     echo "  LOG_LEVEL           runtime log level (default: INFO)"

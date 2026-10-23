@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # rollback.sh — send production traffic back to the previously live colour.
 #
 # Usage:

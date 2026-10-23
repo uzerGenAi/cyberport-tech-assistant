@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Script to check if required environment variables are set for
 # Specialty Bakeries & Pastry Cafés production deployment
@@ -23,7 +24,7 @@ required_vars=(
 all_set=true
 
 for var in "${required_vars[@]}"; do
-    if [ -z "${!var}" ]; then
+    if [ -z "${!var:-}" ]; then
         echo "❌ $var: NOT SET"
         all_set=false
     else

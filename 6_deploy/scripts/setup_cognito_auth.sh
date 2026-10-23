@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Enhanced Cognito Authentication Setup Script
 # This script creates Cognito User Pool + Identity Pool + IAM roles for direct EKS to Bedrock AgentCore communication

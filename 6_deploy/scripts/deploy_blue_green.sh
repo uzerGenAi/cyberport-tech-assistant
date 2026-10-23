@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # deploy_blue_green.sh — blue/green rollout of the web app onto EKS.
 #
 # Usage:

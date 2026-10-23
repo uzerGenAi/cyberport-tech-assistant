@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # agentcore_backends.sh — Terraform stack 6_deploy/infra/agentcore-backends
 #   Aurora MySQL Serverless v2 stores database (RDS Data API) + IAM-authorized promotions API.
 #

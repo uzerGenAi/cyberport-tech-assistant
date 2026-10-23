@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # build_webapp_image.sh — build and push the SPBC web-app container image on AWS CodeBuild.
 #
 # Replaces the inline `docker login/build/push` that used to run on the CI runner,

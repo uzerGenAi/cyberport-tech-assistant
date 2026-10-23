@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # smoke_test.sh — proves the deployed frontend is actually serving the app.
 #
 # Usage:
