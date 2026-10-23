@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # build_webapp_image.sh — build and push the SPBC web-app container image on AWS CodeBuild.
 #
-# Replaces the inline `docker login/build/push` that used to run on the GitHub Actions runner,
+# Replaces the inline `docker login/build/push` that used to run on the CI runner,
 # so the deploy pipeline needs no local Docker. It:
 #   - resolves ECR_REPOSITORY_URL (honoured if exported, else from terraform output) and IMAGE_TAG,
 #   - ensures a CodeBuild service role (SPBC-WebAppCodeBuild-Role) — create if missing,

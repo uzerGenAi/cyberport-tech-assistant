@@ -319,22 +319,29 @@ Behaviour that matters when nobody is watching:
 
 ### Running it from CI
 
-[.github/workflows/deploy.yml](.github/workflows/deploy.yml) runs that sequence on GitHub
-Actions with OIDC — no stored AWS keys and no account IDs in the file. Set these before the
-first run (Settings → Secrets and variables → Actions → Variables):
+That sequence runs on AWS — CodeCommit + CodePipeline (V2) + CodeBuild, no stored AWS keys and
+no account IDs in the pipeline. The source lives in a CodeCommit repo; a push to `main` drives
+the pipeline through four stages: **Source → Validate → Approve → Deploy**. Validate runs
+`make ci`; Deploy runs [6_deploy/codepipeline/buildspec-deploy.yml](6_deploy/codepipeline/buildspec-deploy.yml),
+which maps the deploy steps onto the same scripts. The stack and operator walkthrough live in
+[6_deploy/infra/codepipeline/README.md](6_deploy/infra/codepipeline/README.md).
 
-| Variable | Required | Purpose |
+The slow, billable stages stay opt-in as pipeline variables, surfaced to the Deploy build as
+CodeBuild environment variables:
+
+| Toggle | Default | Purpose |
 |---|---|---|
-| `AWS_DEPLOY_ROLE_ARN` | yes | Role the workflow assumes via OIDC; the run stops with an explanation if unset |
-| `AWS_REGION` | no | Defaults to `eu-central-1` |
-| `COGNITO_ADMIN_USERNAME` + `COGNITO_ADMIN_PASSWORD_SECRET_ID` | no | Creates the sign-in user; without both the run passes `--skip-user` |
-| `SMOKE_TEST_URL` | no | When set, the frontend smoke test runs |
+| `TOGGLE_PROVISION_BACKENDS` | `false` | Apply and seed the AgentCore data backends |
+| `TOGGLE_SETUP_KNOWLEDGE_BASES` | `false` | Bootstrap the vector store and knowledge bases |
+| `TOGGLE_DEPLOY_AGENT` | `true` | Deploy the AgentCore runtime + frontend |
+| `TOGGLE_DEPLOY_EKS` | `false` | Build the web image and run the blue/green EKS rollout |
+| `TOGGLE_SMOKE` | `false` | Run the frontend smoke test (only when `SMOKE_TEST_URL` is also set) |
 
-The `deploy` job uses the `production` environment, so adding required reviewers there turns it
-into an approval gate. `workflow_dispatch` inputs keep the slow, billable stages opt-in
-(`provision_backends`, `setup_knowledge_bases`, `deploy_eks`); the agent and frontend deploy by
-default, and pushing a `v*` tag deploys those two. Images are tagged with the commit SHA, never
-`latest`.
+`COGNITO_ADMIN_USERNAME` + `COGNITO_ADMIN_PASSWORD_SECRET_ID` create the sign-in user; without
+both the Deploy build passes `--skip-user`. The **Approve** stage is a manual approval action
+that pauses the pipeline and notifies the `spbc-pipeline-approvals` SNS topic — approve from the
+console or with `aws codepipeline put-approval-result`. Images are tagged with the commit SHA,
+never `latest`.
 
 ---
 
