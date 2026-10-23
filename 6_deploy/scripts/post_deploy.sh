@@ -130,20 +130,20 @@ log "STEP 2/3 — Launching Bedrock AgentCore runtime..."
 
 AGENTCORE_CONFIG="$WEB_APP_DIR/agentcore-config.json"
 
-# Launch (or update) the runtime via the zip / direct-code-deployment path in
-# deploy_agentcore.sh: package the agent as an arm64 zip, create-or-update the runtime, then
-# write agentcore-config.json. This is the SAME mechanism that produced the live runtime, so a
-# re-deploy updates it in place. The starter-toolkit path (configure_runtime.py) builds a
-# *container* artifact instead, which AWS rejects as an update to a zip runtime
-# ("Agent artifact type cannot be updated"); keeping one artifact type avoids that conflict.
+# Launch (or update) the runtime via the starter toolkit (configure_runtime.py). It builds a
+# linux/arm64 CONTAINER image with CodeBuild (no local Docker needed), pushes it to ECR,
+# creates/updates the runtime, enforces MMDSv2, and writes agentcore-config.json itself.
+#
+# This is the canonical path for both CI and manual deploys. The runtime is a container
+# artifact; AWS does not allow switching an existing runtime's artifact type, so a runtime that
+# was previously created from a zip must be deleted first (deploy_agentcore.sh teardown) before
+# the first container launch recreates it under the same name.
 launch_runtime() {
-  bash "$ROOT_DIR/deploy_agentcore.sh" step7-package-zip
-  bash "$ROOT_DIR/deploy_agentcore.sh" step8-create-runtime
-  bash "$ROOT_DIR/deploy_agentcore.sh" step10-generate-config
+  (cd "$AGENTS_DIR" && python3 configure_runtime.py)
 }
 
 if [[ "$FORCE" = "1" ]]; then
-  log "--force: launching/updating the AgentCore runtime (zip artifact) with the current agent code"
+  log "--force: launching/updating the AgentCore runtime (container via CodeBuild) with the current agent code"
   launch_runtime
 elif [[ -s "$AGENTCORE_CONFIG" ]]; then
   if python3 -c "
@@ -155,7 +155,7 @@ if not d.get('agentRuntimeArn') or 'RUNTIME_NAME' in d.get('agentRuntimeArn','')
     ok "agentcore-config.json already points at a runtime — skipping the AgentCore launch"
     warn "No agent code was deployed in this run. Use --force (or FORCE_REDEPLOY=1) to ship code changes."
   else
-    log "agentcore-config.json has placeholder — re-launching AgentCore runtime (zip artifact)"
+    log "agentcore-config.json has placeholder — re-launching AgentCore runtime (container via CodeBuild)"
     launch_runtime
   fi
 else
