@@ -1255,20 +1255,26 @@ step9_test_runtime() {
         # and exits non-zero). Base64-encoding the JSON ourselves works on both: v1 requires it,
         # and v2 treats base64 as the default blob format. No --cli-binary-format, so the call is
         # portable across CLI versions.
-        payload_b64=$(jq -cn --arg p "$prompt" '{prompt: $p}' | base64 | tr -d '\n')
-        # Capture stdout+stderr together: some CLI builds print the API error to stdout, which
-        # made "invocation failed:" show an empty reason. Keep the JSON response body in out_file.
+        # Pass the payload as a raw-bytes file via fileb://. This avoids the --payload
+        # base64 ambiguity that differs by CLI version: some builds base64-decode a --payload
+        # string, others send it verbatim, and an inline base64 string was decoded to an empty
+        # body by the CI CLI (runtime logged "Invalid JSON ... char 0"). fileb:// reads the JSON
+        # bytes as-is on every version. Capture stdout+stderr so a runtime error is visible.
+        payload_file=$(mktemp)
+        jq -cn --arg p "$prompt" '{prompt: $p}' > "$payload_file"
         if ! aws bedrock-agentcore invoke-agent-runtime \
             --region "$REGION" \
             --agent-runtime-arn "$RUNTIME_ARN" \
             --runtime-session-id "$session_id" \
             --content-type application/json \
-            --payload "$payload_b64" \
+            --payload "fileb://$payload_file" \
             "$out_file" >"$err_file" 2>&1; then
             failures=$((failures + 1))
             err "[${domain}] invocation failed: $(tr -d '\r' < "$err_file" | tail -3)"
+            rm -f "$payload_file"
             continue
         fi
+        rm -f "$payload_file"
 
         response=$(cat "$out_file")
         echo "  Response: $(printf '%s' "$response" | head -c 400)"
