@@ -3,6 +3,12 @@
 # Independent of the EKS stack in ../terraform, with its own state.
 
 terraform {
+  # NOTE: `terraform test` on this stack can hit a known Terraform 1.16.x engine bug
+  # ("value has marks, so it cannot be serialized as JSON") when marshalling a marked/
+  # sensitive value. It is not reproducible on the installed 1.16.6 here, so the bound
+  # below is intentionally NOT raised (bumping required_version would break CI on the
+  # only installed version). ci_checks.sh guards that specific panic as a visible skip.
+  # RECOMMENDED (UNVERIFIED): run CI on a Terraform build without this bug.
   required_version = ">= 1.10.0"
 
   # The bucket can be overridden at init: -backend-config="bucket=<name>" (agentcore_backends.sh
