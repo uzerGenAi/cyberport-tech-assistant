@@ -172,6 +172,50 @@
       100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
     
+    /* Secondary / link styling for forgot-password */
+    .forgot-password-link {
+      display: inline-block;
+      margin-top: 14px;
+      color: #667eea;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .forgot-password-link:hover {
+      color: #5a6fd8;
+      text-decoration: underline;
+    }
+
+    .link-button {
+      background: none;
+      border: none;
+      padding: 0;
+      font: inherit;
+    }
+
+    .success-message {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 15px;
+      border: 1px solid #c8e6c9;
+      display: none;
+    }
+
+    .reset-hint {
+      color: #666;
+      font-size: 13px;
+      margin: 0 0 20px 0;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
     /* Responsive design */
     @media (max-width: 768px) {
       .login-header h1 {
@@ -186,7 +230,7 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
   <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1563.0.min.js"></script>
-  <script src="cognito-enhanced.js?v=4"></script>
+  <script src="cognito-enhanced.js?v=5"></script>
 </head>
 <body>
   <div class="login-header">
@@ -222,7 +266,50 @@
       
       <div id="errorMessage" class="error-message"></div>
       <p class="helper-text">Preview mode lets you explore the experience locally without live AWS credentials.</p>
+
+      <div style="text-align:center;">
+        <button type="button" class="forgot-password-link link-button" id="forgot-password-link">Forgot password?</button>
+      </div>
     </form>
+  </div>
+
+  <!-- Password reset panel -->
+  <div class="login-container hidden" id="reset-container">
+    <h2>Reset Password</h2>
+
+    <!-- Stage 1: request a reset code -->
+    <form id="resetRequestForm">
+      <p class="reset-hint">Enter your username and we'll send a reset code to your registered email.</p>
+      <div class="form-group">
+        <label for="reset-username">Username</label>
+        <input type="text" id="reset-username" name="reset-username" required>
+      </div>
+      <button type="submit" class="btn" id="send-code-button">Send Reset Code</button>
+    </form>
+
+    <!-- Stage 2: enter the code and a new password -->
+    <form id="resetConfirmForm" class="hidden">
+      <p class="reset-hint">Check your email for the reset code, then set a new password.</p>
+      <div class="form-group">
+        <label for="reset-code">Reset Code</label>
+        <input type="text" id="reset-code" name="reset-code" inputmode="numeric" autocomplete="one-time-code" required>
+      </div>
+      <div class="form-group">
+        <label for="new-password">New Password</label>
+        <div class="password-container">
+          <input type="password" id="new-password" name="new-password" required>
+          <span class="password-toggle" onclick="toggleResetPassword()">👁️</span>
+        </div>
+      </div>
+      <button type="submit" class="btn" id="confirm-reset-button">Reset Password</button>
+    </form>
+
+    <div id="resetErrorMessage" class="error-message"></div>
+    <div id="resetSuccessMessage" class="success-message"></div>
+
+    <div style="text-align:center;">
+      <button type="button" class="forgot-password-link link-button" id="back-to-login-link">← Back to Sign In</button>
+    </div>
   </div>
 
   <script>
@@ -258,7 +345,126 @@
       if (sessionStorage.getItem('idToken')) {
         window.location.href = 'index.html';
       }
+
+      // --- Password reset wiring ---
+      const loginContainer = document.querySelector('.login-container');
+      const resetContainer = document.getElementById('reset-container');
+      const resetRequestForm = document.getElementById('resetRequestForm');
+      const resetConfirmForm = document.getElementById('resetConfirmForm');
+      const forgotLink = document.getElementById('forgot-password-link');
+      const backLink = document.getElementById('back-to-login-link');
+      const sendCodeButton = document.getElementById('send-code-button');
+      const confirmResetButton = document.getElementById('confirm-reset-button');
+      const resetError = document.getElementById('resetErrorMessage');
+      const resetSuccess = document.getElementById('resetSuccessMessage');
+
+      function showResetError(msg) {
+        resetSuccess.style.display = 'none';
+        resetError.textContent = msg;
+        resetError.style.display = 'block';
+      }
+      function showResetSuccess(msg) {
+        resetError.style.display = 'none';
+        resetSuccess.textContent = msg;
+        resetSuccess.style.display = 'block';
+      }
+      function clearResetMessages() {
+        resetError.style.display = 'none';
+        resetSuccess.style.display = 'none';
+      }
+
+      if (forgotLink) {
+        forgotLink.addEventListener('click', function() {
+          clearResetMessages();
+          // Prefill reset username from the login form if present
+          const u = document.getElementById('username').value;
+          if (u) document.getElementById('reset-username').value = u;
+          loginContainer.classList.add('hidden');
+          resetContainer.classList.remove('hidden');
+        });
+      }
+
+      if (backLink) {
+        backLink.addEventListener('click', function() {
+          clearResetMessages();
+          resetConfirmForm.classList.add('hidden');
+          resetRequestForm.classList.remove('hidden');
+          resetContainer.classList.add('hidden');
+          loginContainer.classList.remove('hidden');
+        });
+      }
+
+      // Stage 1: send the reset code
+      if (resetRequestForm) {
+        resetRequestForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          clearResetMessages();
+          const username = document.getElementById('reset-username').value.trim();
+          if (!username) return;
+
+          sendCodeButton.classList.add('loading');
+          sendCodeButton.disabled = true;
+          try {
+            await window.CognitoAuth.requestPasswordReset(username);
+            showResetSuccess('A reset code has been sent. Enter it below with your new password.');
+            resetRequestForm.classList.add('hidden');
+            resetConfirmForm.classList.remove('hidden');
+          } catch (err) {
+            showResetError(err.message || 'Could not send reset code. Please check the username and try again.');
+          } finally {
+            sendCodeButton.classList.remove('loading');
+            sendCodeButton.disabled = false;
+          }
+        });
+      }
+
+      // Stage 2: confirm the new password with the code
+      if (resetConfirmForm) {
+        resetConfirmForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          clearResetMessages();
+          const username = document.getElementById('reset-username').value.trim();
+          const code = document.getElementById('reset-code').value.trim();
+          const newPassword = document.getElementById('new-password').value;
+          if (!username || !code || !newPassword) return;
+
+          confirmResetButton.classList.add('loading');
+          confirmResetButton.disabled = true;
+          try {
+            await window.CognitoAuth.confirmPasswordReset(username, code, newPassword);
+            showResetSuccess('Password reset successfully. You can now sign in with your new password.');
+            // Return to the login view after a short pause
+            setTimeout(() => {
+              resetConfirmForm.classList.add('hidden');
+              resetRequestForm.classList.remove('hidden');
+              resetContainer.classList.add('hidden');
+              loginContainer.classList.remove('hidden');
+              clearResetMessages();
+              const pw = document.getElementById('password');
+              if (pw) pw.value = '';
+            }, 2500);
+          } catch (err) {
+            showResetError(err.message || 'Could not reset password. Check the code and try again.');
+          } finally {
+            confirmResetButton.classList.remove('loading');
+            confirmResetButton.disabled = false;
+          }
+        });
+      }
     });
+
+    // Toggle visibility of the new-password field on the reset form
+    function toggleResetPassword() {
+      const field = document.getElementById('new-password');
+      const icon = document.querySelector('#resetConfirmForm .password-toggle');
+      if (field.type === 'password') {
+        field.type = 'text';
+        icon.textContent = '🙈';
+      } else {
+        field.type = 'password';
+        icon.textContent = '👁️';
+      }
+    }
     
     // Password toggle functionality
     function togglePassword() {

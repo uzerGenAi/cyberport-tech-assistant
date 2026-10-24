@@ -223,6 +223,60 @@ async function authenticateUser(username, password) {
   }
 }
 
+// --- Password reset (forgot password) flow ---
+// Uses Cognito's forgotPassword()/confirmPassword() APIs. The first step emails
+// (or SMS-es) a reset code to the user; the second step consumes that code plus
+// a new password. Both resolve/reject through Promises so the UI can await them.
+
+// Build a CognitoUser for the given username using the configured pool.
+async function buildCognitoUser(username) {
+  if (!cognitoConfig) {
+    await loadCognitoConfig();
+  }
+  const userPool = new AmazonCognitoIdentity.CognitoUserPool({
+    UserPoolId: cognitoConfig.UserPoolId,
+    ClientId: cognitoConfig.ClientId
+  });
+  return new AmazonCognitoIdentity.CognitoUser({ Username: username, Pool: userPool });
+}
+
+// Step 1: ask Cognito to send a password reset code to the user.
+function requestPasswordReset(username) {
+  return buildCognitoUser(username).then(cognitoUser => new Promise((resolve, reject) => {
+    cognitoUser.forgotPassword({
+      onSuccess: function(data) {
+        console.log('Password reset code sent:', data);
+        resolve(data);
+      },
+      onFailure: function(err) {
+        console.error('forgotPassword error:', err);
+        reject(err);
+      },
+      // Fires when a verified delivery medium exists and the code was sent.
+      inputVerificationCode: function(data) {
+        console.log('Password reset code delivered:', data);
+        resolve(data);
+      }
+    });
+  }));
+}
+
+// Step 2: confirm the reset with the emailed code and a new password.
+function confirmPasswordReset(username, code, newPassword) {
+  return buildCognitoUser(username).then(cognitoUser => new Promise((resolve, reject) => {
+    cognitoUser.confirmPassword(code, newPassword, {
+      onSuccess: function() {
+        console.log('Password reset confirmed');
+        resolve();
+      },
+      onFailure: function(err) {
+        console.error('confirmPassword error:', err);
+        reject(err);
+      }
+    });
+  }));
+}
+
 // Function to get AWS credentials from Identity Pool
 async function getAWSCredentials(idToken) {
   try {
@@ -394,5 +448,7 @@ window.CognitoAuth = {
   loadCognitoConfig,
   isPreviewMode,
   setPreviewMode,
+  requestPasswordReset,
+  confirmPasswordReset,
   getConfig: () => cognitoConfig,
 };
