@@ -61,8 +61,8 @@ kb_env_var_name() {   # menu -> MENU_KNOWLEDGE_BASE_ID
 }
 
 kb_name_for()         { printf '%s-%s-knowledge-base' "$PROJECT_PREFIX" "$1"; }
-kb_index_for()        { printf 'bakery_%s_index' "$1"; }
-kb_prefix_for()       { printf 'bakery_%s/' "$1"; }
+kb_index_for()        { printf 'electronics_%s_index' "$1"; }
+kb_prefix_for()       { printf 'electronics_%s/' "$1"; }
 kb_data_source_for()  { printf '%s-%s-kb-data-source' "$PROJECT_PREFIX" "$1"; }
 
 # The IAM role ARN of the current identity, in the form data access policies accept

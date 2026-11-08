@@ -9,8 +9,8 @@
 #   bash 3_proof_of_concept/knowledge_bases/bootstrap_vector_store.sh   # once per account
 #   bash 3_proof_of_concept/knowledge_bases/orders_knowledge_base_setup.sh
 #
-# Creates the bakery_orders_index vector index, the knowledge base, its S3 data source
-# (prefix bakery_orders/, holding orders_policies_kb_faqs.txt), then syncs and verifies it.
+# Creates the electronics_orders_index vector index, the knowledge base, its S3 data source
+# (prefix electronics_orders/, holding orders_policies_kb_faqs.txt), then syncs and verifies it.
 # Safe to re-run: anything that already exists is reused.
 
 set -euo pipefail

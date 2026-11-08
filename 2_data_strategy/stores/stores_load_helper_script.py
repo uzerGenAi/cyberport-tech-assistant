@@ -42,7 +42,7 @@ if not db_cluster_name:
     # Find the cluster with error handling - try multiple possible names
     possible_prefixes = [
         'spbc-aurora-cluster',
-        'pastrycafe-aurora-cluster',
+        'techassistant-aurora-cluster',
         'test-aurora-cluster'
     ]
     

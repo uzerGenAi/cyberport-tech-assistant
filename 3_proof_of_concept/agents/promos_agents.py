@@ -1,9 +1,9 @@
-"""Promotions agent for Specialty Bakeries & Pastry Cafés — deals and loyalty offers.
+"""Promotions agent for the Cyberport Tech Assistant — deals, trade-in and loyalty offers.
 
 Active promotions come from the IAM-authorized promotions API (GET /prod/promotions, Terraform
 stack 6_deploy/infra/agentcore-backends). Requests are SigV4-signed with the caller's credentials,
 so the instance role needs execute-api:Invoke on the route. Set PROMOS_API_URL (setup_env.sh
-exports it); without it the API is looked up by its name, spbcBakeryAPI.
+exports it); without it the API is looked up by its name, spbcPromotionsAPI.
 """
 import os
 import re
@@ -18,7 +18,7 @@ from strands.models import BedrockModel  # pylint: disable=import-error
 from model_config import REGION, MODEL_ID, MODEL_ARN  # pylint: disable=import-error
 
 PROMOS_API_URL = os.environ.get("PROMOS_API_URL", "").strip()
-PROMOS_API_NAME = "spbcBakeryAPI"
+PROMOS_API_NAME = "spbcPromotionsAPI"
 PROMOS_API_PATH = "/prod/promotions"
 
 # The generic strands_tools "retrieve" tool needed the model to supply a KB ID it never knew and
@@ -30,7 +30,7 @@ _session = boto3.Session(region_name=REGION)
 
 
 def _discover_api_url():
-    """Legacy: find spbcBakeryAPI by name (HTTP API first, then REST API). None if absent."""
+    """Legacy: find spbcPromotionsAPI by name (HTTP API first, then REST API). None if absent."""
     http_apis = boto3.client('apigatewayv2', region_name=REGION).get_apis(MaxResults="500")
     for api in http_apis.get('Items', []):
         if api.get('Name') == PROMOS_API_NAME:
@@ -113,14 +113,15 @@ _promos_tools = [list_promotions] + ([promos_kb_retrieve] if PROMOS_KNOWLEDGE_BA
 promos_agent = Agent(
     model=BedrockModel(model_id=MODEL_ID, region_name=REGION),
     system_prompt="""
-        You are 'Promotions Assistant' for Specialty Bakeries & Pastry Cafés, an expert in
-        current deals, discounts, and our Pastry Rewards loyalty programme.
+        You are 'Promotions Assistant' for the Cyberport Tech Assistant, an expert in
+        current deals, discounts, trade-in offers, financing offers and business-customer offers.
 
         Your primary responsibilities:
         - Accurately describe active promotions and their eligibility conditions
         - Explain how customers can qualify for each promotion
-        - Provide information about seasonal launch offers and limited-time deals
-        - Answer questions about the Pastry Rewards loyalty programme
+        - Provide information about limited-time deals such as Black Friday week
+        - Explain the trade-in bonus, student discount, 0% financing and manufacturer cashback
+        - Answer questions about business-customer and customer-account offers
         - Check if specific orders qualify for promotions
 
         When responding:

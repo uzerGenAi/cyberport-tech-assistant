@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# amplify-deploy.sh — Deploy Specialty Bakeries & Pastry Cafés web app to AWS Amplify Hosting
+# amplify-deploy.sh — Deploy Cyberport Tech Assistant web app to AWS Amplify Hosting
 set -euo pipefail
 
 REGION="${AWS_REGION:-eu-central-1}"
-APP_NAME="spbc-pastry-cafe"
+APP_NAME="spbc-tech-assistant"
 BRANCH="main"
 ROOT_DIR="$(git -C "$(dirname "$0")" rev-parse --show-toplevel 2>/dev/null || { cd "$(dirname "$0")/../.." && pwd; })"
 WEB_APP_DIR="$ROOT_DIR/6_deploy/web-app"
@@ -13,7 +13,7 @@ ok()   { echo -e "\033[0;32m✅ $1\033[0m"; }
 warn() { echo -e "\033[1;33m⚠️  $1\033[0m"; }
 err()  { echo -e "\033[0;31m❌ $1\033[0m"; exit 1; }
 
-log "Deploying Specialty Bakeries & Pastry Cafés frontend to AWS Amplify (region: $REGION)"
+log "Deploying Cyberport Tech Assistant frontend to AWS Amplify (region: $REGION)"
 
 # Check for required tools
 command -v aws  >/dev/null 2>&1 || err "aws CLI not found"
@@ -38,7 +38,7 @@ if [ -z "$EXISTING_APP_ID" ] || [ "$EXISTING_APP_ID" = "None" ]; then
   APP_ID=$(aws amplify create-app \
     --name "$APP_NAME" \
     --region "$REGION" \
-    --description "Specialty Bakeries & Pastry Cafés AI Concierge Web App" \
+    --description "Cyberport Tech Assistant Web App" \
     --query 'app.appId' \
     --output text)
   ok "Created Amplify app: $APP_ID"
@@ -67,7 +67,7 @@ fi
 
 # Package the web app.
 # Ship only browser assets: local backup folders, build tooling and the
-# container/helper scripts have no business being served from the web root.
+# helper scripts have no business being served from the web root.
 DEPLOY_ZIP="/tmp/spbc-webapp-$(date +%s).zip"
 log "Packaging web app from $WEB_APP_DIR"
 (cd "$WEB_APP_DIR" && zip -qr "$DEPLOY_ZIP" . \
@@ -76,8 +76,7 @@ log "Packaging web app from $WEB_APP_DIR"
   -x '.DS_Store' \
   -x 'backup_*/*' \
   -x '*.sh' \
-  -x '*.py' \
-  -x 'Dockerfile')
+  -x '*.py')
 ok "Package created: $DEPLOY_ZIP"
 
 log "Bundle contents:"
@@ -156,7 +155,7 @@ rm -f "$DEPLOY_ZIP"
 
 echo ""
 echo -e "\033[0;36m============================================================\033[0m"
-echo -e "\033[0;32m🥐 Specialty Bakeries & Pastry Cafés — Amplify Deployment\033[0m"
+echo -e "\033[0;32m📱 Cyberport Tech Assistant — Amplify Deployment\033[0m"
 echo -e "\033[0;36m============================================================\033[0m"
 echo -e "  Amplify App ID : $APP_ID"
 echo -e "  Branch         : $BRANCH"

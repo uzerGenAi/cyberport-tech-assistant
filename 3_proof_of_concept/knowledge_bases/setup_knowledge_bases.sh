@@ -7,7 +7,7 @@
 #
 # Prerequisites:
 #   1. bash 3_proof_of_concept/knowledge_bases/bootstrap_vector_store.sh   (collection + role)
-#   2. The documents are in S3 under bakery_<domain>/   (walkthrough Step 3)
+#   2. The documents are in S3 under electronics_<domain>/   (walkthrough Step 3)
 #
 # Idempotent: existing indexes, knowledge bases and data sources are reused, and each sync
 # is verified (a job that scans zero documents or fails any document stops the run). This

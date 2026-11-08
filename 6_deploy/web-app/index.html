@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Specialty Bakeries & Pastry Cafés</title>
+  <title>Cyberport Tech Assistant</title>
   <!-- Montserrat font for flashy title -->
   <link href="https://fonts.googleapis.com/css?family=Montserrat:900&display=swap" rel="stylesheet">
   <!-- Enhanced styles -->
@@ -17,8 +17,8 @@
     <!-- Top Header with Title and Sign Out -->
     <div class="top-header">
       <div class="header-content">
-        <h1 class="main-title">🥐 Specialty Bakeries & Pastry Cafés</h1>
-        <p class="subtitle">Artisan pastries, fresh breads, and specialty coffee — baked fresh daily.</p>
+        <h1 class="main-title">📱 Cyberport Tech Assistant</h1>
+        <p class="subtitle">Smartphones and laptops, expert advice, click &amp; collect — online and in store.</p>
       </div>
       <button id="signOutButton" class="bubble-btn signout-btn compact top-signout">
         <span class="btn-icon">👋</span>
@@ -32,9 +32,9 @@
     
     <div class="hero-panel">
       <div class="hero-copy">
-        <p class="eyebrow">Powered by Specialty Bakeries & Pastry Cafés AI</p>
-        <h2>Order smarter, discover seasonal pastries, and find your nearest bakery.</h2>
-        <p>Ask about pastries, promotions, bakery locations, or order support — your Pastry Concierge is ready.</p>
+        <p class="eyebrow">Powered by Amazon Bedrock AgentCore</p>
+        <h2>Find the right device, check store stock, and reserve it for click &amp; collect.</h2>
+        <p>Ask about specs, prices, store stock, orders, financing or promotions — your Tech Assistant is ready.</p>
         <div class="hero-actions">
           <a class="pill-link" href="#chatbot">Start chatting</a>
           <span class="hero-note">Add <code>?preview=1</code> to browse sample data without live AWS credentials</span>
@@ -42,8 +42,8 @@
       </div>
       <img
         class="hero-image"
-        src="image.jpg"
-        alt="Freshly baked pastries and breads at a Specialty Bakeries &amp; Pastry Cafés counter"
+        src="hero-devices.svg"
+        alt="A laptop and a smartphone with a chat bubble"
         loading="lazy"
         decoding="async"
         width="320"
@@ -51,15 +51,15 @@
       >
       <div class="hero-stats">
         <div class="stat-card"><strong>24/7</strong><span>Friendly support</span></div>
-        <div class="stat-card"><strong>10+</strong><span>Store locations</span></div>
-        <div class="stat-card"><strong>3</strong><span>Menu favorites</span></div>
+        <div class="stat-card"><strong>9</strong><span>Stores (DE &amp; AT)</span></div>
+        <div class="stat-card"><strong>124</strong><span>Products</span></div>
         <div class="stat-card"><strong>100%</strong><span>Local preview ready</span></div>
       </div>
     </div>
 
     <div class="chatbot-section">
       <div class="chatbot-header">
-        <h2>Pastry Concierge Assistant</h2>
+        <h2>Tech Assistant</h2>
         <div class="user-controls-header">
           <div class="connection-status" id="connection-status">Connecting...</div>
           
@@ -109,27 +109,32 @@
       
       <!-- Sample Prompts Section -->
       <div class="sample-prompts">
-        <h3>Try these sample prompts to test your Pastry Concierge:</h3>
+        <h3>Try these sample prompts to test your Tech Assistant:</h3>
         <div class="prompt-buttons">
-          <button class="prompt-btn" onclick="sendSamplePrompt('Do you have any gluten-free options?')">Do you have any gluten-free options?</button>
-          <button class="prompt-btn" onclick="sendSamplePrompt('What seasonal pastries are available right now?')">What seasonal pastries are available right now?</button>
-          <button class="prompt-btn" onclick="sendSamplePrompt('I received the wrong item — what should I do?')">I received the wrong item — what should I do?</button>
-          <button class="prompt-btn" onclick="sendSamplePrompt('What payment methods do you accept?')">What payment methods do you accept?</button>
-          <button class="prompt-btn" onclick="sendSamplePrompt('How can I use the Fresh Pastry Tuesdays promotion?')">How can I use the Fresh Pastry Tuesdays promotion?</button>
-          <button class="prompt-btn" onclick="sendSamplePrompt('I want to order a custom celebration cake for 20 people')">I want to order a custom celebration cake for 20 people</button>
+          <button class="prompt-btn" onclick="sendSamplePrompt('Which laptop under €1,000 is best for a student?')">Which laptop under €1,000 is best for a student?</button>
+          <button class="prompt-btn" onclick="sendSamplePrompt('Compare the Apple iPhone 14 and the Samsung Galaxy S23')">Compare the Apple iPhone 14 and the Samsung Galaxy S23</button>
+          <button class="prompt-btn" onclick="sendSamplePrompt('Is the Apple iPhone 14 in stock at the Cyberport Store Dresden?')">Is the Apple iPhone 14 in stock at the Cyberport Store Dresden?</button>
+          <button class="prompt-btn" onclick="sendSamplePrompt('What is the status of order ord_2055_023 for customer_2055?')">What is the status of order ord_2055_023 for customer_2055?</button>
+          <button class="prompt-btn" onclick="sendSamplePrompt('Can I pay for a laptop in instalments?')">Can I pay for a laptop in instalments?</button>
+          <button class="prompt-btn" onclick="sendSamplePrompt('How does the trade-in bonus work?')">How does the trade-in bonus work?</button>
         </div>
       </div>
     </div>
 
-    <!-- Menu Section -->
+    <!-- Product catalog section (the CSS classes keep their original menu-* names) -->
     <div class="menu-section">
-      <h2>Our Menu</h2>
+      <h2>Our Products</h2>
       <div class="menu-categories" id="menu-categories">
-        <!-- Menu will be loaded dynamically -->
-        <div class="loading-menu">Loading menu...</div>
+        <!-- Products are loaded dynamically -->
+        <div class="loading-menu">Loading products...</div>
       </div>
     </div>
   </div>
+
+  <p class="demo-disclaimer" style="text-align:center;font-size:0.8rem;opacity:0.75;margin:1.5rem auto;max-width:720px;">
+    Reference demo, not affiliated with or endorsed by Cyberport. Product data from public Kaggle datasets
+    (PcComponentes prices, Apache 2.0); store hours, stock, orders and promotions are illustrative.
+  </p>
 
   <!-- Include enhanced scripts -->
   <script src="agentcore-client-fixed.js?v=5"></script>
@@ -143,21 +148,20 @@
     // Load store data from the stores records
     async function loadStoreData() {
       try {
-        // Store data from stores_records.json (subset for preview)
+        // Store data from 2_data_strategy/stores/stores_records.json (demo stores)
         storeData = [
-          {"store_id": "spbc-de-001", "name": "Backstube Frankfurt Innenstadt", "address": "Zeil 106", "city": "Frankfurt am Main", "state": "DE", "zip_code": "60313", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:00"},
-          {"store_id": "spbc-de-004", "name": "Backstube München Marienplatz", "address": "Kaufingerstraße 15", "city": "München", "state": "DE", "zip_code": "80331", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:30"},
-          {"store_id": "spbc-de-007", "name": "Backstube Berlin Mitte", "address": "Friedrichstraße 120", "city": "Berlin", "state": "DE", "zip_code": "10117", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:00"},
-          {"store_id": "spbc-de-008", "name": "Backstube Berlin Prenzlauer Berg", "address": "Kastanienallee 22", "city": "Berlin", "state": "DE", "zip_code": "10435", "has_drive_thru": false, "hours_start": "07:30", "hours_end": "18:30"},
-          {"store_id": "spbc-de-010", "name": "Backstube Hamburg Altstadt", "address": "Mönckebergstraße 12", "city": "Hamburg", "state": "DE", "zip_code": "20095", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:00"},
-          {"store_id": "spbc-de-012", "name": "Backstube Köln Altstadt", "address": "Hohe Straße 88", "city": "Köln", "state": "DE", "zip_code": "50667", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:00"},
-          {"store_id": "spbc-at-001", "name": "Konditorei Wien Innere Stadt", "address": "Kärntner Straße 45", "city": "Wien", "state": "AT", "zip_code": "1010", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:30"},
-          {"store_id": "spbc-ch-001", "name": "Boulangerie Zürich Altstadt", "address": "Bahnhofstrasse 60", "city": "Zürich", "state": "CH", "zip_code": "8001", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "19:00"},
-          {"store_id": "spbc-de-018", "name": "Backstube Hannover Mitte", "address": "Georgstraße 25", "city": "Hannover", "state": "DE", "zip_code": "30159", "has_drive_thru": true, "hours_start": "06:30", "hours_end": "19:30"},
-          {"store_id": "spbc-de-014", "name": "Backstube Stuttgart Mitte", "address": "Königstraße 34", "city": "Stuttgart", "state": "DE", "zip_code": "70173", "has_drive_thru": false, "hours_start": "07:00", "hours_end": "18:30"}
+          {"store_id": "spbc-de-001", "name": "Cyberport Store Dresden", "address": "Prager Straße 8", "city": "Dresden", "zip_code": "01069", "has_drive_thru": true, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+          {"store_id": "spbc-de-002", "name": "Cyberport Store Berlin", "address": "Friedrichstraße 50-55", "city": "Berlin", "zip_code": "10117", "has_drive_thru": true, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+          {"store_id": "spbc-de-003", "name": "Cyberport Store Hamburg", "address": "Ballindamm 40", "city": "Hamburg", "zip_code": "20095", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+          {"store_id": "spbc-de-004", "name": "Cyberport Store Leipzig", "address": "Neumarkt 29-33", "city": "Leipzig", "zip_code": "04109", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+          {"store_id": "spbc-de-005", "name": "Cyberport Store Dortmund", "address": "Westenhellweg 102-106", "city": "Dortmund", "zip_code": "44137", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+          {"store_id": "spbc-de-006", "name": "Cyberport Store Bochum", "address": "Kortumstraße 100", "city": "Bochum", "zip_code": "44787", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+          {"store_id": "spbc-de-007", "name": "Cyberport Store München", "address": "Kaufingerstraße 15", "city": "München", "zip_code": "80331", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+          {"store_id": "spbc-de-008", "name": "Cyberport Store Köln", "address": "Hohe Straße 88", "city": "Köln", "zip_code": "50667", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+          {"store_id": "spbc-at-001", "name": "Cyberport Store Wien", "address": "Mariahilfer Straße 78", "city": "Wien", "zip_code": "1060", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "19:00", "state": "AT"}
         ];
 
-        // Set default store to Frankfurt Innenstadt
+        // Set default store to Dresden (spbc-de-001)
         selectedStore = storeData.find(store => store.store_id === "spbc-de-001");
         updateSelectedStoreDisplay();
         populateStoreDropdown();
@@ -193,8 +197,9 @@
         storesByCity[cityState].sort((a, b) => a.name.localeCompare(b.name));
         
         storesByCity[cityState].forEach(store => {
-          const hours = `${store.hours_start} - ${store.hours_end}`;
-          const driveThruBadge = store.has_drive_thru ? '<span class="drive-thru-badge">Drive-Thru</span>' : '';
+          const hours = `Mon–Sat ${store.hours_start} - ${store.hours_end}`;
+          // has_drive_thru marks a 24/7 pickup station (column name kept from the original schema)
+          const driveThruBadge = store.has_drive_thru ? '<span class="drive-thru-badge">Pickup station</span>' : '';
           
           dropdownHTML += `
             <div class="store-item" onclick="selectStore('${store.store_id}')">
@@ -326,7 +331,8 @@
           // Set up Agent Logs link
           const agentLogsLink = document.getElementById('agentLogsLink');
           if (agentLogsLink) {
-            const logsUrl = 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fp2pTestAgentsWebSocketFunction';
+            // AgentCore runtime log groups: /aws/bedrock-agentcore/runtimes/<runtime-id>-DEFAULT
+            const logsUrl = config.cloudwatch?.logsUrl || 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#logsV2:log-groups$3FlogGroupNameFilter$3D$252Faws$252Fbedrock-agentcore$252Fruntimes';
             agentLogsLink.addEventListener('click', function(e) {
               e.preventDefault();
               window.open(logsUrl, '_blank');
@@ -346,7 +352,8 @@
           if (agentDashboardLink) {
             agentDashboardLink.addEventListener('click', function(e) {
               e.preventDefault();
-              const fallbackDashboardUrl = 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#dashboards:name=P2P-Agent-Metrics';
+              // CloudWatch generative AI observability: AgentCore runtime metrics, sessions and traces
+              const fallbackDashboardUrl = 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#gen-ai-observability';
               window.open(fallbackDashboardUrl, '_blank');
               dropdownContainer.classList.remove('active');
               console.log('Opening Agent Dashboard (fallback):', fallbackDashboardUrl);
@@ -356,7 +363,7 @@
           if (agentLogsLink) {
             agentLogsLink.addEventListener('click', function(e) {
               e.preventDefault();
-              const fallbackLogsUrl = 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fp2pTestAgentsWebSocketFunction';
+              const fallbackLogsUrl = 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#logsV2:log-groups$3FlogGroupNameFilter$3D$252Faws$252Fbedrock-agentcore$252Fruntimes';
               window.open(fallbackLogsUrl, '_blank');
               dropdownContainer.classList.remove('active');
               console.log('Opening Agent Logs (fallback):', fallbackLogsUrl);
@@ -370,150 +377,138 @@
       // seconds regardless of whether anything had connected, so the page claimed
       // a working agent while every message was failing. Removed deliberately.
       
-      // Load and display interactive menu
+      // Load and display the product catalog
       loadInteractiveMenu();
     });
     
     
-    // Menu data (embedded to avoid CORS issues) — Specialty Bakeries & Pastry Cafés
+    // Product data (embedded to avoid CORS issues) — summary of 2_data_strategy/menu/menu_records.json.
+    // Prices and stock shown in chat come from the live catalog, not from this list.
     const menuData = [
-      {"item_id": "breakfast_petit_dejeuner_pain", "name": "Petit-Déjeuner with Petit Pain", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 70}},
-      {"item_id": "breakfast_petit_dejeuner_croissant", "name": "Petit-Déjeuner with Croissant", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 72}},
-      {"item_id": "breakfast_merci", "name": "Merci Breakfast", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 85}},
-      {"item_id": "breakfast_all_cheese", "name": "All Cheese & More Breakfast", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "breakfast_kronberger_cello", "name": "Kronberger Cello (Salmon Rolls)", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 78}},
-      {"item_id": "breakfast_hundertwasser", "name": "Hundertwasser Breakfast", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 82}},
-      {"item_id": "breakfast_sasis", "name": "Sa'SIS Breakfast", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 88}},
-      {"item_id": "breakfast_parkhotel", "name": "Parkhotel Breakfast", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 86}},
-      {"item_id": "breakfast_pancakes_bacon", "name": "Pancakes with Maple Syrup, Butter & Bacon", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 84}},
-      {"item_id": "breakfast_pancakes_berries", "name": "Pancakes with Fresh Berries, Maple Syrup & Cream", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 86}},
-      {"item_id": "breakfast_yogurt_fruit_muesli", "name": "Yogurt, Fruit & Muesli", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 75}},
-      {"item_id": "breakfast_granola", "name": "Homemade Granola with Greek Yogurt & Berries", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "breakfast_porridge", "name": "Porridge with Fresh Fruit, Walnuts & Almond Milk", "category": "breakfast", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 74}},
-      {"item_id": "breakfast_avocado_toast", "name": "Avocado Toast on Sourdough", "category": "breakfast", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 88}},
-      {"item_id": "breakfast_eggsciting_bagel", "name": "Eggs-Citing Bagel (Avocado, Tomato Salsa, Scrambled Egg)", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 85}},
-      {"item_id": "breakfast_benedict_bacon", "name": "Eggs Benedict with Bacon", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 86}},
-      {"item_id": "breakfast_benedict_salmon", "name": "Eggs Benedict with Smoked Salmon", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 85}},
-      {"item_id": "breakfast_benedict_florentine", "name": "Eggs Benedict Florentine (Baby Spinach)", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "breakfast_croissant_benedict", "name": "Smashed Croissant Benedict", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 84}},
-      {"item_id": "breakfast_croissant_salmon", "name": "Smashed Croissant with Salmon", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 83}},
-      {"item_id": "breakfast_wrap", "name": "Breakfast Wrap (Scrambled Egg, Cheddar, Jalapeños, Bacon, Avocado)", "category": "breakfast", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 82}},
-      {"item_id": "eggs_scrambled_plain", "name": "Scrambled Eggs", "category": "eggs", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 76}},
-      {"item_id": "eggs_scrambled_bacon", "name": "Scrambled Eggs with Bacon", "category": "eggs", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "eggs_scrambled_cheese_ham", "name": "Scrambled Eggs with Cheese & Ham", "category": "eggs", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 79}},
-      {"item_id": "eggs_scrambled_parma", "name": "Scrambled Eggs with Parma Ham, Tomato & Mozzarella", "category": "eggs", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 78}},
-      {"item_id": "eggs_scrambled_feta", "name": "Scrambled Eggs with Tomato & Feta", "category": "eggs", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 75}},
-      {"item_id": "eggs_scrambled_herbs", "name": "Scrambled Eggs with Herbs of Provence", "category": "eggs", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 72}},
-      {"item_id": "eggs_fried_bacon", "name": "Two Fried Eggs with Bacon", "category": "eggs", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 74}},
-      {"item_id": "eggs_fried_cheese_ham", "name": "Two Fried Eggs with Cheese & Ham", "category": "eggs", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 73}},
-      {"item_id": "eggs_omelette_merci", "name": "Omelette Merci (Cheese, Ham, Tomato, Gherkins)", "category": "eggs", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 77}},
-      {"item_id": "eggs_omelette_herbs", "name": "Omelette with Herbs of Provence", "category": "eggs", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 71}},
-      {"item_id": "eggs_omelette_feta", "name": "Omelette with Tomato & Feta", "category": "eggs", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 73}},
-      {"item_id": "eggs_omelette_farmer", "name": "Farmer's Omelette (Potato, Bacon, Gherkins)", "category": "eggs", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 75}},
-      {"item_id": "eggs_boiled", "name": "Soft-Boiled Organic Egg", "category": "eggs", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 60}},
-      {"item_id": "eggs_in_glass", "name": "Organic Egg in a Glass", "category": "eggs", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 58}},
-      {"item_id": "savoury_croque_sasis", "name": "Croque Sa'SIS (Turkey, Cheese, Fried Egg, Side Salad)", "category": "savoury", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 86}},
-      {"item_id": "savoury_croque_monfrere", "name": "Croque Mon Frère (Ham, Cheese, Side Salad)", "category": "savoury", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 84}},
-      {"item_id": "savoury_baked_camembert", "name": "Baked Camembert", "category": "savoury", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "savoury_smashburger", "name": "Sa'SIS Smashburger with Fries", "category": "savoury", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 92}},
-      {"item_id": "salad_merci", "name": "Salad Merci (Emmental, Ham, Egg)", "category": "salads", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 78}},
-      {"item_id": "salad_turkey", "name": "Mixed Salad with Turkey Breast", "category": "salads", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "salad_nicoise", "name": "Salad Niçoise (Tuna, Egg, Red Onion)", "category": "salads", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 79}},
-      {"item_id": "salad_greek", "name": "Greek Salad (Feta, Tomato, Cucumber, Onion, Olives)", "category": "salads", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 82}},
-      {"item_id": "salad_goat_cheese", "name": "Goat Cheese Salad (Baked Honey Goat Cheese)", "category": "salads", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 81}},
-      {"item_id": "savoury_steak_sandwich", "name": "Elli's Favourite Steak Sandwich with Fries", "category": "savoury", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 88}},
-      {"item_id": "small_frankfurter", "name": "Two Frankfurter Sausages with Farmhouse Bread & Mustard", "category": "small_plates", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 74}},
-      {"item_id": "small_frites_gourmandes", "name": "Frites Gourmandes (Guacamole, Sour Cream, Salsa, Cheddar)", "category": "small_plates", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 82}},
-      {"item_id": "small_tarte_flambee_bacon", "name": "Tarte Flambée Alsatian Style (Bacon & Onion)", "category": "small_plates", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 83}},
-      {"item_id": "small_tarte_flambee_veg", "name": "Tarte Flambée Vegetarian (Cherry Tomato, Feta, Rocket)", "category": "small_plates", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 82}},
-      {"item_id": "small_quiche_tomato_mozzarella", "name": "Quiche Tomato & Mozzarella", "category": "small_plates", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 76}},
-      {"item_id": "small_quiche_feta_olive", "name": "Quiche Feta & Olive", "category": "small_plates", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 74}},
-      {"item_id": "small_quiche_lorraine", "name": "Quiche Lorraine (Cheese & Ham)", "category": "small_plates", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "vienn_croissant", "name": "Croissant", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 95}},
-      {"item_id": "vienn_mini_croissant", "name": "Mini Croissant", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 84}},
-      {"item_id": "vienn_croissant_amandes", "name": "Almond Croissant", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 92}},
-      {"item_id": "vienn_croissant_pommes", "name": "Apple Croissant", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 85}},
-      {"item_id": "vienn_mini_croissant_pommes", "name": "Mini Apple Croissant", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 78}},
-      {"item_id": "vienn_pain_au_chocolat", "name": "Pain au Chocolat", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 93}},
-      {"item_id": "vienn_mini_pain_au_chocolat", "name": "Mini Pain au Chocolat", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "vienn_pain_aux_raisins", "name": "Pain aux Raisins", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 82}},
-      {"item_id": "vienn_tartelette", "name": "Tartelette", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 84}},
-      {"item_id": "vienn_fruit_petit_four", "name": "Fruit Petit Four", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 76}},
-      {"item_id": "vienn_petit_four", "name": "Petit Four", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 77}},
-      {"item_id": "vienn_tarte", "name": "Tarte (Slice)", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "vienn_cream_cake", "name": "Cream / Gateau Slice", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 83}},
-      {"item_id": "vienn_brioche_nature", "name": "Brioche Nature", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 78}},
-      {"item_id": "vienn_brioche_sucre", "name": "Brioche au Sucre", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 76}},
-      {"item_id": "vienn_brioche_chocolat", "name": "Brioche au Chocolat", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "vienn_brioche_raisins", "name": "Brioche aux Raisins", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 75}},
-      {"item_id": "vienn_cheese_ham_croissant", "name": "Cheese & Ham Croissant", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 85}},
-      {"item_id": "vienn_feta_olive_croissant", "name": "Feta & Olive Croissant", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 79}},
-      {"item_id": "vienn_cinnamon_roll", "name": "Cinnamon Roll", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 86}},
-      {"item_id": "vienn_chocolate_roll", "name": "Chocolate Roll", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 84}},
-      {"item_id": "vienn_fruit_danish", "name": "Fruit Danish", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "vienn_pretzel_croissant", "name": "Pretzel Croissant", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 78}},
-      {"item_id": "vienn_pretzel_corner", "name": "Pretzel Corner", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 74}},
-      {"item_id": "vienn_petit_gateau", "name": "Petit Gâteau", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 82}},
-      {"item_id": "vienn_french_slice", "name": "French Pâtisserie Slice", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 83}},
-      {"item_id": "vienn_eclair", "name": "Éclair", "category": "viennoiserie", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 88}},
-      {"item_id": "coffee_pot", "name": "Pot of Coffee", "category": "coffee", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "coffee_small_pot", "name": "Small Pot of Coffee", "category": "coffee", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 70}},
-      {"item_id": "coffee_schumli", "name": "Schümli Coffee", "category": "coffee", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 72}},
-      {"item_id": "coffee_espresso", "name": "Espresso", "category": "coffee", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 90}},
-      {"item_id": "coffee_doppio", "name": "Doppio", "category": "coffee", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 78}},
-      {"item_id": "coffee_doppio_macchiato", "name": "Doppio Macchiato", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 74}},
-      {"item_id": "coffee_espresso_macchiato", "name": "Espresso Macchiato", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 76}},
-      {"item_id": "coffee_latte_macchiato", "name": "Latte Macchiato", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 88}},
-      {"item_id": "coffee_cappuccino", "name": "Cappuccino", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 91}},
-      {"item_id": "coffee_cafe_au_lait", "name": "Café au Lait", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 84}},
-      {"item_id": "coffee_flat_white", "name": "Flat White", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 89}},
-      {"item_id": "coffee_pumpkin_spice", "name": "Pumpkin Spice Latte", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 82}},
-      {"item_id": "coffee_vanilla_latte", "name": "Vanilla Latte", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 85}},
-      {"item_id": "coffee_caramel_latte", "name": "Caramel Latte", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 85}},
-      {"item_id": "coffee_cold_brew", "name": "Cold Brew (15h brewed)", "category": "coffee", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 83}},
-      {"item_id": "coffee_cortado", "name": "Cortado", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 78}},
-      {"item_id": "coffee_iced_vanilla_latte", "name": "Iced Vanilla Latte", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 84}},
-      {"item_id": "coffee_iced_caramel_latte", "name": "Iced Caramel Latte", "category": "coffee", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 84}},
-      {"item_id": "hot_hot_chocolate", "name": "Hot Chocolate", "category": "hot_drinks", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 85}},
-      {"item_id": "hot_pot_chocolate", "name": "Pot of Hot Chocolate", "category": "hot_drinks", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 72}},
-      {"item_id": "hot_chai_latte", "name": "Chai Latte", "category": "hot_drinks", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 82}},
-      {"item_id": "hot_matcha_latte", "name": "Matcha Latte", "category": "hot_drinks", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 81}},
-      {"item_id": "hot_iced_chai_latte", "name": "Iced Chai Latte", "category": "hot_drinks", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "hot_iced_matcha_latte", "name": "Iced Matcha Latte", "category": "hot_drinks", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "tea_hot_lemon", "name": "Hot Lemon", "category": "tea", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 68}},
-      {"item_id": "tea_fresh_mint", "name": "Fresh Mint Tea", "category": "tea", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 74}},
-      {"item_id": "tea_mint_ginger", "name": "Mint & Ginger Tea", "category": "tea", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 72}},
-      {"item_id": "tea_fresh_ginger", "name": "Fresh Ginger Tea", "category": "tea", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 70}},
-      {"item_id": "tea_black_pot", "name": "Pot of Black Tea (English Breakfast, Earl Grey, Assam...)", "category": "tea", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 78}},
-      {"item_id": "tea_cup", "name": "Cup of Tea", "category": "tea", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 75}},
-      {"item_id": "tea_herbal_pot", "name": "Pot of Herbal/Fruit Tea (Peppermint, Camomile, Rooibos...)", "category": "tea", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 76}},
-      {"item_id": "cold_water_still_025", "name": "Still Water (0.25 l)", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 70}},
-      {"item_id": "cold_water_sparkling_025", "name": "Sparkling Water (0.25 l)", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 70}},
-      {"item_id": "cold_cola", "name": "Cola (Light, Zero, Original, 0.33 l)", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 78}},
-      {"item_id": "cold_sprite_fanta", "name": "Sprite / Fanta / Mezzo Mix (0.33 l)", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 76}},
-      {"item_id": "cold_orangina", "name": "Orangina (0.2 l)", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 72}},
-      {"item_id": "cold_bitter_lemon", "name": "Bitter Lemon", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 66}},
-      {"item_id": "cold_ginger_ale", "name": "Ginger Ale", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 66}},
-      {"item_id": "cold_tonic", "name": "Tonic Water", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 66}},
-      {"item_id": "cold_apple_juice", "name": "Apple Juice", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 74}},
-      {"item_id": "cold_orange_juice", "name": "Orange Juice", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 76}},
-      {"item_id": "cold_blackcurrant_juice", "name": "Blackcurrant Juice", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 68}},
-      {"item_id": "cold_passionfruit_juice", "name": "Passionfruit Juice", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 70}},
-      {"item_id": "cold_fresh_orange_juice", "name": "Freshly Squeezed Orange Juice", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 84}},
-      {"item_id": "cold_rhubarb_mint_spritzer", "name": "Rhubarb-Mint Spritzer", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 78}},
-      {"item_id": "cold_blackcurrant_mint_spritzer", "name": "Blackcurrant-Mint Spritzer", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 76}},
-      {"item_id": "cold_passionfruit_mint_spritzer", "name": "Passionfruit-Mint Spritzer", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 76}},
-      {"item_id": "cold_classic_lemonade", "name": "Classic Lemonade", "category": "cold_drinks", "attributes_json": {"is_dairy_free": true, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "dessert_strawberry_sundae", "name": "Strawberry Sundae (3 scoops, cream, fresh strawberries)", "category": "desserts", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 84}},
-      {"item_id": "dessert_merci_sundae", "name": "Merci Sundae (3 scoops, meringue, cream, fresh fruit)", "category": "desserts", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 82}},
-      {"item_id": "dessert_chocolate_sundae", "name": "Chocolate Sundae (3 scoops chocolate, sauce, cream)", "category": "desserts", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 85}},
-      {"item_id": "dessert_amarena_sundae", "name": "Amarena Sundae (3 scoops, amarena cherries & sauce, cream)", "category": "desserts", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "dessert_mixed_ice", "name": "Mixed Ice Cream (3 scoops)", "category": "desserts", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 82}},
-      {"item_id": "dessert_mixed_ice_cream", "name": "Mixed Ice Cream with Cream (3 scoops)", "category": "desserts", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}},
-      {"item_id": "dessert_milkshake", "name": "Milkshake (flavour of your choice)", "category": "desserts", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 86}},
-      {"item_id": "dessert_iced_coffee", "name": "Iced Coffee", "category": "desserts", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 85}},
-      {"item_id": "dessert_iced_chocolate", "name": "Iced Chocolate", "category": "desserts", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 84}},
-      {"item_id": "dessert_ice_scoop", "name": "Ice Cream (per scoop)", "category": "desserts", "attributes_json": {"is_dairy_free": false, "is_sugar_free": false, "popularity_score": 80}}
+      {"item_id": "phone_samsung_galaxy_s21_fe_5g", "name": "Samsung Galaxy S21 FE 5G", "category": "smartphones", "price_eur": 472.15, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 89, "condition": "New"}},
+      {"item_id": "phone_samsung_galaxy_s23_ultra", "name": "Samsung Galaxy S23 Ultra", "category": "smartphones", "price_eur": 1052.0, "spec": "256GB / 512GB / 1TB", "attributes_json": {"popularity_score": 82, "condition": "New"}},
+      {"item_id": "phone_samsung_galaxy_s23_plus", "name": "Samsung Galaxy S23 Plus", "category": "smartphones", "price_eur": 893.0, "spec": "256GB / 512GB", "attributes_json": {"popularity_score": 76, "condition": "New"}},
+      {"item_id": "phone_samsung_galaxy_s22_ultra_5g", "name": "Samsung Galaxy S22 Ultra 5G", "category": "smartphones", "price_eur": 844.0, "spec": "128GB / 256GB / 512GB", "attributes_json": {"popularity_score": 76, "condition": "New"}},
+      {"item_id": "phone_samsung_galaxy_s21_5g", "name": "Samsung Galaxy S21 5G", "category": "smartphones", "price_eur": 372.0, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 76, "condition": "New"}},
+      {"item_id": "phone_samsung_galaxy_s23", "name": "Samsung Galaxy S23", "category": "smartphones", "price_eur": 694.9, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 76, "condition": "New"}},
+      {"item_id": "phone_samsung_galaxy_s20_fe_5g", "name": "Samsung Galaxy S20 FE 5G", "category": "smartphones", "price_eur": 549.0, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 76, "condition": "New"}},
+      {"item_id": "phone_samsung_galaxy_a53_5g", "name": "Samsung Galaxy A53 5G", "category": "smartphones", "price_eur": 390.0, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 76, "condition": "New"}},
+      {"item_id": "phone_samsung_galaxy_a54_5g", "name": "Samsung Galaxy A54 5G", "category": "smartphones", "price_eur": 377.96, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 76, "condition": "New"}},
+      {"item_id": "phone_samsung_galaxy_a34_5g", "name": "Samsung Galaxy A34 5G", "category": "smartphones", "price_eur": 299.9, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 76, "condition": "New"}},
+      {"item_id": "phone_samsung_galaxy_a13_a137", "name": "Samsung Galaxy A13 A137", "category": "smartphones", "price_eur": 156.94, "spec": "32GB / 64GB / 128GB", "attributes_json": {"popularity_score": 76, "condition": "New"}},
+      {"item_id": "phone_samsung_galaxy_z_flip4", "name": "Samsung Galaxy Z Flip4", "category": "smartphones", "price_eur": 700.71, "spec": "128GB / 256GB / 512GB", "attributes_json": {"popularity_score": 72, "condition": "New"}},
+      {"item_id": "phone_samsung_galaxy_s20_plus", "name": "Samsung Galaxy S20 Plus", "category": "smartphones", "price_eur": 319.0, "spec": "128GB", "attributes_json": {"popularity_score": 72, "condition": "New"}},
+      {"item_id": "phone_samsung_galaxy_a13", "name": "Samsung Galaxy A13", "category": "smartphones", "price_eur": 146.0, "spec": "32GB / 64GB / 128GB", "attributes_json": {"popularity_score": 72, "condition": "New"}},
+      {"item_id": "phone_apple_iphone_11", "name": "Apple iPhone 11", "category": "smartphones", "price_eur": 348.0, "spec": "64GB / 128GB / 256GB", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "phone_apple_iphone_xr", "name": "Apple iPhone XR", "category": "smartphones", "price_eur": 239.0, "spec": "64GB / 128GB / 256GB", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "phone_apple_iphone_14_plus", "name": "Apple iPhone 14 Plus", "category": "smartphones", "price_eur": 1159.0, "spec": "128GB / 256GB / 512GB", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "phone_apple_iphone_14", "name": "Apple iPhone 14", "category": "smartphones", "price_eur": 1009.0, "spec": "128GB / 256GB / 512GB", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "phone_apple_iphone_13", "name": "Apple iPhone 13", "category": "smartphones", "price_eur": 909.0, "spec": "128GB / 256GB / 512GB", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "phone_apple_iphone_12", "name": "Apple iPhone 12", "category": "smartphones", "price_eur": 799.0, "spec": "64GB / 128GB / 256GB", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "phone_apple_iphone_13_mini", "name": "Apple iPhone 13 Mini", "category": "smartphones", "price_eur": 809.0, "spec": "128GB / 256GB / 512GB", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "phone_apple_iphone_12_mini", "name": "Apple iPhone 12 Mini", "category": "smartphones", "price_eur": 689.0, "spec": "64GB / 128GB / 256GB", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "phone_apple_iphone_13_pro", "name": "Apple iPhone 13 Pro", "category": "smartphones", "price_eur": 1159.0, "spec": "128GB / 256GB / 512GB / 1TB", "attributes_json": {"popularity_score": 95, "condition": "New"}},
+      {"item_id": "phone_apple_iphone_13_pro_max", "name": "Apple iPhone 13 Pro Max", "category": "smartphones", "price_eur": 1259.0, "spec": "128GB / 256GB / 512GB / 1TB", "attributes_json": {"popularity_score": 92, "condition": "New"}},
+      {"item_id": "phone_apple_iphone_14_pro_max", "name": "Apple iPhone 14 Pro Max", "category": "smartphones", "price_eur": 1469.0, "spec": "128GB / 256GB / 512GB / 1TB", "attributes_json": {"popularity_score": 89, "condition": "New"}},
+      {"item_id": "phone_xiaomi_redmi_12c", "name": "Xiaomi Redmi 12C", "category": "smartphones", "price_eur": 119.0, "spec": "32GB / 64GB / 128GB", "attributes_json": {"popularity_score": 82, "condition": "New"}},
+      {"item_id": "phone_xiaomi_redmi_10a", "name": "Xiaomi Redmi 10A", "category": "smartphones", "price_eur": 95.59, "spec": "32GB / 64GB / 128GB", "attributes_json": {"popularity_score": 82, "condition": "New"}},
+      {"item_id": "phone_xiaomi_redmi_note_12_pro_5g", "name": "Xiaomi Redmi Note 12 Pro 5G", "category": "smartphones", "price_eur": 289.95, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 79, "condition": "New"}},
+      {"item_id": "phone_xiaomi_redmi_note_10_pro", "name": "Xiaomi Redmi Note 10 Pro", "category": "smartphones", "price_eur": 199.99, "spec": "64GB / 128GB / 256GB", "attributes_json": {"popularity_score": 79, "condition": "New"}},
+      {"item_id": "phone_xiaomi_redmi_note_11", "name": "Xiaomi Redmi Note 11", "category": "smartphones", "price_eur": 189.99, "spec": "64GB / 128GB", "attributes_json": {"popularity_score": 79, "condition": "New"}},
+      {"item_id": "phone_xiaomi_redmi_10c", "name": "Xiaomi Redmi 10C", "category": "smartphones", "price_eur": 105.04, "spec": "64GB / 128GB", "attributes_json": {"popularity_score": 79, "condition": "New"}},
+      {"item_id": "phone_xiaomi_redmi_note_11_pro_5g", "name": "Xiaomi Redmi Note 11 Pro 5G", "category": "smartphones", "price_eur": 283.47, "spec": "64GB / 128GB", "attributes_json": {"popularity_score": 76, "condition": "New"}},
+      {"item_id": "phone_xiaomi_redmi_9c", "name": "Xiaomi Redmi 9C", "category": "smartphones", "price_eur": 106.9, "spec": "32GB / 64GB / 128GB", "attributes_json": {"popularity_score": 76, "condition": "New"}},
+      {"item_id": "phone_xiaomi_redmi_note_11_pro_plus_5g", "name": "Xiaomi Redmi Note 11 Pro Plus 5G", "category": "smartphones", "price_eur": 381.13, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 72, "condition": "New"}},
+      {"item_id": "phone_google_pixel_7", "name": "Google Pixel 7", "category": "smartphones", "price_eur": 580.0, "spec": "128GB", "attributes_json": {"popularity_score": 56, "condition": "New"}},
+      {"item_id": "phone_google_pixel_6a", "name": "Google Pixel 6A", "category": "smartphones", "price_eur": 419.0, "spec": "128GB", "attributes_json": {"popularity_score": 56, "condition": "New"}},
+      {"item_id": "phone_google_pixel_6_pro", "name": "Google Pixel 6 Pro", "category": "smartphones", "price_eur": 1166.96, "spec": "128GB", "attributes_json": {"popularity_score": 53, "condition": "New"}},
+      {"item_id": "phone_google_pixel_6", "name": "Google Pixel 6", "category": "smartphones", "price_eur": 691.64, "spec": "128GB", "attributes_json": {"popularity_score": 53, "condition": "New"}},
+      {"item_id": "phone_google_pixel_4_xl", "name": "Google Pixel 4 XL", "category": "smartphones", "price_eur": 283.81, "spec": "64GB", "attributes_json": {"popularity_score": 53, "condition": "New"}},
+      {"item_id": "phone_motorola_edge_40", "name": "Motorola Edge 40", "category": "smartphones", "price_eur": 491.64, "spec": "256GB", "attributes_json": {"popularity_score": 59, "condition": "New"}},
+      {"item_id": "phone_motorola_edge_30_neo", "name": "Motorola Edge 30 Neo", "category": "smartphones", "price_eur": 399.0, "spec": "128GB", "attributes_json": {"popularity_score": 59, "condition": "New"}},
+      {"item_id": "phone_motorola_edge_20_lite", "name": "Motorola Edge 20 Lite", "category": "smartphones", "price_eur": 235.01, "spec": "128GB", "attributes_json": {"popularity_score": 59, "condition": "New"}},
+      {"item_id": "phone_motorola_moto_g31", "name": "Motorola Moto G31", "category": "smartphones", "price_eur": 165.99, "spec": "64GB / 128GB", "attributes_json": {"popularity_score": 59, "condition": "New"}},
+      {"item_id": "phone_motorola_moto_g32", "name": "Motorola Moto G32", "category": "smartphones", "price_eur": 206.99, "spec": "128GB", "attributes_json": {"popularity_score": 59, "condition": "New"}},
+      {"item_id": "phone_oneplus_8_pro", "name": "OnePlus 8 Pro", "category": "smartphones", "price_eur": 819.0, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 56, "condition": "New"}},
+      {"item_id": "phone_oneplus_9_pro_5g", "name": "OnePlus 9 Pro 5G", "category": "smartphones", "price_eur": 769.87, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 56, "condition": "New"}},
+      {"item_id": "phone_oneplus_9_5g", "name": "OnePlus 9 5G", "category": "smartphones", "price_eur": 528.0, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 56, "condition": "New"}},
+      {"item_id": "phone_oppo_a77_5g", "name": "OPPO A77 5G", "category": "smartphones", "price_eur": 158.01, "spec": "64GB / 128GB", "attributes_json": {"popularity_score": 63, "condition": "New"}},
+      {"item_id": "phone_oppo_a78_5g", "name": "OPPO A78 5G", "category": "smartphones", "price_eur": 189.0, "spec": "128GB", "attributes_json": {"popularity_score": 63, "condition": "New"}},
+      {"item_id": "phone_oppo_a16", "name": "OPPO A16", "category": "smartphones", "price_eur": 169.0, "spec": "32GB / 64GB", "attributes_json": {"popularity_score": 63, "condition": "New"}},
+      {"item_id": "phone_honor_70_5g", "name": "Honor 70 5G", "category": "smartphones", "price_eur": 399.0, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 63, "condition": "New"}},
+      {"item_id": "phone_honor_x7a", "name": "Honor X7a", "category": "smartphones", "price_eur": 173.64, "spec": "128GB", "attributes_json": {"popularity_score": 59, "condition": "New"}},
+      {"item_id": "phone_honor_magic4_pro_5g", "name": "Honor Magic4 Pro 5G", "category": "smartphones", "price_eur": 639.0, "spec": "256GB", "attributes_json": {"popularity_score": 56, "condition": "New"}},
+      {"item_id": "phone_poco_x5_pro_5g", "name": "POCO X5 Pro 5G", "category": "smartphones", "price_eur": 319.98, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 72, "condition": "New"}},
+      {"item_id": "phone_poco_x5_5g", "name": "POCO X5 5G", "category": "smartphones", "price_eur": 261.66, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 72, "condition": "New"}},
+      {"item_id": "phone_poco_c40", "name": "POCO C40", "category": "smartphones", "price_eur": 119.0, "spec": "32GB / 64GB", "attributes_json": {"popularity_score": 72, "condition": "New"}},
+      {"item_id": "phone_realme_9", "name": "Realme 9", "category": "smartphones", "price_eur": 281.6, "spec": "128GB", "attributes_json": {"popularity_score": 69, "condition": "New"}},
+      {"item_id": "phone_realme_gt2", "name": "Realme GT2", "category": "smartphones", "price_eur": 552.59, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 66, "condition": "New"}},
+      {"item_id": "phone_realme_9_pro_5g", "name": "Realme 9 Pro 5G", "category": "smartphones", "price_eur": 332.59, "spec": "128GB", "attributes_json": {"popularity_score": 66, "condition": "New"}},
+      {"item_id": "phone_nothing_phone_1", "name": "Nothing Phone 1", "category": "smartphones", "price_eur": 499.0, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 66, "condition": "New"}},
+      {"item_id": "phone_nothing_phone_2", "name": "Nothing Phone (2)", "category": "smartphones", "price_eur": 699.0, "spec": "256GB / 512GB", "attributes_json": {"popularity_score": 63, "condition": "New"}},
+      {"item_id": "phone_sony_xperia_l1_4g", "name": "Sony Xperia L1 4G", "category": "smartphones", "price_eur": 124.0, "spec": "16GB", "attributes_json": {"popularity_score": 53, "condition": "New"}},
+      {"item_id": "phone_nokia_8_3", "name": "Nokia 8.3", "category": "smartphones", "price_eur": 569.0, "spec": "128GB", "attributes_json": {"popularity_score": 53, "condition": "New"}},
+      {"item_id": "phone_nokia_x10_5g", "name": "Nokia X10 5G", "category": "smartphones", "price_eur": 468.72, "spec": "128GB", "attributes_json": {"popularity_score": 53, "condition": "New"}},
+      {"item_id": "phone_vivo_y76_5g", "name": "Vivo Y76 5G", "category": "smartphones", "price_eur": 306.0, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 63, "condition": "New"}},
+      {"item_id": "phone_vivo_x60_pro_5g", "name": "Vivo X60 Pro 5G", "category": "smartphones", "price_eur": 799.0, "spec": "256GB", "attributes_json": {"popularity_score": 56, "condition": "New"}},
+      {"item_id": "phone_doro_8050", "name": "Doro 8050", "category": "smartphones", "price_eur": 179.47, "spec": "16GB", "attributes_json": {"popularity_score": 53, "condition": "New"}},
+      {"item_id": "laptop_lenovo_ideapad_gaming_3_15ach6", "name": "Lenovo IdeaPad Gaming 3 15ACH6", "category": "gaming_laptops", "price_eur": 779.01, "spec": "AMD Ryzen 5 5600H, 16GB RAM, 512GB SSD, GTX 1650", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_asus_rog_strix_g15_g513rc_hn180", "name": "ASUS ROG Strix G15 G513RC-HN180", "category": "gaming_laptops", "price_eur": 909.99, "spec": "AMD Ryzen 7 6800H, 16GB RAM, 512GB SSD, RTX 3050", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_asus_tuf_gaming_f15_fx506lhb_hn359", "name": "ASUS TUF Gaming F15 Fx506lhb-hn359", "category": "gaming_laptops", "price_eur": 719.01, "spec": "Intel Core i5-10300H, 16GB RAM, 512GB SSD, GTX 1650", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_msi_raider_ge68hx_13vf_046xes", "name": "MSI Raider GE68HX 13VF-046XES", "category": "gaming_laptops", "price_eur": 2499.0, "spec": "Intel Core i7-13700HX, 32GB RAM, 1TB SSD, RTX 4060", "attributes_json": {"popularity_score": 91, "condition": "New"}},
+      {"item_id": "laptop_msi_stealth_15_a13vf_019xes", "name": "MSI Stealth 15 A13VF-019XES", "category": "gaming_laptops", "price_eur": 1799.0, "spec": "Intel Core i7-13620H, 16GB RAM, 1TB SSD, RTX 4060", "attributes_json": {"popularity_score": 90, "condition": "New"}},
+      {"item_id": "laptop_razer_blade_15_qhd", "name": "Razer Blade 15 QHD", "category": "gaming_laptops", "price_eur": 2799.99, "spec": "Intel Core i7-12800H, 16GB RAM, 1TB SSD, RTX 3060", "attributes_json": {"popularity_score": 85, "condition": "New"}},
+      {"item_id": "laptop_hp_victus_16_e0100ns", "name": "HP Victus 16-E0100NS", "category": "gaming_laptops", "price_eur": 792.65, "spec": "AMD Ryzen 5 5600H, 8GB RAM, 512GB SSD, GTX 1650", "attributes_json": {"popularity_score": 84, "condition": "New"}},
+      {"item_id": "laptop_hp_omen_16_c0042ns", "name": "HP OMEN 16-C0042NS", "category": "gaming_laptops", "price_eur": 1149.0, "spec": "AMD Ryzen 7 5800H, 16GB RAM, 512GB SSD, RTX 3050", "attributes_json": {"popularity_score": 84, "condition": "New"}},
+      {"item_id": "laptop_msi_katana_gf66_12uc_873xes", "name": "MSI Katana GF66 12UC-873XES", "category": "gaming_laptops", "price_eur": 875.06, "spec": "Intel Core i5-12450H, 16GB RAM, 512GB SSD, RTX 3050", "attributes_json": {"popularity_score": 80, "condition": "New"}},
+      {"item_id": "laptop_gigabyte_aorus_15_9kf_e3es383sd", "name": "Gigabyte AORUS 15 9KF-E3ES383SD", "category": "gaming_laptops", "price_eur": 1086.85, "spec": "Intel Core i5-12500H, 8GB RAM, 512GB SSD, RTX 4060", "attributes_json": {"popularity_score": 76, "condition": "New"}},
+      {"item_id": "laptop_acer_nitro_5_an515_47_r5k6", "name": "Acer Nitro 5 AN515-47-R5K6", "category": "gaming_laptops", "price_eur": 1199.0, "spec": "AMD Ryzen 5 7535HS, 16GB RAM, 1TB SSD, RTX 3050", "attributes_json": {"popularity_score": 74, "condition": "New"}},
+      {"item_id": "laptop_lenovo_legion_5_15ith6h", "name": "Lenovo Legion 5 15ITH6H", "category": "gaming_laptops", "price_eur": 1319.01, "spec": "Intel Core i5-11400H, 16GB RAM, 512GB SSD, RTX 3060", "attributes_json": {"popularity_score": 73, "condition": "New"}},
+      {"item_id": "laptop_acer_predator_triton_300_se_pt316_51s_74lt", "name": "Acer Predator Triton 300 SE PT316-51s-74LT", "category": "gaming_laptops", "price_eur": 1589.01, "spec": "Intel Core i7-12700H, 16GB RAM, 512GB SSD, RTX 3050", "attributes_json": {"popularity_score": 69, "condition": "New"}},
+      {"item_id": "laptop_deep_gaming_nubian_15", "name": "Deep Gaming Nubian 15", "category": "gaming_laptops", "price_eur": 1334.0, "spec": "Intel Core i7-13700H, 32GB RAM, 1TB SSD, RTX 3050", "attributes_json": {"popularity_score": 59, "condition": "New"}},
+      {"item_id": "laptop_asus_rog_strix_scar_16_2023_g634jy_nm014w", "name": "ASUS ROG Strix Scar 16 2023 G634JY-NM014W", "category": "gaming_laptops", "price_eur": 4949.01, "spec": "Intel Core i9-13980HX, 32GB RAM, 2TB SSD, RTX 4090", "attributes_json": {"popularity_score": 52, "condition": "New"}},
+      {"item_id": "laptop_asus_vivobook_13_slate_oled_t3300ka_lq069w", "name": "ASUS VivoBook 13 Slate OLED T3300KA-LQ069W", "category": "premium_laptops", "price_eur": 749.99, "spec": "Intel Pentium Silver N6000, 8GB RAM, 128GB SSD", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_apple_macbook_air_2023", "name": "Apple MacBook Air 2023", "category": "premium_laptops", "price_eur": 1599.0, "spec": "Apple M2, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_msi_creator_m16_b12udx_688xes", "name": "MSI Creator M16 B12UDX-688XES", "category": "premium_laptops", "price_eur": 1399.0, "spec": "Intel Core i7-12650H, 16GB RAM, 512GB SSD, RTX 3050", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_asus_zenbook_14_um3402ya_kp286", "name": "ASUS ZenBook 14 UM3402YA-KP286", "category": "premium_laptops", "price_eur": 755.48, "spec": "AMD Ryzen 5 5625U, 8GB RAM, 512GB SSD", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_microsoft_surface_laptop_go", "name": "Microsoft Surface Laptop Go", "category": "premium_laptops", "price_eur": 686.88, "spec": "Intel Core i5-1035G1, 4GB RAM, 64GB eMMC", "attributes_json": {"popularity_score": 97, "condition": "New"}},
+      {"item_id": "laptop_msi_prestige_14h_b12ucx_414xes", "name": "MSI Prestige 14H B12UCX-414XES", "category": "premium_laptops", "price_eur": 999.0, "spec": "Intel Core i5-12450H, 16GB RAM, 512GB SSD, RTX 2050", "attributes_json": {"popularity_score": 95, "condition": "New"}},
+      {"item_id": "laptop_lg_gram_14zb90q", "name": "LG Gram 14ZB90Q", "category": "premium_laptops", "price_eur": 1149.0, "spec": "Intel Core i5-1240P, 16GB RAM, 512GB SSD", "attributes_json": {"popularity_score": 83, "condition": "New"}},
+      {"item_id": "laptop_microsoft_surface_pro_9", "name": "Microsoft Surface Pro 9", "category": "premium_laptops", "price_eur": 1293.93, "spec": "Intel Evo Core i5-1235U, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 81, "condition": "New"}},
+      {"item_id": "laptop_lenovo_yoga_slim_7_pro_14arh7", "name": "Lenovo Yoga Slim 7 Pro 14ARH7", "category": "premium_laptops", "price_eur": 979.0, "spec": "AMD Ryzen 5 6600HS, 8GB RAM, 512GB SSD", "attributes_json": {"popularity_score": 75, "condition": "New"}},
+      {"item_id": "laptop_gigabyte_aero_14_oled_bmf_72esbb4sh", "name": "Gigabyte AERO 14 OLED BMF-72ESBB4SH", "category": "premium_laptops", "price_eur": 1969.01, "spec": "Intel Core i7-13700H, 16GB RAM, 1TB SSD, RTX 4050", "attributes_json": {"popularity_score": 70, "condition": "New"}},
+      {"item_id": "laptop_samsung_galaxy_book2", "name": "Samsung Galaxy Book2", "category": "premium_laptops", "price_eur": 849.0, "spec": "Intel Core i5-1235U, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 68, "condition": "New"}},
+      {"item_id": "laptop_microsoft_surface_go_3", "name": "Microsoft Surface GO 3", "category": "premium_laptops", "price_eur": 599.01, "spec": "Intel Pentium Gold 6500Y, 8GB RAM, 128GB SSD", "attributes_json": {"popularity_score": 58, "condition": "New"}},
+      {"item_id": "laptop_dell_xps_15_9520", "name": "Dell XPS 15 9520", "category": "premium_laptops", "price_eur": 2319.0, "spec": "Intel Core i7-12700H, 16GB RAM, 1TB SSD, RTX 3050", "attributes_json": {"popularity_score": 54, "condition": "New"}},
+      {"item_id": "laptop_hp_envy_x360_13_bf0003ns", "name": "HP ENVY x360 13-bf0003ns", "category": "premium_laptops", "price_eur": 1399.0, "spec": "Intel Evo Core i7-1250U, 16GB RAM, 1TB SSD", "attributes_json": {"popularity_score": 53, "condition": "New"}},
+      {"item_id": "laptop_hp_15s_eq1134ns", "name": "HP 15S-EQ1134NS", "category": "everyday_laptops", "price_eur": 301.01, "spec": "AMD 3020e, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_lenovo_ideapad_1_15ada7", "name": "Lenovo IdeaPad 1 15ADA7", "category": "everyday_laptops", "price_eur": 321.99, "spec": "AMD 3020e, 4GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_asus_vivobook_flip_14_tp401ma_ec444ws", "name": "ASUS VivoBook Flip 14 TP401MA-EC444WS", "category": "everyday_laptops", "price_eur": 345.0, "spec": "Intel Celeron N4020, 4GB RAM, 128GB eMMC", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_lenovo_v15_igl", "name": "Lenovo V15 IGL", "category": "everyday_laptops", "price_eur": 279.0, "spec": "Intel Celeron N4020, 4GB RAM, 128GB SSD", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_hp_chromebook_11_g9", "name": "HP Chromebook 11 G9", "category": "everyday_laptops", "price_eur": 230.14, "spec": "Intel Celeron N4500, 4GB RAM, 32GB flash", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_asus_chromebook_c204ma_gj0342", "name": "ASUS Chromebook C204MA-GJ0342", "category": "everyday_laptops", "price_eur": 239.25, "spec": "Intel Celeron N4020, 4GB RAM, 32GB eMMC", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_lenovo_100e_chromebook_gen_3", "name": "Lenovo 100e Chromebook Gen 3", "category": "everyday_laptops", "price_eur": 327.0, "spec": "AMD 3015Ce, 4GB RAM, 32GB eMMC", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_acer_chromebook_314_cb314_1h_c07w", "name": "Acer Chromebook 314 CB314-1H-C07W", "category": "everyday_laptops", "price_eur": 346.99, "spec": "Intel Celeron N4020, 8GB RAM, 64GB eMMC", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_samsung_chromebook_4_xe310xba_k01es", "name": "Samsung Chromebook 4 XE310XBA-K01ES", "category": "everyday_laptops", "price_eur": 365.9, "spec": "Intel Celeron N4000, 4GB RAM, 32GB eMMC", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_asus_p1512cea_ej0213x", "name": "ASUS P1512CEA-EJ0213X", "category": "everyday_laptops", "price_eur": 609.0, "spec": "Intel Core i5-1135G7, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_msi_modern_15_b12m_430xes", "name": "MSI Modern 15 B12M-430XES", "category": "everyday_laptops", "price_eur": 499.0, "spec": "Intel Core i3-1215U, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 97, "condition": "New"}},
+      {"item_id": "laptop_acer_aspire_3_a315_34", "name": "Acer Aspire 3 A315-34", "category": "everyday_laptops", "price_eur": 306.99, "spec": "Intel Celeron N4020, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 92, "condition": "New"}},
+      {"item_id": "laptop_hp_250_g9", "name": "HP 250 G9", "category": "everyday_laptops", "price_eur": 357.64, "spec": "Intel Celeron N4500, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 91, "condition": "New"}},
+      {"item_id": "laptop_acer_extensa_15_ex215_22", "name": "Acer Extensa 15 EX215-22", "category": "everyday_laptops", "price_eur": 371.0, "spec": "AMD Ryzen 3 3250U, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 79, "condition": "New"}},
+      {"item_id": "laptop_lenovo_thinkpad_l13_gen_2", "name": "Lenovo ThinkPad L13 Gen 2", "category": "business_laptops", "price_eur": 799.0, "spec": "AMD Ryzen 5 Pro 5650U, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_asus_expertbook_b1_b1502cba_ej0433", "name": "ASUS ExpertBook B1 B1502CBA-EJ0433", "category": "business_laptops", "price_eur": 445.99, "spec": "Intel Core i3-1215U, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_lenovo_thinkbook_14", "name": "Lenovo ThinkBook 14", "category": "business_laptops", "price_eur": 699.0, "spec": "Intel Core i5-1135G7, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 99, "condition": "New"}},
+      {"item_id": "laptop_dell_latitude_3520", "name": "Dell Latitude 3520", "category": "business_laptops", "price_eur": 789.0, "spec": "Intel Core i5-1135G7, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 97, "condition": "New"}},
+      {"item_id": "laptop_hp_elitebook_840_g8", "name": "HP EliteBook 840 G8", "category": "business_laptops", "price_eur": 750.73, "spec": "Intel Core i5-1135G7, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 94, "condition": "New"}},
+      {"item_id": "laptop_dell_vostro_3510", "name": "Dell Vostro 3510", "category": "business_laptops", "price_eur": 599.0, "spec": "Intel Core i3-1115G4, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 84, "condition": "New"}},
+      {"item_id": "laptop_hp_probook_650_g8", "name": "HP ProBook 650 G8", "category": "business_laptops", "price_eur": 709.0, "spec": "Intel Core i5-1135G7, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 83, "condition": "New"}},
+      {"item_id": "laptop_acer_travelmate_p2_tmp214_52_p5sm", "name": "Acer TravelMate P2 TMP214-52-P5SM", "category": "business_laptops", "price_eur": 474.99, "spec": "Intel Pentium Gold 6405U, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 62, "condition": "New"}},
+      {"item_id": "laptop_hp_15s_fq2095ns", "name": "HP 15S-fq2095ns", "category": "refurbished_laptops", "price_eur": 334.54, "spec": "Intel Core i3-1115G4, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 99, "condition": "Refurbished"}},
+      {"item_id": "laptop_lenovo_thinkpad_l450", "name": "Lenovo ThinkPad L450", "category": "refurbished_laptops", "price_eur": 239.0, "spec": "Intel Core i5-4300U, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 99, "condition": "Refurbished"}},
+      {"item_id": "laptop_lenovo_ideapad_3_15ada05", "name": "Lenovo IdeaPad 3 15ADA05", "category": "refurbished_laptops", "price_eur": 299.0, "spec": "AMD 3020e, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 99, "condition": "Refurbished"}},
+      {"item_id": "laptop_asus_vivobook_15_f515ja_ej066", "name": "ASUS VivoBook 15 F515JA-EJ066", "category": "refurbished_laptops", "price_eur": 363.83, "spec": "Intel Core i3-1005G1, 8GB RAM, 256GB SSD", "attributes_json": {"popularity_score": 99, "condition": "Refurbished"}},
+      {"item_id": "laptop_asus_rog_zephyrus_g14_ga401ii_he004", "name": "ASUS ROG Zephyrus G14 GA401II-HE004", "category": "refurbished_laptops", "price_eur": 771.79, "spec": "AMD Ryzen 7 4800HS, 16GB RAM, 1TB SSD, GTX 1650", "attributes_json": {"popularity_score": 99, "condition": "Refurbished"}},
+      {"item_id": "laptop_apple_macbook_pro", "name": "Apple MacBook Pro", "category": "refurbished_laptops", "price_eur": 604.0, "spec": "Intel Core i5, 8GB RAM, 128GB flash", "attributes_json": {"popularity_score": 99, "condition": "Refurbished"}}
     ];
     
     function loadInteractiveMenu() {
@@ -536,27 +531,19 @@
       
       // Create category display names and icons
       const categoryInfo = {
-        'viennoiserie': { name: 'Viennoiserie', icon: '🥐', description: 'Freshly laminated butter croissants and pastries' },
-        'breads':       { name: 'Artisan Breads', icon: '🍞', description: 'Sourdough, brioche, and rye — baked fresh every morning' },
-        'patisserie':   { name: 'Patisserie', icon: '🎂', description: 'Éclairs, tarts, macarons, and fine French pastries' },
-        'cakes':        { name: 'Cakes', icon: '🍰', description: 'Celebration cakes and signature slices' },
-        'savoury':      { name: 'Savoury', icon: '🥗', description: 'Quiches and savoury pastries' },
-        'coffee':       { name: 'Coffee', icon: '☕', description: 'Specialty espresso drinks, flat whites, and filter coffee' },
-        'hot_drinks':   { name: 'Hot Drinks', icon: '🍵', description: 'Hot chocolate, chai latte, and matcha' },
-        'breakfast':    { name: 'Breakfast', icon: '🍳', description: 'Served daily from 7am — classics, Benedicts, and bowls' },
-        'eggs':         { name: 'Egg Dishes', icon: '🥚', description: 'Organic scrambled, fried, and omelettes' },
-        'salads':       { name: 'Salads', icon: '🥗', description: 'Fresh mixed salads, Niçoise, Greek, and goat cheese' },
-        'small_plates': { name: 'Small Plates', icon: '🍴', description: 'Tartes flambées, quiches, and bites — from 4pm' },
-        'tea':          { name: 'Tea', icon: '🫖', description: 'Ronnefeldt blends and freshly brewed infusions' },
-        'cold_drinks':  { name: 'Cold Drinks', icon: '🥤', description: 'Juices, spritzers, lemonades, and sparkling water' },
-        'desserts':     { name: 'Desserts & Ice Cream', icon: '🍨', description: 'Sundaes, milkshakes, iced coffee, and scoops' }
+        'smartphones':         { name: 'Smartphones', icon: '📱', description: 'Apple, Samsung, Google, Xiaomi and more — priced per storage size' },
+        'premium_laptops':     { name: 'Premium Laptops', icon: '💻', description: 'MacBook, Surface, XPS, Zenbook and other thin-and-light models' },
+        'gaming_laptops':      { name: 'Gaming Laptops', icon: '🎮', description: 'Dedicated NVIDIA GeForce graphics for gaming and creative work' },
+        'everyday_laptops':    { name: 'Everyday Laptops & Chromebooks', icon: '🖥️', description: 'Affordable laptops for home, school and browsing' },
+        'business_laptops':    { name: 'Business Laptops', icon: '💼', description: 'ThinkPad, EliteBook, Latitude and other models built for work' },
+        'refurbished_laptops': { name: 'Refurbished Laptops', icon: '♻️', description: 'Tested, reset and sold with a 12-month warranty' }
       };
       
       // Clear loading message
       menuContainer.innerHTML = '';
       
-      // Create expandable categories
-      Object.keys(categories).forEach(categoryKey => {
+      // Create expandable categories, in the order of categoryInfo
+      Object.keys(categories).sort((a, b) => Object.keys(categoryInfo).indexOf(a) - Object.keys(categoryInfo).indexOf(b)).forEach(categoryKey => {
         const category = categoryInfo[categoryKey] || { name: categoryKey, icon: '🛒', description: '' };
         const items = categories[categoryKey];
         
@@ -582,9 +569,9 @@
                   <span class="popularity-badge">${item.attributes_json.popularity_score}% ⭐</span>
                 </div>
                 <div class="item-details">
-                  ${item.attributes_json.caffeine_mg ? `<span class="detail-badge caffeine">☕ ${item.attributes_json.caffeine_mg}mg caffeine</span>` : ''}
-                  ${item.attributes_json.is_dairy_free ? '<span class="detail-badge dairy-free">🥛 Dairy Free</span>' : ''}
-                  ${item.attributes_json.is_sugar_free ? '<span class="detail-badge sugar-free">🍯 Sugar Free</span>' : ''}
+                  <span class="detail-badge">from €${item.price_eur.toFixed(2)}</span>
+                  ${item.spec ? `<span class="detail-badge">${item.spec}</span>` : ''}
+                  ${item.attributes_json.condition === 'Refurbished' ? '<span class="detail-badge">♻️ Refurbished</span>' : ''}
                 </div>
               </div>
             `).join('')}
@@ -594,7 +581,7 @@
         menuContainer.appendChild(categoryElement);
       });
       
-      console.log('Interactive menu loaded successfully');
+      console.log('Product catalog loaded successfully');
     }
     
     function toggleCategory(categoryKey) {
@@ -616,7 +603,7 @@
       // Add the selected item to the chat
       const chatInput = document.getElementById('chatbot-input');
       if (chatInput) {
-        chatInput.value = `I'd like to order a ${itemName}`;
+        chatInput.value = `Tell me more about the ${itemName}`;
         chatInput.focus();
       }
       

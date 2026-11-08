@@ -1,0 +1,11 @@
+{
+    "observabilityType": "cloudwatch",
+    "cloudwatch": {
+        "region": "eu-central-1",
+        "dashboardUrl": "https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#gen-ai-observability",
+        "logsUrl": "https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#logsV2:log-groups$3FlogGroupNameFilter$3D$252Faws$252Fbedrock-agentcore$252Fruntimes",
+        "logGroupPrefix": "/aws/bedrock-agentcore/runtimes",
+        "metricsNamespace": "AWS/Bedrock-AgentCore"
+    },
+    "enabled": true
+}

@@ -2,90 +2,91 @@ import streamlit as st
 
 st.set_page_config(layout="wide")
 
-st.title("Generative AI Value Model: Specialty Bakeries & Pastry Cafés — Multi-Agent Use Cases")
+st.title("Generative AI Value Model: Cyberport Tech Assistant — Multi-Agent Use Cases")
+st.caption("Illustrative default assumptions for a mid-size online-first retailer, not Cyberport figures. Replace them with the client's own data.")
 
 with st.sidebar:
     st.header("Controls & Assumptions")
     st.markdown("**➡️ Select a Use Case:**")
     use_case = st.selectbox("\n", [
-        "Custom Cake Orders & Production Planning",
-        "Customer Loyalty & Pastry Subscriptions",
-        "Ingredient & Supply Chain Management"
+        "Pre-sales Product Advice & Click & Collect",
+        "After-sales: Order Status, Returns & Warranty",
+        "Store Stock Visibility & Lost-sale Prevention"
     ])
 
     st.sidebar.markdown("---")
 
-    if use_case == "Custom Cake Orders & Production Planning":
+    if use_case == "Pre-sales Product Advice & Click & Collect":
         col1, col2 = st.sidebar.columns(2)
         with col1:
-            queries_per_day = st.number_input("Custom orders/day", value=120, min_value=1)
-            agent_time = st.number_input("Human time (mins)", value=25.0, min_value=0.1)
-            ai_time = st.number_input("AI time (mins)", value=4.0, min_value=0.1)
+            queries_per_day = st.number_input("Advice contacts/day", value=1500, min_value=1)
+            agent_time = st.number_input("Human time (mins)", value=8.0, min_value=0.1)
+            ai_time = st.number_input("AI time (mins)", value=1.5, min_value=0.1)
         with col2:
-            agent_cost = st.number_input("Staff cost/hr (€)", value=22.0, min_value=0.0)
-            ai_cost = st.number_input("AI cost/order (€)", value=0.05, min_value=0.0)
-            ai_resolution = st.slider("AI handles (%)", 0, 100, 70)
-
-        st.sidebar.markdown("---")
-        col3, col4 = st.sidebar.columns(2)
-        with col3:
-            csat_improve = st.slider("CSAT improve (%)", 0, 20, 12)
-            conversion_lift = st.slider("Conversion lift (%)", 0, 30, 18)
-        with col4:
-            personalization_uplift = st.slider("Personalisation (%)", 0, 10, 5)
-            response_speed_uplift = st.slider("Response speed (%)", 0, 10, 4)
-        recommendation_accuracy = st.slider("Recommendation accuracy (%)", 0, 10, 4)
-
-    elif use_case == "Customer Loyalty & Pastry Subscriptions":
-        col1, col2 = st.sidebar.columns(2)
-        with col1:
-            tickets_per_day = st.number_input("Interactions/day", value=800, min_value=1)
-            agent_time = st.number_input("Human time (mins)", value=10.0, min_value=0.1)
-            ai_time = st.number_input("AI time (mins)", value=2.0, min_value=0.1)
-        with col2:
-            agent_cost = st.number_input("Staff cost/hr (€)", value=20.0, min_value=0.0)
-            ai_cost = st.number_input("AI cost/interaction (€)", value=0.03, min_value=0.0)
-            ai_resolution = st.slider("AI handles (%)", 0, 100, 75)
+            agent_cost = st.number_input("Staff cost/hr (€)", value=30.0, min_value=0.0)
+            ai_cost = st.number_input("AI cost/contact (€)", value=0.05, min_value=0.0)
+            ai_resolution = st.slider("AI handles (%)", 0, 100, 40)
 
         st.sidebar.markdown("---")
         col3, col4 = st.sidebar.columns(2)
         with col3:
             csat_improve = st.slider("CSAT improve (%)", 0, 20, 10)
-            conversion_lift = st.slider("Subscription conversion (%)", 0, 30, 12)
+            conversion_lift = st.slider("Conversion lift (%)", 0, 30, 8)
         with col4:
             personalization_uplift = st.slider("Personalisation (%)", 0, 10, 5)
-            response_speed_uplift = st.slider("Response speed (%)", 0, 10, 4)
-        recommendation_accuracy = st.slider("Recommendation accuracy (%)", 0, 10, 3)
+            response_speed_uplift = st.slider("Response speed (%)", 0, 10, 6)
+        recommendation_accuracy = st.slider("Recommendation accuracy (%)", 0, 10, 5)
 
-    elif use_case == "Ingredient & Supply Chain Management":
+    elif use_case == "After-sales: Order Status, Returns & Warranty":
         col1, col2 = st.sidebar.columns(2)
         with col1:
-            inventory_checks_per_month = st.number_input("Checks/month", value=300, min_value=1)
-            agent_time = st.number_input("Human time (mins)", value=35.0, min_value=0.1)
-            ai_time = st.number_input("AI time (mins)", value=6.0, min_value=0.1)
+            tickets_per_day = st.number_input("Service contacts/day", value=2500, min_value=1)
+            agent_time = st.number_input("Human time (mins)", value=6.0, min_value=0.1)
+            ai_time = st.number_input("AI time (mins)", value=1.0, min_value=0.1)
         with col2:
             agent_cost = st.number_input("Staff cost/hr (€)", value=28.0, min_value=0.0)
-            ai_cost = st.number_input("AI cost/check (€)", value=0.08, min_value=0.0)
-            ai_resolution = st.slider("AI automates (%)", 0, 100, 65)
+            ai_cost = st.number_input("AI cost/contact (€)", value=0.03, min_value=0.0)
+            ai_resolution = st.slider("AI handles (%)", 0, 100, 55)
 
         st.sidebar.markdown("---")
         col3, col4 = st.sidebar.columns(2)
         with col3:
-            csat_improve = st.slider("Quality improve (%)", 0, 10, 4)
-            conversion_lift = st.slider("Waste reduction (%)", 0, 30, 22)
+            csat_improve = st.slider("CSAT improve (%)", 0, 20, 12)
+            conversion_lift = st.slider("Return-rate reduction (%)", 0, 30, 10)
+        with col4:
+            personalization_uplift = st.slider("Personalisation (%)", 0, 10, 5)
+            response_speed_uplift = st.slider("Response speed (%)", 0, 10, 8)
+        recommendation_accuracy = st.slider("Answer accuracy (%)", 0, 10, 4)
+
+    elif use_case == "Store Stock Visibility & Lost-sale Prevention":
+        col1, col2 = st.sidebar.columns(2)
+        with col1:
+            inventory_checks_per_month = st.number_input("Stock enquiries/month", value=12000, min_value=1)
+            agent_time = st.number_input("Human time (mins)", value=4.0, min_value=0.1)
+            ai_time = st.number_input("AI time (mins)", value=0.5, min_value=0.1)
+        with col2:
+            agent_cost = st.number_input("Staff cost/hr (€)", value=25.0, min_value=0.0)
+            ai_cost = st.number_input("AI cost/enquiry (€)", value=0.02, min_value=0.0)
+            ai_resolution = st.slider("AI automates (%)", 0, 100, 70)
+
+        st.sidebar.markdown("---")
+        col3, col4 = st.sidebar.columns(2)
+        with col3:
+            csat_improve = st.slider("CSAT improve (%)", 0, 10, 4)
+            conversion_lift = st.slider("Lost-sale reduction (%)", 0, 30, 6)
         with col4:
             personalization_uplift = st.slider("Personalisation (%)", 0, 10, 2)
             response_speed_uplift = st.slider("Response speed (%)", 0, 10, 5)
-        recommendation_accuracy = st.slider("Forecast accuracy (%)", 0, 10, 4)
+        recommendation_accuracy = st.slider("Stock answer accuracy (%)", 0, 10, 4)
 
 # Business logic calculations
-if use_case == "Custom Cake Orders & Production Planning":
+if use_case == "Pre-sales Product Advice & Click & Collect":
     agent_hours = (queries_per_day * agent_time) / 60
     agent_cost_period = agent_hours * agent_cost
     ai_cost_period = queries_per_day * ai_cost
     savings = (agent_cost_period - ai_cost_period) * (ai_resolution / 100)
     annual_savings = savings * 365
-elif use_case == "Customer Loyalty & Pastry Subscriptions":
+elif use_case == "After-sales: Order Status, Returns & Warranty":
     agent_hours = (tickets_per_day * agent_time) / 60
     agent_cost_period = agent_hours * agent_cost
     ai_cost_period = tickets_per_day * ai_cost
@@ -101,23 +102,23 @@ else:
 total_cx_gain = csat_improve + personalization_uplift + response_speed_uplift + recommendation_accuracy
 
 # Main panel
-if use_case == "Custom Cake Orders & Production Planning":
-    st.markdown("### Use Case: Custom Cake Orders & Production Planning")
+if use_case == "Pre-sales Product Advice & Click & Collect":
+    st.markdown("### Use Case: Pre-sales Product Advice & Click & Collect")
     st.write(
-        "AI agents handle order intake, specification capture, scheduling, and customer updates — "
-        "freeing pastry chefs to focus on crafting exceptional bakes."
+        "AI agents compare specs, recommend the right smartphone or laptop, quote exact prices and "
+        "place click & collect orders, so store and hotline staff can focus on complex advice."
     )
-elif use_case == "Customer Loyalty & Pastry Subscriptions":
-    st.markdown("### Use Case: Customer Loyalty & Pastry Subscriptions")
+elif use_case == "After-sales: Order Status, Returns & Warranty":
+    st.markdown("### Use Case: After-sales: Order Status, Returns & Warranty")
     st.write(
-        "AI-driven loyalty and subscription management increases repeat visits, "
-        "personalises recommendations, and resolves customer queries consistently."
+        "AI agents answer order status, delivery, return, warranty and financing questions 24/7 "
+        "from live order data and policy documents, and hand complex cases to the hotline."
     )
 else:
-    st.markdown("### Use Case: Ingredient & Supply Chain Management")
+    st.markdown("### Use Case: Store Stock Visibility & Lost-sale Prevention")
     st.write(
-        "AI-powered inventory and supply chain management reduces ingredient waste, "
-        "prevents stockouts of key items, and optimises daily production planning."
+        "AI agents tell customers which store has a product in stock and when it is open, "
+        "turning online browsing into store visits and reducing lost sales."
     )
 
 col1, col2, col3 = st.columns(3)
@@ -150,10 +151,10 @@ with col3:
         st.metric("Savings (Period)", f"€{savings:,.0f}")
         st.metric("Annual Savings", f"€{annual_savings:,.0f}")
     with metric_cols6:
-        if use_case == "Ingredient & Supply Chain Management":
-            st.metric("Waste Reduction", f"{conversion_lift}%")
-        elif use_case == "Customer Loyalty & Pastry Subscriptions":
-            st.metric("Subscription Conv.", f"{conversion_lift}%")
+        if use_case == "Store Stock Visibility & Lost-sale Prevention":
+            st.metric("Lost-sale Reduction", f"{conversion_lift}%")
+        elif use_case == "After-sales: Order Status, Returns & Warranty":
+            st.metric("Return-rate Reduction", f"{conversion_lift}%")
         else:
             st.metric("Conversion Lift", f"{conversion_lift}%")
         time_saved = ((agent_time - ai_time) * ai_resolution / 100)

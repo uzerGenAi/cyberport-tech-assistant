@@ -1,67 +1,49 @@
-ORDER POLICIES — Specialty Bakeries & Pastry Cafés
+**Orders, Delivery and Returns KB — Cyberport Tech Assistant**
 
-CANCELLATION POLICY:
-You can cancel your order within 5 minutes of placing it through the app or at the counter. If the order has not yet entered preparation, it will be cancelled without charge. Once baking or assembly has begun, cancellation may not be possible. For custom celebration cakes, cancellations must be made at least 48 hours before the collection date for a full refund. Cancellations within 48 hours of collection will forfeit the deposit.
+1. **How do I check the status of my order?**
+   Give the Tech Assistant your order ID and the customer ID or name used when the order was placed. For your privacy, both are needed before any order details are shared.
 
-WRONG ITEM RECEIVED:
-If you received the wrong item, let us know what you ordered and what you got. We will verify and offer one of the following: a replacement, a refund for the incorrect item, or a credit for your next visit. Please report the issue promptly, ideally on the day of purchase.
+2. **What do the order statuses mean?**
+   PROCESSING: we have received your order and are preparing it. READY_FOR_PICKUP: your click & collect order is waiting for you in the store. SHIPPED: your order is on its way. DELIVERED: your home delivery has arrived. COLLECTED: you have picked up your click & collect order. CANCELLED: the order was cancelled and any payment refunded.
 
-MISSING ITEM IN ORDER:
-If something is missing from your order, please report it promptly. Once confirmed, we will refund the missing item or provide a store credit. We take fulfilment accuracy seriously and log all reported issues.
+3. **How does click & collect work?**
+   Order online or through the Tech Assistant and choose a store. When your order shows READY_FOR_PICKUP, collect it at the click & collect counter. Bring your order ID and photo ID. Orders are held for 5 days. After that they are cancelled and refunded.
 
-STALE OR POOR-QUALITY ITEMS:
-If your baked goods arrive stale, over-baked, or not as expected, please contact us. We may offer a refund, store credit, or a voucher for a future order. Photos of the item can help us resolve the issue faster.
+4. **What is a pickup station?**
+   Selected stores have a 24/7 pickup station: a locker outside the store. If your store has one, you receive a code by email or SMS when your order is ready and can collect it at any time, including when the store is closed.
 
-CUSTOMISATION NOT HONOURED:
-If your customisation — such as a dairy-free milk request, a specific cake decoration, or a dietary substitution — was not followed, please inform us. Once verified, you will receive a refund or credit. If the issue involved an allergen concern, we will escalate it immediately to our food safety team.
+5. **How long does home delivery take?**
+   Items in stock are usually delivered within 1 to 3 working days in Germany and 2 to 4 working days in Austria. You receive a tracking link as soon as the order is shipped.
 
-ORDER DELAYED:
-If your order is delayed beyond the quoted collection or preparation time, we will inform you of any known issues. For delays over 15 minutes, we may offer a voucher or partial refund depending on the situation.
+6. **Can I cancel my order?**
+   Yes. You can cancel free of charge until the order is SHIPPED or READY_FOR_PICKUP. After that, collect or receive the order and use your right of withdrawal or our return policy instead.
 
-ORDER NOT RECEIVED / NOT READY FOR COLLECTION:
-If your order is marked as ready but is not available at the collection point, please speak to a team member or contact support. If confirmed lost or not prepared, we will issue a full refund or priority replacement.
+7. **What is the 14-day right of withdrawal?**
+   For orders placed online, EU law gives you the right to withdraw from the purchase within 14 days of receiving the goods, without giving a reason. You may test the product as you would in a store. If the product has been used beyond that, its value may be reduced.
 
-PAYMENT ISSUES:
-If you were charged twice or your payment failed, contact us with the transaction reference. Most billing issues are resolved within 3–5 business days. You will receive a reference number to track the resolution.
+8. **Can I return a product I bought in a store?**
+   EU law does not give a withdrawal right for purchases made in a store. As a goodwill policy, we accept returns of unopened products in their original packaging within 14 days of purchase with the receipt. Opened products are exchanged or refunded only if they are faulty.
 
-REORDERING:
-You can reorder a previous item through your order history in the app. If a specific item is no longer available or is out of season, we will inform you and suggest available alternatives.
+9. **How do I return an online order?**
+   Return it in any of our stores, or request a free return label through your account. Include all accessories and the original packaging if possible. Refunds are made to the original payment method once the return has been checked.
 
-FEEDBACK:
-We value your feedback on product quality, service, and your overall experience. Whether you loved a new seasonal pastry or have suggestions for improvement, we listen. Occasionally, we may thank you with a store voucher for sharing your thoughts.
+10. **What should I do before returning or repairing a device?**
+    Back up your data, sign out of all accounts and remove device locks such as Apple Find My or the Google account lock, then reset the device to factory settings. We cannot process returns or repairs for devices that are still locked to an account.
 
-FRAUD PREVENTION:
-If we notice unusual activity such as repeated refund requests, we may contact you for verification. Our goal is to protect your account and maintain trust across our bakery community.
+11. **My delivery arrived damaged or incomplete. What should I do?**
+    Report visible transport damage or missing items within 48 hours of delivery, with photos if possible. We will arrange a replacement or a refund.
 
-ESCALATION:
-If you are not satisfied with the resolution provided, you may request to escalate your concern. A senior team member will review the full case and work with you to reach a fair outcome.
+12. **What warranty do I get?**
+    Every new product comes with the 2-year legal guarantee under EU law. Many manufacturers add their own guarantee on top, and the terms vary by brand. Refurbished laptops come with a 12-month warranty.
 
-ALLERGY CONCERNS:
-If you have a food allergy or intolerance, please declare it clearly when ordering. Our bakeries handle gluten, dairy, eggs, nuts, and soy in the same production areas and we cannot guarantee a completely allergen-free environment. If your item was not prepared according to your allergen request, stop consumption immediately and report it to us. We take allergen mishandling extremely seriously and will issue a full refund or replacement and escalate to our food safety team.
+13. **What is the difference between the legal guarantee and a manufacturer guarantee?**
+    The legal guarantee is your right against the seller: if a product is faulty at delivery, we must repair or replace it, or refund it if repair or replacement fails. A manufacturer guarantee is a voluntary extra promise from the brand, often with its own claim process.
 
-STORE EXPERIENCE ISSUES:
-If you had an issue at a physical location — such as staff conduct, hygiene concerns, or long wait times — please share the store location and time of your visit. We will route your feedback to the local bakery manager and follow up as needed.
+14. **How do I make a warranty claim?**
+    Bring the product and your receipt or order ID to any store repair desk, or contact customer service. We check the device and arrange a repair, replacement or refund.
 
-ACCOUNT OR APP PROBLEMS:
-If you experience difficulty logging in, updating your profile, or encounter app glitches, please contact us. You may also try reinstalling the app or checking for updates. We will assist with account restoration or report technical bugs to our team.
+15. **Can I buy extra protection for my device?**
+    Yes. Device protection plans can be added when you buy a smartphone or laptop. They extend cover beyond the legal guarantee and can include accidental damage such as a broken screen. Terms are explained at checkout.
 
-GIFT CARD ISSUES:
-If your gift card did not apply correctly or the balance appears incorrect, provide us with the card number or transaction reference. We will review and adjust the balance if needed.
-
-PROMO CODE NOT WORKING:
-If a promotional code fails at checkout, please verify the expiry date, eligible items, and minimum spend requirements. If the code is valid and still not working, contact us and we will apply the discount manually or issue store credit.
-
-ORDER MODIFICATIONS:
-If you need to modify an order after placing it — for example, changing a pastry selection, adjusting a cake size, or updating a customisation — please contact us immediately. If preparation has not yet begun, we will do our best to accommodate the request.
-
-RECEIPT OR INVOICE REQUESTS:
-You can request a receipt or invoice through the app or by contacting us with your order ID. We will email it to you or make it available in your order history. Invoices for business catering orders are available on request.
-
-UNAVAILABLE OR SOLD-OUT ITEMS:
-Fresh-baked items are produced in limited quantities each day. If an item is sold out after you place your order, we will inform you as soon as possible and offer a suitable alternative or a refund for that item.
-
-ORDER HISTORY ACCESS:
-You can view your full order history in the app. This allows you to track past purchases, reorder favourites, review collection times, or download receipts.
-
-ADVANCE ORDERS AND CATERING:
-Large catering orders and custom celebration cakes require advance notice — typically 3 or more days. Catering orders must be prepaid in full at the time of booking. Please contact us to discuss your requirements and confirm availability.
+16. **Can I change the delivery address after ordering?**
+    You can change the address until the order is SHIPPED. Contact customer service with your order ID.

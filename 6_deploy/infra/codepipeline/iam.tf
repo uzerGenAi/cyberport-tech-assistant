@@ -30,7 +30,7 @@ data "aws_iam_policy_document" "codebuild_trust" {
 
 resource "aws_iam_role" "codebuild_deploy" {
   name               = var.codebuild_role_name
-  description        = "Role CodeBuild assumes to validate and deploy the SPBC Pastry Concierge."
+  description        = "Role CodeBuild assumes to validate and deploy the SPBC Tech Assistant."
   assume_role_policy = data.aws_iam_policy_document.codebuild_trust.json
 }
 
@@ -50,7 +50,7 @@ data "aws_iam_policy_document" "codepipeline_trust" {
 
 resource "aws_iam_role" "codepipeline" {
   name               = var.codepipeline_role_name
-  description        = "Role CodePipeline assumes to orchestrate the SPBC Pastry Concierge pipeline."
+  description        = "Role CodePipeline assumes to orchestrate the SPBC Tech Assistant pipeline."
   assume_role_policy = data.aws_iam_policy_document.codepipeline_trust.json
 }
 
@@ -145,9 +145,9 @@ data "aws_iam_policy_document" "permissions" {
   }
 
   statement {
-    sid       = "ContainersAndClusters"
+    sid       = "ContainerBuilds"
     effect    = "Allow"
-    actions   = ["ecr:*", "eks:*", "codebuild:*", "cloudformation:*"]
+    actions   = ["ecr:*", "codebuild:*", "cloudformation:*"]
     resources = ["*"]
   }
 

@@ -14,7 +14,7 @@ resource "aws_cloudwatch_log_group" "ci" {
 
 resource "aws_codebuild_project" "deploy" {
   name          = var.deploy_project_name
-  description   = "Runs the SPBC Pastry Concierge deploy buildspec."
+  description   = "Runs the SPBC Tech Assistant deploy buildspec."
   service_role  = aws_iam_role.codebuild_deploy.arn
   build_timeout = 120
 
@@ -52,11 +52,6 @@ resource "aws_codebuild_project" "deploy" {
       type  = "PLAINTEXT"
     }
 
-    environment_variable {
-      name  = "TOGGLE_DEPLOY_EKS"
-      value = var.toggle_deploy_eks ? "true" : "false"
-      type  = "PLAINTEXT"
-    }
 
     environment_variable {
       name  = "TOGGLE_SMOKE"
@@ -92,7 +87,7 @@ resource "aws_codebuild_project" "deploy" {
 
 resource "aws_codebuild_project" "ci" {
   name          = var.ci_project_name
-  description   = "Runs the SPBC Pastry Concierge validate buildspec (make ci)."
+  description   = "Runs the SPBC Tech Assistant validate buildspec (make ci)."
   service_role  = aws_iam_role.codebuild_deploy.arn
   build_timeout = 120
 

@@ -1,4 +1,4 @@
-/* Enhanced styles for Specialty Bakeries & Pastry Cafés — Pastry Concierge */
+/* Enhanced styles for the Cyberport Tech Assistant */
 
 /* Import original styles as base */
 @import url('style.css');
@@ -874,7 +874,7 @@ body {
     padding: 10px;
   }
   
-  /* Hero panel stacks on mobile; the café image spans the full width */
+  /* Hero panel stacks on mobile; the hero image spans the full width */
   .hero-panel {
     flex-direction: column;
     align-items: stretch;

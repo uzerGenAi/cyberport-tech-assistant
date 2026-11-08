@@ -15,11 +15,11 @@ set -euo pipefail
 #
 # Examples:
 #   eval "$(bash 6_deploy/scripts/agentcore_backends.sh env)"
-#   bash 6_deploy/scripts/agentcore_backends.sh apply -var aurora_deletion_protection=false  # one-off, before destroy
+#   bash 6_deploy/scripts/agentcore_backends.sh apply -var aurora_deletion_protection=false -var dynamodb_deletion_protection=false  # one-off, before destroy
 # Lasting settings belong in 6_deploy/infra/agentcore-backends/terraform.tfvars (see the .example):
 # a -var flag is forgotten on the next apply.
 #
-# Remote state lives in s3://spbc-tfstate-eu-central-1 (override: TF_STATE_BUCKET) with S3 native
+# Remote state lives in s3://spbc-tfstate-<account-id> (override: TF_STATE_BUCKET) with S3 native
 # locking; create the bucket once with: make backend-setup. AUTO_APPROVE=1 skips the apply
 # confirmation (CI only). Needs Terraform 1.10+.
 
@@ -30,9 +30,7 @@ TF_DIR="${ROOT_DIR}/6_deploy/infra/agentcore-backends"
 PLAN_FILE="${TF_DIR}/.build/backends.tfplan"
 LOADER="${ROOT_DIR}/2_data_strategy/stores/load_stores_data_api.py"
 REGION="eu-central-1"
-# Bucket names are global: if this one belongs to another account, pick your own and pass the
-# same TF_STATE_BUCKET to make backend-setup and to this script
-STATE_BUCKET="${TF_STATE_BUCKET:-spbc-tfstate-eu-central-1}"
+# State bucket: spbc-tfstate-<account-id> unless TF_STATE_BUCKET overrides it (state_bucket.sh)
 CLUSTER_ID="spbc-aurora-cluster"
 
 # Messages go to stderr so `eval "$(... env)"` only sees the export lines
@@ -54,16 +52,26 @@ need() {
 check_state_backend() {
     aws s3api head-bucket --bucket "$STATE_BUCKET" --region "$REGION" >/dev/null 2>&1 \
         || die "Terraform state bucket s3://${STATE_BUCKET} not found or not yours. Run once: make backend-setup
-   (if another account owns that name: TF_STATE_BUCKET=<unique-name> for both commands)"
+   (the default name is spbc-tfstate-<account-id>; TF_STATE_BUCKET overrides it for both commands)"
 }
 
 init() {
     need terraform aws
     aws sts get-caller-identity >/dev/null 2>&1 || die "No AWS credentials (aws sts get-caller-identity failed)"
+    # shellcheck source=state_bucket.sh
+    source "$(dirname "${BASH_SOURCE[0]}")/state_bucket.sh" || die "Could not resolve the state bucket"
     check_state_backend
     log "terraform init (state: s3://${STATE_BUCKET}/prod/agentcore-backends.tfstate)"
     # Explicit: callers run inside `|| rc=$?`, where set -e is suspended
-    tf init -input=false -backend-config="bucket=${STATE_BUCKET}" >/dev/null || die "terraform init failed"
+    # Provider downloads occasionally time out (first run on macOS especially): retry before failing
+    local attempt
+    for attempt in 1 2 3; do
+        tf init -input=false -backend-config="bucket=${STATE_BUCKET}" >/dev/null 2>"${TF_DIR}/.init.err" && { rm -f "${TF_DIR}/.init.err"; return 0; }
+        warn "terraform init attempt ${attempt}/3 failed: $(tail -n 2 "${TF_DIR}/.init.err" | tr '\n' ' ')"
+        sleep $((attempt * 5))
+    done
+    rm -f "${TF_DIR}/.init.err"
+    die "terraform init failed after 3 attempts"
 }
 
 # terraform plan into PLAN_FILE; returns 0 = no changes, 2 = changes
@@ -207,13 +215,15 @@ validate() {
 }
 
 destroy() {
-    local protected answer
+    local protected table_protected answer
     init
     protected=$(aws rds describe-db-clusters --region "$REGION" --db-cluster-identifier "$CLUSTER_ID" \
         --query 'DBClusters[0].DeletionProtection' --output text 2>/dev/null || echo "absent")
-    if [ "$protected" = "True" ]; then
-        warn "Deletion protection is on for ${CLUSTER_ID}. Turn it off first (this changes nothing else):"
-        warn "  bash 6_deploy/scripts/agentcore_backends.sh apply -var aurora_deletion_protection=false"
+    table_protected=$(aws dynamodb describe-table --region "$REGION" --table-name "spbc-orders-table" \
+        --query 'Table.DeletionProtectionEnabled' --output text 2>/dev/null || echo "absent")
+    if [ "$protected" = "True" ] || [ "$table_protected" = "True" ]; then
+        warn "Deletion protection is on (database: ${protected}, orders table: ${table_protected}). Turn it off first (this changes nothing else):"
+        warn "  bash 6_deploy/scripts/agentcore_backends.sh apply -var aurora_deletion_protection=false -var dynamodb_deletion_protection=false"
         die "Not destroying."
     fi
     if aws rds describe-db-cluster-snapshots --region "$REGION" \
@@ -223,7 +233,9 @@ destroy() {
         warn "  aws rds delete-db-cluster-snapshot --region ${REGION} --db-cluster-snapshot-identifier ${CLUSTER_ID}-final"
         die "Not destroying."
     fi
-    warn "This deletes the stores database, the promotions API and the network created for them."
+    warn "This deletes the stores database, the promotions API, the network created for them and the"
+    warn "orders and sessions tables. Table data is NOT kept (no final snapshot, and point-in-time"
+    warn "recovery ends with the table); export any orders you need first."
     warn "Kept: final snapshot ${CLUSTER_ID}-final (delete it in RDS → Snapshots when no longer needed)."
     warn "The reader secret enters a 7-day recovery window; re-creating the stack within 7 days needs:"
     warn "  aws secretsmanager delete-secret --secret-id spbc-stores-db-reader --force-delete-without-recovery"

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240" role="img" aria-labelledby="t">
+  <title id="t">A laptop and a smartphone</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f2937"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ef4444"/>
+      <stop offset="1" stop-color="#b91c1c"/>
+    </linearGradient>
+    <linearGradient id="phone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#60a5fa"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="240" rx="18" fill="url(#bg)"/>
+  <!-- laptop -->
+  <rect x="44" y="58" width="176" height="112" rx="8" fill="#374151"/>
+  <rect x="52" y="66" width="160" height="96" rx="4" fill="url(#screen)"/>
+  <rect x="64" y="80" width="70" height="8" rx="4" fill="#fecaca"/>
+  <rect x="64" y="96" width="110" height="6" rx="3" fill="#fca5a5" opacity="0.8"/>
+  <rect x="64" y="108" width="92" height="6" rx="3" fill="#fca5a5" opacity="0.8"/>
+  <rect x="64" y="128" width="46" height="18" rx="9" fill="#ffffff"/>
+  <path d="M28 172 h208 l-10 14 h-188 z" fill="#4b5563"/>
+  <rect x="114" y="172" width="36" height="5" rx="2" fill="#6b7280"/>
+  <!-- phone -->
+  <rect x="222" y="86" width="64" height="120" rx="12" fill="#e5e7eb"/>
+  <rect x="228" y="96" width="52" height="98" rx="6" fill="url(#phone)"/>
+  <circle cx="254" cy="200" r="3" fill="#9ca3af"/>
+  <rect x="236" y="108" width="36" height="6" rx="3" fill="#dbeafe"/>
+  <rect x="236" y="120" width="28" height="6" rx="3" fill="#bfdbfe"/>
+  <rect x="236" y="172" width="36" height="12" rx="6" fill="#ffffff"/>
+  <!-- chat bubble -->
+  <rect x="196" y="28" width="98" height="40" rx="12" fill="#ffffff"/>
+  <path d="M214 68 l-6 12 l16 -12 z" fill="#ffffff"/>
+  <circle cx="226" cy="48" r="5" fill="#ef4444"/>
+  <circle cx="245" cy="48" r="5" fill="#ef4444" opacity="0.7"/>
+  <circle cx="264" cy="48" r="5" fill="#ef4444" opacity="0.4"/>
+</svg>

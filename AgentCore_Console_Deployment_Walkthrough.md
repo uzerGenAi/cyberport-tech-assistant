@@ -1,16 +1,17 @@
 # AgentCore Runtime: Console Deployment Walkthrough
 
-**Project:** Specialty Bakeries & Pastry Cafés (SPBC), Pastry Concierge multi-agent app
+**Project:** Cyberport Tech Assistant (SPBC project prefix), multi-agent electronics shopping and service assistant (reference demo, not affiliated with Cyberport)
 **What you deploy:** the Strands agents in [6_deploy/agents](6_deploy/agents) to **Amazon Bedrock AgentCore Runtime**, plus their knowledge bases and an optional guardrail.
 **Region:** `eu-central-1` (Frankfurt), everywhere: console Region selector, CloudShell, every command.
+**Architecture and stack:** see [README.md](README.md#technology-stack) for the technology stack, the architecture diagram and the request flow. This guide builds the same system by hand in the console.
 
 | Item | Value |
 |---|---|
 | Chat model | Amazon Nova Pro through the **EU cross-Region inference profile** `eu.amazon.nova-pro-v1:0`. Frankfurt has no in-Region on-demand capacity for Nova Pro, so the bare ID `amazon.nova-pro-v1:0` fails there. The profile keeps traffic in EU Regions (eu-central-1, eu-north-1, eu-west-1, eu-west-3). |
 | Embeddings | Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`), 1024 dimensions, in-Region |
 | Tools | AWS console + AWS CloudShell (browser shell). Your laptop is only used to zip the project files. |
-| Backends | Stores database (Aurora MySQL Serverless v2, read through the RDS Data API) and the IAM-authorized promotions API, both from the Terraform stack [6_deploy/infra/agentcore-backends](6_deploy/infra/agentcore-backends), applied from CloudShell in Step 2 |
-| Out of scope | The EKS stack, Cognito, Amplify. Step 9 covers the hand-off to them. |
+| Backends | Stores database (Aurora MySQL Serverless v2, read through the RDS Data API), the IAM-authorized promotions API and the orders and sessions DynamoDB tables, all from the Terraform stack [6_deploy/infra/agentcore-backends](6_deploy/infra/agentcore-backends), applied from CloudShell in Step 2 |
+| Out of scope | Cognito and Amplify. Step 9 covers the hand-off to them. |
 
 > This guide uses **AgentCore Runtime** (host your own agent code). It does not use the separate managed "AgentCore harness" feature, which has its own console section. Stay in **Runtime**.
 
@@ -37,10 +38,10 @@ The runtime **refuses to start** unless the four required knowledge base IDs are
 | Feature | Needs | If missing |
 |---|---|---|
 | Everything | Nova Pro (EU profile), KBs for menu, orders, payments, stores | Container crashes at startup |
-| Menu lookups | S3 object `menu/menu_records.json` | Menu answers fail |
+| Product catalog lookups | S3 object `menu/menu_records.json` (the catalog keeps the original `menu` domain key) | Product, price and stock answers fail |
 | Order status / placing orders | DynamoDB table `spbc-orders-table` | Order lookups and placement fail |
 | Store locations and hours | Stores database from Step 2: cluster `spbc-aurora-cluster` with the Data API, table `StoresDB.stores`, reader secret `spbc-stores-db-reader` | Store lookups fail (store FAQ answers still work) |
-| Live promotions | Promotions API `spbcBakeryAPI` from Step 2 (`GET /prod/promotions`, IAM-authorized) | Promos fall back to the promos KB |
+| Live promotions | Promotions API `spbcPromotionsAPI` from Step 2 (`GET /prod/promotions`, IAM-authorized) | Promos fall back to the promos KB |
 | Content safety | Guardrail | Runs without one |
 
 Decide now which features you'll deliver. Step 2 builds or checks each dependency.
@@ -52,7 +53,7 @@ Decide now which features you'll deliver. Step 2 builds or checks each dependenc
 
 ### 0.4 Existing runtime
 
-AgentCore console → **Runtime**. If `pastry_concierge_agent` already exists (the repo's `6_deploy/web-app/agentcore-config.json` points at one), either update that runtime (Step 10) or choose a new name such as `pastry_concierge_agent_v2`. Names start with a letter, use only letters, digits and underscores, and are at most 48 characters.
+AgentCore console → **Runtime**. If `tech_assistant_agent` already exists (a previous deployment, recorded in `6_deploy/web-app/agentcore-config.json` if that file exists, points at one), either update that runtime (Step 10) or choose a new name such as `tech_assistant_agent_v2`. Names start with a letter, use only letters, digits and underscores, and are at most 48 characters.
 
 ### 0.5 Values worksheet
 
@@ -130,7 +131,7 @@ The stores database and the promotions API come from one Terraform stack, [6_dep
 | Stores database | Aurora MySQL Serverless v2 cluster `spbc-aurora-cluster`: 2 instances in different AZs, encrypted, TLS required, 7-day backups, deletion protection, a final snapshot on delete, RDS Data API on |
 | Credentials | Master password generated and rotated by RDS, used only by the loader. Read-only user `stores_reader` (SELECT on `StoresDB.stores`); the agents use its secret `spbc-stores-db-reader` |
 | Network | A VPC with private subnets only (no internet gateway, no NAT) and flow logs. The database has no inbound rule: everything goes through the Data API |
-| Promotions API | HTTP API `spbcBakeryAPI`, route `GET /promotions` with **IAM** authorization, stage `prod`, throttled and access-logged. A Lambda function returns the promotions in [promos_records.json](2_data_strategy/promos/promos_records.json) that are valid today |
+| Promotions API | HTTP API `spbcPromotionsAPI`, route `GET /promotions` with **IAM** authorization, stage `prod`, throttled and access-logged. A Lambda function returns the promotions in [promos_records.json](2_data_strategy/promos/promos_records.json) that are valid today |
 
 > **Cost:** Aurora Serverless v2 bills per ACU-hour, around the clock: by default 0.5 ACU minimum on each of 2 instances. For non-production, set `aurora_instance_count = 1` and `aurora_min_acu = 0` (one instance that pauses when idle; the first question after a pause waits about 15 seconds). The API and the Lambda function bill per request.
 
@@ -147,12 +148,11 @@ The stores database and the promotions API come from one Terraform stack, [6_dep
      && mkdir -p ~/.local/bin && unzip -oq "terraform_${TF_VERSION}_linux_${ARCH}.zip" terraform -d ~/.local/bin
    export PATH="$HOME/.local/bin:$PATH" && terraform version
    ```
-2. Create the state bucket `spbc-tfstate-eu-central-1` (versioned, encrypted, private; state locking uses a lock file in the bucket). The script reuses the bucket if it exists:
+2. Create the state bucket `spbc-tfstate-<account-id>` (named after your account because bucket names are global; versioned, encrypted, private; state locking uses a lock file in the bucket). The script reuses the bucket if it exists:
    ```bash
    cd ~/spbc && bash 6_deploy/scripts/terraform_backend_setup.sh
    ```
-   - It also creates a DynamoDB lock table and a `terraform.tfvars` for the separate EKS stack; this guide doesn't use them.
-   - Bucket names are global. If another account owns that name, pick your own and export it before this and every later `agentcore_backends.sh` command: `export TF_STATE_BUCKET=spbc-tfstate-$ACCOUNT_ID`.
+   - The name is derived from your account, so nothing needs exporting. To use another name, export `TF_STATE_BUCKET=<unique-name>` before this and every later `agentcore_backends.sh` command.
 
 **Gate:** `terraform version` prints `v1.16.6` (1.10 or later works), and the script ends with "Terraform backend ready".
 
@@ -184,12 +184,10 @@ bash 6_deploy/scripts/agentcore_backends.sh check
 - `seed` works from CloudShell through the Data API, with no VPC access. It creates `StoresDB.stores`, upserts [stores_records.json](2_data_strategy/stores/stores_records.json), creates or re-syncs `stores_reader` from its secret, then proves the reader can read but not write. Safe to re-run. If it reports that boto3 is missing, run `pip3 install --user boto3` first.
 - `check` calls both backends the way the runtime does: a query with the reader secret, an unsigned API request (must be rejected with 403) and a SigV4-signed one (must return promotions).
 
-**Gate:** `seed` ends with `Done: 26 stores readable by stores_reader; writes are denied as expected.` and `check` prints three ✅ lines. `DatabaseResumingException` only means the cluster is waking up: wait 30 seconds and run it again.
+**Gate:** `seed` ends with `Done: 9 stores readable by stores_reader; writes are denied as expected.` and `check` prints three ✅ lines. `DatabaseResumingException` only means the cluster is waking up: wait 30 seconds and run it again.
 
 ### 2.4 Orders table (DynamoDB)
-
-If you ran the EKS stack (`make provision`), the table already exists. Otherwise create it either with the backends stack (set `create_orders_table = true` in its `terraform.tfvars`, then run `agentcore_backends.sh apply` again) or in the console:
-
+The backends stack from Step 2.2 already created `spbc-orders-table` (and `spbc-sessions-table`, which only the proof-of-concept CLI uses). Skip to the optional seeding step. If you did not apply that stack, create the table in the console instead:
 1. DynamoDB → **Create table**.
 2. Name `spbc-orders-table`; partition key `user_id` (String); sort key `order_timestamp` (String); capacity **On-demand**. The key names and types must match exactly: the code queries by `user_id`, newest `order_timestamp` first.
 3. (Optional) Turn on point-in-time recovery.
@@ -210,7 +208,7 @@ shows `ACTIVE`, `user_id` as HASH and `order_timestamp` as RANGE.
 
 1. **VPC → Subnets:** pick at least two private subnets whose route table has `0.0.0.0/0 → nat-…`. A route to `igw-…` means the subnet is public, so don't use it. All Frankfurt AZs (euc1-az1/2/3) are supported.
 2. **Security groups → Create** `spbc-agentcore-runtime` with outbound HTTPS 443 to `0.0.0.0/0`. The Data API and the promotions API are HTTPS endpoints, so no database port is needed.
-3. If that VPC has an `execute-api` interface endpoint with **private DNS** on, requests from the VPC to public APIs such as `spbcBakeryAPI` fail. Use subnets in a VPC without one, or turn private DNS off on it.
+3. If that VPC has an `execute-api` interface endpoint with **private DNS** on, requests from the VPC to public APIs such as `spbcPromotionsAPI` fail. Use subnets in a VPC without one, or turn private DNS off on it.
 4. Legacy MySQL cluster only: also allow outbound MySQL 3306 to the Aurora security group, and inbound 3306 from `spbc-agentcore-runtime` on the Aurora security group.
 
 **Gate:** subnet IDs and the runtime security group ID are in the worksheet.
@@ -220,16 +218,16 @@ shows `ACTIVE`, `user_id` as HASH and `order_timestamp` as RANGE.
 ## Step 3: S3 bucket and data files
 
 1. S3 → **Create bucket** `spbc-kb-docs-<ACCOUNT_ID>` in eu-central-1. Keep **Block all public access** on and default encryption.
-2. Upload the files to these **exact** keys. Any other prefix means a knowledge base syncs zero documents, or the menu tool can't find its file.
+2. Upload the files to these **exact** keys. Any other prefix means a knowledge base syncs zero documents, or the catalog agent's `get_menu` tool can't find its file.
 
 | Local file (in `~/spbc/2_data_strategy`) | S3 key | Used by |
 |---|---|---|
-| `menu/menu_records.json` | `menu/menu_records.json` | Menu agent `get_menu` tool (not a KB) |
-| `menu/menu_items_kb_faqs.txt` | `bakery_menu/menu_items_kb_faqs.txt` | Menu KB |
-| `orders/orders_policies_kb_faqs.txt` | `bakery_orders/orders_policies_kb_faqs.txt` | Orders KB |
-| `payments/payments_policies_kb_faqs.txt` | `bakery_payments/payments_policies_kb_faqs.txt` | Payments KB |
-| `stores/store_kb_faqs.txt` | `bakery_stores/store_kb_faqs.txt` | Stores KB |
-| `promos/promos_kb_faqs.txt` | `bakery_promos/promos_kb_faqs.txt` | Promos KB |
+| `menu/menu_records.json` | `menu/menu_records.json` | Product catalog agent (`menu_agents.py`) `get_menu` tool (not a KB) |
+| `menu/menu_items_kb_faqs.txt` | `electronics_menu/menu_items_kb_faqs.txt` | Buying-guide KB (`menu` domain) |
+| `orders/orders_policies_kb_faqs.txt` | `electronics_orders/orders_policies_kb_faqs.txt` | Orders KB |
+| `payments/payments_policies_kb_faqs.txt` | `electronics_payments/payments_policies_kb_faqs.txt` | Payments KB |
+| `stores/store_kb_faqs.txt` | `electronics_stores/store_kb_faqs.txt` | Stores KB |
+| `promos/promos_kb_faqs.txt` | `electronics_promos/promos_kb_faqs.txt` | Promos KB |
 
 From CloudShell (creates the bucket and uploads):
 ```bash
@@ -237,11 +235,11 @@ cd ~/spbc/2_data_strategy
 aws s3api create-bucket --bucket "$BUCKET" --region eu-central-1 \
   --create-bucket-configuration LocationConstraint=eu-central-1
 aws s3 cp menu/menu_records.json                 "s3://$BUCKET/menu/menu_records.json"
-aws s3 cp menu/menu_items_kb_faqs.txt            "s3://$BUCKET/bakery_menu/"
-aws s3 cp orders/orders_policies_kb_faqs.txt     "s3://$BUCKET/bakery_orders/"
-aws s3 cp payments/payments_policies_kb_faqs.txt "s3://$BUCKET/bakery_payments/"
-aws s3 cp stores/store_kb_faqs.txt               "s3://$BUCKET/bakery_stores/"
-aws s3 cp promos/promos_kb_faqs.txt              "s3://$BUCKET/bakery_promos/"
+aws s3 cp menu/menu_items_kb_faqs.txt            "s3://$BUCKET/electronics_menu/"
+aws s3 cp orders/orders_policies_kb_faqs.txt     "s3://$BUCKET/electronics_orders/"
+aws s3 cp payments/payments_policies_kb_faqs.txt "s3://$BUCKET/electronics_payments/"
+aws s3 cp stores/store_kb_faqs.txt               "s3://$BUCKET/electronics_stores/"
+aws s3 cp promos/promos_kb_faqs.txt              "s3://$BUCKET/electronics_promos/"
 ```
 
 **Gate:** `aws s3 ls "s3://$BUCKET" --recursive` lists exactly those six keys.
@@ -260,7 +258,7 @@ bash 3_proof_of_concept/knowledge_bases/bootstrap_vector_store.sh     # once per
 bash 3_proof_of_concept/knowledge_bases/setup_knowledge_bases.sh      # all five domains
 ```
 
-- `bootstrap_vector_store.sh` creates what the knowledge bases need and nothing in this repo used to create: the OpenSearch Serverless collection `spbc-bakery-vectors` with its encryption, network and data access policies, plus the service role `AmazonBedrockExecutionRoleForKnowledgeBase_eu-central-1`. It records `AOSSENDPOINT`, `OPENSEARCH_COLLECTION_ARN` and `ROLE_ARN` in `~/environment/env.sh`.
+- `bootstrap_vector_store.sh` creates what the knowledge bases need and nothing in this repo used to create: the OpenSearch Serverless collection `spbc-electronics-vectors` with its encryption, network and data access policies, plus the service role `AmazonBedrockExecutionRoleForKnowledgeBase_eu-central-1`. It records `AOSSENDPOINT`, `OPENSEARCH_COLLECTION_ARN` and `ROLE_ARN` in `~/environment/env.sh`.
 - `setup_knowledge_bases.sh` then creates each domain's vector index, knowledge base and S3 data source, syncs it, and **fails if a sync indexes nothing** — so a silent empty knowledge base can't pass. Pass a domain name to do just one, e.g. `setup_knowledge_bases.sh orders`.
 - Both are safe to re-run: anything that already exists is reused.
 - `awscurl` is needed for index creation (`pip3 install --user awscurl`; it's in [requirements.txt](requirements.txt)).
@@ -272,7 +270,7 @@ For each domain:
 
 1. Amazon Bedrock → **Knowledge Bases** → **Create** → **Knowledge Base with vector store**.
 2. Name `spbc-<domain>-knowledge-base`. IAM: **Create and use a new service role**.
-3. Data source **Amazon S3**. S3 URI `s3://<BUCKET>/bakery_<domain>/` (trailing slash included). Keep default chunking.
+3. Data source **Amazon S3**. S3 URI `s3://<BUCKET>/electronics_<domain>/` (trailing slash included). Keep default chunking.
 4. Embeddings model **Titan Text Embeddings V2**, **1024** dimensions, floating-point. Don't pick "Titan Embeddings G1 - Text": that is v1 (1536 dimensions).
 5. Vector store: **Quick create a new vector store → Amazon OpenSearch Serverless**. The agent code always requests **HYBRID** search, which AWS documents for OpenSearch Serverless; other stores (for example S3 Vectors) may reject it.
 6. Create. When it finishes: **Data sources** → select → **Sync**.
@@ -280,11 +278,11 @@ For each domain:
 
 | Domain | KB name | S3 URI | Gate question |
 |---|---|---|---|
-| menu | `spbc-menu-knowledge-base` | `s3://<BUCKET>/bakery_menu/` | Are your pastries baked fresh daily? |
-| orders | `spbc-orders-knowledge-base` | `s3://<BUCKET>/bakery_orders/` | Can I cancel my order after placing it? |
-| payments | `spbc-payments-knowledge-base` | `s3://<BUCKET>/bakery_payments/` | Can I pay with cash at the bakery? |
-| stores | `spbc-stores-knowledge-base` | `s3://<BUCKET>/bakery_stores/` | Are you open on public holidays? |
-| promos | `spbc-promos-knowledge-base` | `s3://<BUCKET>/bakery_promos/` | What do I get on Fresh Pastry Tuesdays? |
+| menu | `spbc-menu-knowledge-base` | `s3://<BUCKET>/electronics_menu/` | How much RAM do I need for gaming? |
+| orders | `spbc-orders-knowledge-base` | `s3://<BUCKET>/electronics_orders/` | Can I cancel my order after placing it? |
+| payments | `spbc-payments-knowledge-base` | `s3://<BUCKET>/electronics_payments/` | Can I pay with PayPal when I order online? |
+| stores | `spbc-stores-knowledge-base` | `s3://<BUCKET>/electronics_stores/` | Are you open on public holidays? |
+| promos | `spbc-promos-knowledge-base` | `s3://<BUCKET>/electronics_promos/` | How does the trade-in bonus work? |
 
 **Gate (per KB):**
 - The sync shows **Completed** with at least 1 document scanned and **0 failed**.
@@ -299,11 +297,11 @@ kb_test() {  # usage: kb_test <KB_ID> "<question>"
         retrievalConfiguration:{vectorSearchConfiguration:{numberOfResults:7,overrideSearchType:"HYBRID"}}}}')" \
     --query 'output.text' --output text
 }
-kb_test "$MENU_KB"     "Are your pastries baked fresh daily?"
+kb_test "$MENU_KB"     "How much RAM do I need for gaming?"
 kb_test "$ORDERS_KB"   "Can I cancel my order after placing it?"
-kb_test "$PAYMENTS_KB" "Can I pay with cash at the bakery?"
+kb_test "$PAYMENTS_KB" "Can I pay with PayPal when I order online?"
 kb_test "$STORES_KB"   "Are you open on public holidays?"
-kb_test "$PROMOS_KB"   "What do I get on Fresh Pastry Tuesdays?"
+kb_test "$PROMOS_KB"   "How does the trade-in bonus work?"
 ```
 
 > **Cost:** each quick-create OpenSearch Serverless collection bills for capacity every hour it exists, even when idle. Plan the teardown (Step 11).
@@ -316,14 +314,19 @@ The orchestrator applies the guardrail only when both `GUARDRAIL_ID` and `GUARDR
 
 1. Amazon Bedrock → **Guardrails** → **Create guardrail** → name `SPBC-Guardrail`.
 2. **Content filters:** hate, insults, sexual, violence, misconduct on High; prompt attacks on High (input).
-3. **Denied topic** `NonBakeryTopics`. Definition: requests unrelated to pastries, breads, cakes, drinks, menu, ordering, order status, payments, promotions, loyalty rewards, or store locations and hours. Add examples such as "Help me write code".
+3. **Denied topics**, each describing what to block (keep them specific; never deny "software" or "IT help" in general, because laptop and phone questions are full of both):
+   - `OutOfScopeRequests`: crypto or investment advice, medical, legal or tax advice, politics, travel booking, homework and essay writing.
+   - `UnsafeDeviceModification`: opening, puncturing or self-repairing lithium batteries, chargers or mains-powered devices, or disabling safety features.
+   - `PiracyAndDRMCircumvention`: pirated software, cracked licences, illegal IPTV, removing copy protection, carrier locks or region locks.
+   - `PersonalCreditAdvice`: whether the customer should take credit, or whether a financing application will be approved.
 4. **Sensitive information:**
-   - Credit/debit card number → **Block**.
+   - Credit/debit card number, card CVV, PIN, IBAN and password → **Block**.
    - Email and phone → **Mask**.
    - **Don't add Name:** the order flow asks for the customer's name.
+   - The same policy is scripted in `deploy_agentcore.sh step6-guardrail` and `5_security_rai/create_and_store_guardrail.sh`.
 5. **Create version** and record the guardrail ID and the **version number**. A numbered version is immutable; `DRAFT` also works but changes whenever someone edits the guardrail.
 
-**Gate:** in the guardrail's **Test** panel, "Help me with my tax return" is blocked and "Do you have almond croissants?" passes.
+**Gate:** in the guardrail's **Test** panel, "Help me with my tax return" and "How do I open my phone battery myself?" are blocked, while "Which laptops do you have for students?", "Can I bring my old phone for recycling?" and "Can I pay for a laptop in instalments?" pass.
 
 ---
 
@@ -340,7 +343,7 @@ rm -rf ~/spbc/build ~/spbc/agent.zip
 ~/.local/bin/uv pip install --quiet --python "$(command -v python3)" --python-version 3.11 \
   --python-platform aarch64-manylinux2014 --only-binary :all: \
   --target ~/spbc/build -r requirements.txt
-cp barista_supervisor_agent.py menu_agents.py orders_agents.py place_order.py \
+cp tech_assistant_agent.py menu_agents.py orders_agents.py place_order.py \
    payments_policy_agents.py stores_agents.py promos_agents.py ~/spbc/build/
 (cd ~/spbc/build && zip -qr ../agent.zip . -x '*__pycache__*')
 ls -lh ~/spbc/agent.zip
@@ -361,7 +364,7 @@ The [Dockerfile](6_deploy/agents/Dockerfile) already handles three things:
 
 ```bash
 cd ~/spbc/6_deploy/agents
-REPO=spbc-pastry-concierge
+REPO=spbc-tech-assistant
 IMAGE=$ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com/$REPO:v$(date +%Y%m%d%H%M)   # unique tag = rollback target
 aws ecr describe-repositories --repository-names $REPO >/dev/null 2>&1 \
   || aws ecr create-repository --repository-name $REPO --image-scanning-configuration scanOnPush=true
@@ -388,9 +391,9 @@ Amazon Bedrock AgentCore console → **Runtime** → **Create runtime** (or **Ho
 
 | Setting | Value |
 |---|---|
-| Name | `pastry_concierge_agent` (or the name from §0.4) |
+| Name | `tech_assistant_agent` (or the name from §0.4) |
 | Compute type | Default (serverless). Not *Instances*. |
-| Agent source | **Option A:** S3 source → existing object → the zip's S3 URI; runtime **Python 3.11**; entry point `barista_supervisor_agent.py`. **Option B:** ECR container → the image URI with its unique tag. |
+| Agent source | **Option A:** S3 source → existing object → the zip's S3 URI; runtime **Python 3.11**; entry point `tech_assistant_agent.py`. **Option B:** ECR container → the image URI with its unique tag. |
 | Protocol | **HTTP** |
 | Inbound auth | **IAM (SigV4)**, the default. Don't choose JWT: the web app signs requests with Cognito identity-pool credentials. |
 | Network | **Public** (§0.3), or **VPC** with the subnets and security group from Step 2.5 |
@@ -398,7 +401,7 @@ Amazon Bedrock AgentCore console → **Runtime** → **Create runtime** (or **Ho
 | Environment variables | Table in §7.2 |
 | Permissions | **Create and use a new service role** (recommended), or a role you built from Appendix A |
 
-Create, then wait for status **Ready**. Record the runtime ID and ARN; the ARN looks like `arn:aws:bedrock-agentcore:eu-central-1:<ACCOUNT_ID>:runtime/pastry_concierge_agent-<id>`.
+Create, then wait for status **Ready**. Record the runtime ID and ARN; the ARN looks like `arn:aws:bedrock-agentcore:eu-central-1:<ACCOUNT_ID>:runtime/tech_assistant_agent-<id>`.
 
 ### 7.2 Environment variables
 
@@ -407,7 +410,7 @@ Create, then wait for status **Ready**. Record the runtime ID and ARN; the ARN l
 | `REGION` | `eu-central-1` | **Container crashes at startup** |
 | `MODEL_ID` | `eu.amazon.nova-pro-v1:0` | **Crash** |
 | `MODEL_ARN` | `arn:aws:bedrock:eu-central-1:<ACCOUNT_ID>:inference-profile/eu.amazon.nova-pro-v1:0` | **Crash** |
-| `MENU_KNOWLEDGE_BASE_ID` | Menu KB ID | **Crash** |
+| `MENU_KNOWLEDGE_BASE_ID` | Buying-guide KB ID (`menu` domain) | **Crash** |
 | `ORDERS_KNOWLEDGE_BASE_ID` | Orders KB ID | **Crash** |
 | `PAYMENTS_KNOWLEDGE_BASE_ID` | Payments KB ID | **Crash** |
 | `STORES_KNOWLEDGE_BASE_ID` | Stores KB ID | **Crash** |
@@ -474,11 +477,12 @@ Runtime → **Test** (or CloudShell below). Send one payload per domain. The pay
 
 | Domain | Payload | Pass |
 |---|---|---|
-| Menu | `{"prompt": "Do you have an Almond Croissant, and what does it cost?"}` | Item details and a price in € |
-| Orders | `{"prompt": "What is the status of the most recent order for user_001?"}` | A status from DynamoDB, or "No recent order found" if you didn't seed |
-| Payments | `{"prompt": "Can I pay with cash at the bakery?"}` | Yes, from the payments KB |
-| Promos | `{"prompt": "What do I get on Fresh Pastry Tuesdays?"}` | Free plain croissant with a hot drink (from the API or the promos KB) |
-| Stores | `{"prompt": "What are the opening hours of your Frankfurt am Main bakery?"}` | Hours of the Frankfurt bakeries from the stores database (for example Backstube Frankfurt Innenstadt, 07:00–19:00) |
+| Catalog | `{"prompt": "Do you have the Apple iPhone 14 with 128GB, and what does it cost?"}` | Product details and a price in € (€1009.00 in the Kaggle catalog) |
+| Stock | `{"prompt": "Is the Apple iPhone 14 in stock at store spbc-de-001?"}` | Units in stock at the Cyberport Store Dresden |
+| Orders | `{"prompt": "What is the status of order ord_2055_023 for customer_2055?"}` | SHIPPED from DynamoDB, or "No order found" if you didn't seed |
+| Payments | `{"prompt": "Can I pay with PayPal when I order online?"}` | Yes, from the payments KB |
+| Promos | `{"prompt": "Is there a student discount on laptops?"}` | 10% off with STUDENT10 (from the API or the promos KB) |
+| Stores | `{"prompt": "What are the opening hours of your store in Dresden?"}` | Hours of the Dresden store from the stores database (Cyberport Store Dresden, 10:00–20:00) |
 
 ```bash
 invoke() {  # usage: invoke "<prompt>"   (session IDs must be ≥ 33 characters)
@@ -488,7 +492,7 @@ invoke() {  # usage: invoke "<prompt>"   (session IDs must be ≥ 33 characters)
     --content-type application/json --cli-binary-format raw-in-base64-out \
     --payload "$(jq -cn --arg p "$1" '{prompt:$p}')" /tmp/reply.json >/dev/null && cat /tmp/reply.json; echo
 }
-invoke "Can I pay with cash at the bakery?"
+invoke "Can I pay with PayPal when I order online?"
 ```
 
 **Gate:**
@@ -499,11 +503,11 @@ invoke "Can I pay with cash at the bakery?"
 
 ## Step 9: Hand off to the web app
 
-Write [6_deploy/web-app/agentcore-config.json](6_deploy/web-app/agentcore-config.json):
+Write `6_deploy/web-app/agentcore-config.json` (a generated file that is gitignored and does not exist until you create it):
 
 ```json
 {
-  "agentRuntimeArn": "arn:aws:bedrock-agentcore:eu-central-1:<ACCOUNT_ID>:runtime/pastry_concierge_agent-<id>",
+  "agentRuntimeArn": "arn:aws:bedrock-agentcore:eu-central-1:<ACCOUNT_ID>:runtime/tech_assistant_agent-<id>",
   "region": "eu-central-1",
   "apiVersion": "2023-07-26",
   "accountId": "<ACCOUNT_ID>"
@@ -538,14 +542,14 @@ Delete in this order:
 8. The Terraform backends (Aurora bills per ACU-hour until it's gone). Deletion protection is on, so turn it off first, then destroy:
    ```bash
    cd ~/spbc
-   bash 6_deploy/scripts/agentcore_backends.sh apply -var aurora_deletion_protection=false
+   bash 6_deploy/scripts/agentcore_backends.sh apply -var aurora_deletion_protection=false -var dynamodb_deletion_protection=false
    bash 6_deploy/scripts/agentcore_backends.sh destroy
    ```
-   - `destroy` refuses while protection is on or while a snapshot named `spbc-aurora-cluster-final` already exists.
+   - `destroy` refuses while protection is on (database or orders table) or while a snapshot named `spbc-aurora-cluster-final` already exists.
    - The final snapshot `spbc-aurora-cluster-final` is kept: delete it under RDS → Snapshots when you no longer need it.
    - The secret `spbc-stores-db-reader` waits 7 days before deletion; to re-create the stack sooner, restore it or force-delete it (the script prints both commands).
-   - With `create_orders_table = true`, the orders table has deletion protection too: turn it off in DynamoDB first, or remove the table from Terraform with `terraform -chdir=6_deploy/infra/agentcore-backends state rm 'aws_dynamodb_table.orders[0]'` to keep it.
-9. Optionally, the runtime log groups and the state bucket `spbc-tfstate-eu-central-1` (only if no other stack uses it).
+   - The orders and sessions tables are deleted with their data (no snapshot is kept). Export any orders you need first.
+9. Optionally, the runtime log groups and the state bucket `spbc-tfstate-<account-id>` (only if no other stack uses it).
 
 If you created a NAT gateway only for this, delete it too; it bills hourly.
 
@@ -570,7 +574,7 @@ If you created a NAT gateway only for this, delete it too; it bills hourly.
 | Stores: `No Aurora cluster whose identifier starts with 'spbc-aurora-cluster'…` | Legacy path: `STORES_DB_CLUSTER_ARN` / `STORES_DB_SECRET_ARN` not set | §7.2 (set both from Step 2.2) |
 | Stores: timeouts connecting to Aurora | Legacy path in Public mode, or security groups / NAT routes wrong | Set the Data API variables (§7.2), or Step 2.5 |
 | Promos: `Promotions API denied the request` (403) | The role lacks `execute-api:Invoke` on `…/prod/GET/promotions` of this API | §7.3 step 3 (re-print the policy after re-creating the API) |
-| Promos: `API not found` | `PROMOS_API_URL` unset and no API named `spbcBakeryAPI` | Set `PROMOS_API_URL` (§7.2); otherwise the promos KB answers instead |
+| Promos: `API not found` | `PROMOS_API_URL` unset and no API named `spbcPromotionsAPI` | Set `PROMOS_API_URL` (§7.2); otherwise the promos KB answers instead |
 | Promos: an empty list | No promotion in [promos_records.json](2_data_strategy/promos/promos_records.json) is valid today | Update the dates, then `agentcore_backends.sh apply` (the Lambda function is rebuilt) |
 | Guardrail blocks normal orders | Name or order data masked or blocked, or the denied topic is too broad | Step 5 settings; test the order flow |
 | No `strands` lines in logs | `LOG_LEVEL` above INFO | Set `LOG_LEVEL=INFO` (or `DEBUG` temporarily) |
@@ -583,7 +587,7 @@ If you created a NAT gateway only for this, delete it too; it bills hourly.
 | This guide | `deploy_agentcore.sh` command | Automated (`configure_runtime.py` + starter toolkit) |
 |---|---|---|
 | Step 1 model check | `step1-model-access` | `check_env.sh` (Converse check) |
-| Step 2 backends | Reads the Terraform outputs automatically; `step2-iam-role` / `step8-create-runtime` put `SPBC-AgentCore-Backends` on the role | `make backends` → `make seed-stores` → `make backends-check` (the same `agentcore_backends.sh`); DynamoDB from `make provision` or `create_orders_table`; `configure_runtime.py` attaches `SPBC-AgentCore-Backends` |
+| Step 2 backends | Reads the Terraform outputs automatically; `step2-iam-role` / `step8-create-runtime` put `SPBC-AgentCore-Backends` on the role | `make backends` → `make seed-stores` → `make backends-check` (the same `agentcore_backends.sh`); the DynamoDB tables come from the same `make backends`; `configure_runtime.py` attaches `SPBC-AgentCore-Backends` |
 | Step 3 S3 layout | `step3-s3-bucket` | `2_data_strategy/*/configure_*.sh` |
 | Step 4 KBs | `step5-knowledge-bases` finds, syncs and verifies existing KBs | `make knowledge-bases` (`bootstrap_vector_store.sh` + `setup_knowledge_bases.sh`, idempotent, verifies each sync) |
 | Step 5 guardrail | `step6-guardrail` | `5_security_rai/create_and_store_guardrail.sh` |
@@ -597,7 +601,7 @@ If you created a NAT gateway only for this, delete it too; it bills hourly.
 
 ## Appendix A: IAM policies
 
-Replace `<ACCOUNT_ID>`, `<BUCKET>`, the KB IDs, `<GUARDRAIL_ID>` and `<RUNTIME_NAME>` (default `pastry_concierge_agent`).
+Replace `<ACCOUNT_ID>`, `<BUCKET>`, the KB IDs, `<GUARDRAIL_ID>` and `<RUNTIME_NAME>` (default `tech_assistant_agent`).
 
 ### A.1 Trust policy (only for a role you create yourself)
 
@@ -717,7 +721,7 @@ Don't type this one: `bash 6_deploy/scripts/agentcore_backends.sh policy` prints
 
 ### A.5 Legacy backends (only without the Step 2 stack)
 
-When `STORES_DB_*` and `PROMOS_API_URL` are unset, the agents discover a cluster named `spbc-aurora-cluster*` with the secret `spbc-aurora-db-credentials` (MySQL driver, VPC mode) and an API named `spbcBakeryAPI`. Use these statements as `SPBC-AgentCore-Backends` instead of A.4:
+When `STORES_DB_*` and `PROMOS_API_URL` are unset, the agents discover a cluster named `spbc-aurora-cluster*` with the secret `spbc-aurora-db-credentials` (MySQL driver, VPC mode) and an API named `spbcPromotionsAPI`. Use these statements as `SPBC-AgentCore-Backends` instead of A.4:
 
 ```json
 {

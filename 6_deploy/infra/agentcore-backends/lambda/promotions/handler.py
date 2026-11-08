@@ -1,4 +1,4 @@
-"""GET /promotions for the SPBC Pastry Concierge (HTTP API, IAM-authorized).
+"""GET /promotions for the SPBC Tech Assistant (HTTP API, IAM-authorized).
 
 Serves the promotions bundled with the function (promos_records.json, copied from
 2_data_strategy/promos/ at deploy time). By default only promotions whose validity window

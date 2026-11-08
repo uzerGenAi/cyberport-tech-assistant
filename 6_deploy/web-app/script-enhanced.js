@@ -1,7 +1,7 @@
-// Pastry Concierge Script - Direct AgentCore Integration
+// Tech Assistant Script - Direct AgentCore Integration
 console.log('🚀 Loading Enhanced Script with Direct AgentCore Integration');
 
-const ASSISTANT_NAME = 'Pastry Concierge';
+const ASSISTANT_NAME = 'Tech Assistant';
 
 const chatbotForm = document.getElementById('chatbot-form');
 const chatbotInput = document.getElementById('chatbot-input');
@@ -279,9 +279,9 @@ async function initializeApp() {
         addMessage(`Preview mode is on, so I answer from this page\u2019s local sample data instead of the live ${ASSISTANT_NAME}. Use "Exit preview mode" in the banner above to connect for real.`, 'bot');
     } else if (appState.mode === 'degraded') {
         const copy = failureCopy(appState.reason);
-        addMessage(`${copy.headline} I can still show you the sample menu, bakery locations and promotions stored on this page.`, 'bot');
+        addMessage(`${copy.headline} I can still show you the sample products, store locations and promotions stored on this page.`, 'bot');
     } else {
-        addMessage('Welcome to Specialty Bakeries & Pastry Cafés! I can help you with orders, store information, promotions, and more. How can I assist you today?', 'bot');
+        addMessage('Welcome to the Cyberport Tech Assistant! I can help you choose a smartphone or laptop, check stock in a store, place a click & collect order, track an order, and answer questions about payments and promotions. How can I help you today?', 'bot');
     }
 }
 
@@ -408,13 +408,15 @@ window.sendSamplePrompt = sendSamplePrompt;
 // Mirrors 2_data_strategy/promos/promos_records.json — the live agent reads the
 // authoritative copy from the promotions API, so this list can lag behind.
 const LOCAL_PROMOTIONS = [
-    { title: 'Fresh Pastry Tuesdays', description: 'Every Tuesday, get a free plain croissant with any hot drink purchase.', code: 'TUESDAYCROISSANT' },
-    { title: 'Pastry Rewards — Double Points Weekend', description: 'Earn 2× Pastry Rewards points on all purchases over €15 every Saturday and Sunday.', code: '' },
-    { title: 'New Customer Welcome', description: '€5 off your first order of €15 or more when you register in the app.', code: 'WELCOME5' },
-    { title: 'Student Discount', description: '10% off your entire order with a valid student ID or university email.', code: 'STUDENT10' },
-    { title: 'Birthday Cake Offer', description: 'Receive a complimentary 6-inch celebration cake slice on your birthday month when you are a Pastry Rewards member.', code: '' },
-    { title: 'Office Catering Bundle', description: 'Order a catering package for 10 or more people and receive a complimentary assorted macaron box (12 pieces).', code: 'CATERINGBONUS' },
-    { title: 'Seasonal Pastry Launch — 20% Off', description: '20% off all new seasonal pastries during the first week of each seasonal launch.', code: 'SEASONLAUNCH' },
+    {"title": "Trade-in Bonus", "description": "Trade in your old smartphone or laptop and get an extra €50 on top of its trade-in value when you buy a new smartphone or laptop over €400.", "code": "TRADEIN50"},
+    {"title": "Accessory Bundle Deal", "description": "10% off cases, chargers and screen protectors bought together with a new smartphone, when you order with your Cyberport customer account.", "code": ""},
+    {"title": "Student Laptop Discount", "description": "10% off any new laptop, up to €150 off, with a valid student ID or university email address.", "code": "STUDENT10"},
+    {"title": "Business Volume Discount", "description": "5% off orders of five or more laptops for business customers who order with a company name and VAT ID.", "code": "BUSINESS5"},
+    {"title": "Gaming Laptop Bundle", "description": "Get a free gaming headset with any gaming laptop over €1,000.", "code": "GAMERBUNDLE"},
+    {"title": "Refurbished Week", "description": "An extra 5% off all refurbished laptops.", "code": "REFURB5"},
+    {"title": "0% Financing", "description": "Spread purchases of €299 or more over 6, 12 or 24 months at 0% interest, subject to a credit check by our financing partner.", "code": ""},
+    {"title": "Newsletter Welcome Offer", "description": "€10 off your first online order of €100 or more after signing up for the newsletter.", "code": "WELCOME10"},
+    {"title": "Black Friday Week", "description": "Up to 20% off selected smartphones and laptops. Discounted products are marked in the shop.", "code": ""}
 ];
 
 // Client-side fallback for preview mode and for genuine failures.
@@ -427,20 +429,19 @@ function handleAgentFallback(userInput, error) {
     const reason = error && error.reason ? error.reason : null;
     
     // Determine the user's intent using keyword matching
-    const isStoreQuery = inputLower.includes('store') || inputLower.includes('bakery') ||
+    const isStoreQuery = inputLower.includes('store') || inputLower.includes('shop') ||
                          inputLower.includes('location') || inputLower.includes('branch') ||
                          inputLower.includes('address') || inputLower.includes('where') || 
                          inputLower.includes('hours') || inputLower.includes('open') || 
-                         inputLower.includes('drive-thru');
+                         inputLower.includes('pickup station');
                          
-    const isMenuQuery = inputLower.includes('menu') || inputLower.includes('allergen') ||
-                        inputLower.includes('gluten') || inputLower.includes('vegan') ||
-                        inputLower.includes('price') || inputLower.includes('cost') || 
-                        inputLower.includes('drink') || inputLower.includes('food') ||
-                        inputLower.includes('coffee') || inputLower.includes('pastry') ||
-                        inputLower.includes('pastries') || inputLower.includes('bread') ||
-                        inputLower.includes('cake') || inputLower.includes('croissant') ||
-                        inputLower.includes('chocolate');
+    const isMenuQuery = inputLower.includes('product') || inputLower.includes('laptop') ||
+                        inputLower.includes('phone') || inputLower.includes('iphone') ||
+                        inputLower.includes('galaxy') || inputLower.includes('macbook') ||
+                        inputLower.includes('price') || inputLower.includes('cost') ||
+                        inputLower.includes('spec') || inputLower.includes('ram') ||
+                        inputLower.includes('gaming') || inputLower.includes('compare') ||
+                        inputLower.includes('recommend');
                         
     const isPromoQuery = inputLower.includes('promo') || inputLower.includes('deal') || 
                          inputLower.includes('discount') || inputLower.includes('coupon') || 
@@ -457,7 +458,7 @@ function handleAgentFallback(userInput, error) {
 
     // 1. Store queries — served from the sample store list on this page
     if (isStoreQuery) {
-        fallbackMsg += "Here are the bakeries listed in this page's sample data:\n\n";
+        fallbackMsg += "Here are the stores listed in this page's sample data:\n\n";
         const stores = (typeof storesData !== 'undefined' && storesData.length > 0) ? storesData : 
                        ((typeof storeData !== 'undefined' && storeData.length > 0) ? storeData : []);
                        
@@ -466,20 +467,20 @@ function handleAgentFallback(userInput, error) {
                 fallbackMsg += `📍 ${store.name}\n`;
                 fallbackMsg += `   Address: ${store.address}, ${store.city}, ${store.state}\n`;
                 fallbackMsg += `   Hours: ${store.hours_start} - ${store.hours_end}\n`;
-                if (store.has_drive_thru) fallbackMsg += '   Drive-Thru: yes\n';
+                if (store.has_drive_thru) fallbackMsg += '   Pickup station: yes\n';
                 fallbackMsg += '\n';
             });
             fallbackMsg += 'This is a sample subset and may not reflect current opening hours.';
         } else {
-            fallbackMsg += "No bakery list is available on this page either. Try the 'Select Store' dropdown above.";
+            fallbackMsg += "No store list is available on this page either. Try the 'Select Store' dropdown above.";
         }
         addMessage(fallbackMsg, 'bot');
         return;
     }
 
-    // 2. Menu queries — served from the sample catalogue embedded in index.html
+    // 2. Product queries — served from the sample catalogue embedded in index.html
     if (isMenuQuery) {
-        fallbackMsg += "Here is the menu from this page's sample data:\n\n";
+        fallbackMsg += "Here are the products in this page's sample data:\n\n";
         const menu = (typeof menuData !== 'undefined' && menuData.length > 0) ? menuData : [];
         
         if (menu.length > 0) {
@@ -489,14 +490,14 @@ function handleAgentFallback(userInput, error) {
                 categories[item.category].push(item.name);
             });
             Object.keys(categories).forEach(cat => {
-                const label = cat.charAt(0).toUpperCase() + cat.slice(1);
-                fallbackMsg += `🥐 ${label}\n`;
+                const label = cat.charAt(0).toUpperCase() + cat.slice(1).replace(/_/g, ' ');
+                fallbackMsg += `📱 ${label}\n`;
                 fallbackMsg += `   ${categories[cat].join(', ')}\n\n`;
             });
-            fallbackMsg += "Expand 'Our Menu' below for details. I cannot confirm prices or " +
-                           'allergen information without the live agent.';
+            fallbackMsg += "Expand 'Our Products' below for details. I cannot confirm current prices or " +
+                           'store stock without the live agent.';
         } else {
-            fallbackMsg += "No menu data is available on this page either. Try the 'Our Menu' section below.";
+            fallbackMsg += "No product data is available on this page either. Try the 'Our Products' section below.";
         }
         addMessage(fallbackMsg, 'bot');
         return;
@@ -519,7 +520,7 @@ function handleAgentFallback(userInput, error) {
     // 4. Anything needing the agent itself: orders, order status, payments
     fallbackMsg += 'Placing orders, checking order status and payment questions all need the ' +
                    'live agent, so I cannot help with those from this page. You can still browse ' +
-                   'the menu, bakery locations and promotions below.';
+                   'the products, store locations and promotions below.';
     addMessage(fallbackMsg, 'bot');
 }
 

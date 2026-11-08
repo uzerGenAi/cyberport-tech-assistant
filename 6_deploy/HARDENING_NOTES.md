@@ -158,3 +158,70 @@ break the passing tftest assertion, so nothing was changed:
 - EKS (`terraform`) and CodePipeline stacks: no RDS/`deletion_protection` resources; the
   CodePipeline artifacts S3 bucket has only a lifecycle-expiration config (CI artifacts),
   which is the correct posture.
+
+---
+
+## Cleanup pass before redeploy (November 2026)
+
+The "future-pass candidates" from the cruft sweep above were removed, together with other files
+that nothing in the current deploy flow (`Makefile`, `6_deploy/codepipeline/*.yml`,
+`post_deploy.sh`, `end_to_end.sh`) runs. Tracked files are recoverable from git history.
+
+**Removed (tracked):**
+- `6_deploy/scripts/deploy_stack.sh`, `deploy_frontend.sh`: legacy EKS + CloudFront path with
+  interactive prompts and leftovers from another project (a `P2P-Agent-Metrics` dashboard, a
+  `p2peksautomodenoderole` role). `deploy_stack.sh` was also the only writer of the
+  `SPBC-Agent-Metrics` dashboard, whose `SPBC/Agents` namespace nothing emits.
+- `6_deploy/web-app/webapp.sh` (only called by `deploy_stack.sh`), `update-cognito-config.sh`
+  (nothing ran it), `6_deploy/scripts/setup_dev_tools.sh` (Cloud9-era installer that only
+  chmod-ed the scripts above), `6_deploy/scripts/terraform_backend_config.sh` (a placeholder that
+  only printed a message), `6_deploy/scripts/frontend-deployment.yaml` (an unreferenced k8s
+  manifest; `deploy_blue_green.sh` generates the per-colour Deployments).
+- `6_deploy/web-app/observability.html`: unlinked page that claimed metrics were flowing to the
+  `SPBC/Agents` namespace.
+- `6_deploy/web-app/image.jpg`: the old café photo; the hero is now `hero-devices.svg`.
+- `5_security_rai/bedrock-agent-ec2-least-privilege.json`: unreferenced, and despite its name it
+  granted `bedrock:*` and `ec2:*` on `*`.
+
+**Removed (local, untracked or gitignored):** `__pycache__/` and `.DS_Store` files; the six
+`6_deploy/web-app/backup_*` folders (configs of deleted Cognito pools and pre-rename scripts);
+`agentcore-config.json` and `cognito-config.json` (pointed at the deleted runtime and pools;
+`make post-deploy` regenerates both); `6_deploy/agents/.bedrock_agentcore.yaml` (starter-toolkit
+state for the deleted runtime, now gitignored); `6_deploy/infra/agentcore-backends/.build/` and
+that stack's `.terraform/terraform.tfstate` backend pointer to the deleted state bucket (the
+pointer made `make ci` fail offline); the unused `6_deploy/web-app/image.png` and the
+comments-only root `env.sh`.
+
+**Changed so nothing depends on the removed files:**
+- `6_deploy/web-app/observability-config.json` is now a tracked static file (console links only:
+  CloudWatch generative AI observability and the `/aws/bedrock-agentcore/runtimes` log groups).
+  The EKS image build requires it and only the removed `deploy_stack.sh` used to write it.
+- `index.html` reads the logs link from that file; its fallback links pointed at another
+  project's dashboard and Lambda log group.
+- The web-app `Dockerfile` copies `hero-devices.svg` instead of `image.jpg` and no longer copies
+  `observability.html`.
+
+---
+
+## EKS removal (November 2026)
+
+The optional EKS web-hosting tier was removed. The agents never ran on it: they run in the
+Bedrock AgentCore runtime, and the web app is served by AWS Amplify and calls AgentCore directly
+from the browser with temporary Cognito credentials.
+
+**Removed:** the `6_deploy/infra/terraform` stack (VPC with three NAT gateways, EKS 1.29, node
+group, cluster autoscaler, ECR web repository, optional ACM/Route 53), `6_deploy/k8s/`,
+`end_to_end.sh`, `build_webapp_image.sh`, `deploy_blue_green.sh`, `rollback.sh`, the web-app
+`Dockerfile` and `buildspec.yml`, the `make provision` / `deploy` / `rollback` targets, and the
+`TOGGLE_DEPLOY_EKS` pipeline toggle with its `eks:*` IAM permission.
+
+**Moved, not lost:** `spbc-orders-table` and `spbc-sessions-table` now belong to the
+`agentcore-backends` stack (`tables.tf`) and are always created. Both have point-in-time recovery,
+encryption and deletion protection (`dynamodb_deletion_protection`). The `create_orders_table`
+variable no longer exists. Destroying the stack now deletes these tables with their data, and
+`agentcore_backends.sh destroy` says so.
+
+**Simplified:** `terraform_backend_setup.sh` only creates the state bucket. The DynamoDB lock
+table (`spbc-tfstate-lock`) was used by the removed stack alone; the other two stacks lock with
+an S3 lock file. The EKS API allowlist options and the generated `terraform.tfvars` are gone, and
+`make ci` validates two Terraform stacks instead of three.

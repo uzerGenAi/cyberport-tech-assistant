@@ -13,7 +13,7 @@ variable "environment" {
 variable "repository_name" {
   description = "CodeCommit repository name and the pipeline source."
   type        = string
-  default     = "spbc-pastry-concierge"
+  default     = "spbc-tech-assistant"
 }
 
 variable "branch_name" {
@@ -50,8 +50,8 @@ variable "execution_role_name_patterns" {
   description = <<-EOT
     IAM role name patterns the deploy role may create/update/pass. Covers every role the
     deploy path touches: this project's roles (both hyphen and underscore spellings), the
-    Cognito identity-pool roles, the Bedrock KB execution role, the EKS stack roles, and the
-    AgentCore starter-toolkit CodeBuild role the zip/container launch auto-creates.
+    Cognito identity-pool roles, the Bedrock KB execution role, and the AgentCore
+    starter-toolkit CodeBuild role the zip/container launch auto-creates.
   EOT
   type        = list(string)
   default = [
@@ -61,7 +61,6 @@ variable "execution_role_name_patterns" {
     "Cognito_*",
     "AmazonBedrockExecutionRoleForKnowledgeBase_*",
     "AmazonBedrockAgentCore*",
-    "pastrycafe-*",
   ]
 }
 
@@ -121,12 +120,6 @@ variable "toggle_deploy_agent" {
   description = "Default for the deploy env var: deploy Cognito, the AgentCore runtime and the frontend."
   type        = bool
   default     = true
-}
-
-variable "toggle_deploy_eks" {
-  description = "Default for the deploy env var: build the web image and do a blue/green EKS rollout."
-  type        = bool
-  default     = false
 }
 
 variable "toggle_smoke" {

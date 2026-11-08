@@ -1,6 +1,6 @@
 # CodePipeline deploy stack
 
-All-AWS CI/CD for the SPBC Pastry Concierge: a CodeCommit source repository, a V2 CodePipeline
+All-AWS CI/CD for the SPBC Tech Assistant: a CodeCommit source repository, a V2 CodePipeline
 (`Source` → `Validate` → `Approve` → `Deploy`), two CodeBuild projects (`spbc-ci` runs
 `make ci`, `spbc-deploy` runs the deploy buildspec), an artifact S3 bucket, a manual-approval
 SNS topic, and the CodeBuild / CodePipeline IAM roles. This replaces the retired GitHub Actions
@@ -11,58 +11,25 @@ The buildspecs live under [`6_deploy/codepipeline/`](../../codepipeline/):
 
 ## 1. Apply order / bootstrap
 
-The Terraform state bucket `spbc-tfstate-eu-central-1` must exist **before** `terraform init`
-(the same chicken-and-egg as the other stacks). Two ways to create it — pick knowingly:
-
-**Recommended for this stack — create the state bucket directly.** This stack only needs the
-bucket to exist, and this avoids the EKS-stack side effects of the alternative below:
+The Terraform state bucket `spbc-tfstate-<account-id>` (derived from your AWS account, because bucket names are global) must exist **before** `terraform init`
+(the same chicken-and-egg as the agentcore-backends stack). Create it with:
 
 ```sh
-aws s3api create-bucket \
-  --bucket spbc-tfstate-eu-central-1 \
-  --region eu-central-1 \
-  --create-bucket-configuration LocationConstraint=eu-central-1
-
-aws s3api put-bucket-versioning \
-  --bucket spbc-tfstate-eu-central-1 \
-  --versioning-configuration Status=Enabled
-
-aws s3api put-bucket-encryption \
-  --bucket spbc-tfstate-eu-central-1 \
-  --server-side-encryption-configuration \
-  '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+make backend-setup
 ```
 
-**Or reuse `make backend-setup`** (what the other stacks' docs point at) — but note two real
-behaviours of `terraform_backend_setup.sh`:
-
-- The CIDR is **not** "any value". With no `--cidr` / `EKS_PUBLIC_ACCESS_CIDRS` it attempts
-  outbound-IP auto-detection and **errors out** if that fails; it refuses `0.0.0.0/0` without
-  `--allow-open`.
-- It **rewrites `6_deploy/infra/terraform/terraform.tfvars`** (the EKS stack's vars) as a side
-  effect.
-
-  So run it with an explicit placeholder to skip detection, and be aware it mutates the EKS
-  stack's tfvars:
-
-  ```sh
-  EKS_PUBLIC_ACCESS_CIDRS=<your-ip>/32 make backend-setup
-  ```
+That runs `6_deploy/scripts/terraform_backend_setup.sh`: it creates a versioned, encrypted,
+non-public bucket, prompts for nothing, and does nothing if the bucket already exists. Both
+stacks lock their state with an S3 lock file, so no DynamoDB lock table is needed.
 
 Then apply this stack:
 
 ```sh
-terraform -chdir=6_deploy/infra/codepipeline init
+terraform -chdir=6_deploy/infra/codepipeline init \
+  -backend-config="bucket=spbc-tfstate-$(aws sts get-caller-identity --query Account --output text)"
 terraform -chdir=6_deploy/infra/codepipeline apply
 ```
-
-Override the **state** bucket at init if your account uses a different one (same
-`-backend-config` / `TF_STATE_BUCKET` pattern as the other stacks):
-
-```sh
-terraform -chdir=6_deploy/infra/codepipeline init \
-  -backend-config="bucket=<your-state-bucket>"
-```
+The bucket is not written in `versions.tf`; pass it at init as above (use your `TF_STATE_BUCKET` name instead if you set one).
 
 The **artifact** bucket is a separate resource with its own knob: set
 `artifact_bucket_name` to pin a name, otherwise it derives
@@ -76,7 +43,7 @@ password:
 
 ```sh
 pip install git-remote-codecommit
-git remote add codecommit codecommit::eu-central-1://spbc-pastry-concierge
+git remote add codecommit codecommit::eu-central-1://spbc-tech-assistant
 git push codecommit main
 ```
 
@@ -95,7 +62,7 @@ Pushing to `main` starts the pipeline (CodePipeline manages the EventBridge rule
 
   ```sh
   aws codepipeline put-approval-result \
-    --pipeline-name spbc-pastry-concierge \
+    --pipeline-name spbc-tech-assistant \
     --stage-name Approve \
     --action-name Approve \
     --result summary="ok",status=Approved \
@@ -109,16 +76,15 @@ apply.
 
 ## 4. Toggle env vars
 
-The deploy buildspec is gated by five toggles, exposed as pipeline-level variables (defaults
+The deploy buildspec is gated by four toggles, exposed as pipeline-level variables (defaults
 come from the matching `toggle_*` Terraform variables) and passed into the Deploy action as
 `EnvironmentVariables`:
 
 | Pipeline variable | Default | Effect |
 |---|---|---|
-| `TOGGLE_PROVISION_BACKENDS` | `false` | Apply the stores DB + promotions API stack, seed, and check. |
+| `TOGGLE_PROVISION_BACKENDS` | `false` | Apply the backends stack (stores DB, promotions API, orders and sessions tables), seed, and check. |
 | `TOGGLE_SETUP_KNOWLEDGE_BASES` | `false` | Bootstrap the vector store and create/sync the knowledge bases. |
 | `TOGGLE_DEPLOY_AGENT` | `true` | Deploy Cognito, the AgentCore runtime, the frontend, then verify the agent. |
-| `TOGGLE_DEPLOY_EKS` | `false` | Build the web image and do a blue/green rollout onto EKS. |
 | `TOGGLE_SMOKE` | `false` | Run the frontend smoke test. |
 
 Only `TOGGLE_DEPLOY_AGENT` is on by default. Override per run by editing the pipeline variable
@@ -134,7 +100,7 @@ Same posture as the retired `github-oidc` README. The `SPBC-Deploy-Permissions` 
 CodeBuild role is ported verbatim from that stack: service actions are deliberately broad on
 `*` (this is a single-project deploy role), while the sensitive IAM role management and
 `iam:PassRole` are scoped to this project's role-name patterns (`SPBC-*`, `Cognito_*`, the
-Bedrock KB execution role, the EKS stack roles, the AgentCore starter-toolkit role) and never
+Bedrock KB execution role, the AgentCore starter-toolkit role) and never
 `*`.
 
 The role is assumed by CodeBuild directly (`codebuild.amazonaws.com`) — there is no OIDC

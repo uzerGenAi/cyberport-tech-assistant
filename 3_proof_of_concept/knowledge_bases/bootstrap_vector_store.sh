@@ -4,7 +4,7 @@
 # Creates (and re-uses on later runs):
 #   • IAM role  AmazonBedrockExecutionRoleForKnowledgeBase_<region>   — assumed by Bedrock
 #   • OpenSearch Serverless encryption, network and data access policies
-#   • OpenSearch Serverless VECTORSEARCH collection  spbc-bakery-vectors
+#   • OpenSearch Serverless VECTORSEARCH collection  spbc-electronics-vectors
 #
 # Then writes OPENSEARCH_COLLECTION, OPENSEARCH_COLLECTION_ARN, AOSSENDPOINT and ROLE_ARN
 # into ~/environment/env.sh, which is what setup_knowledge_bases.sh and the per-domain
@@ -31,10 +31,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./kb_common.sh
 . "${SCRIPT_DIR}/kb_common.sh"
 
-COLLECTION_NAME="${COLLECTION_NAME:-${PROJECT_PREFIX}-bakery-vectors}"
-ENCRYPTION_POLICY_NAME="${PROJECT_PREFIX}-bakery-enc"
-NETWORK_POLICY_NAME="${PROJECT_PREFIX}-bakery-net"
-ACCESS_POLICY_NAME="${PROJECT_PREFIX}-bakery-access"
+COLLECTION_NAME="${COLLECTION_NAME:-${PROJECT_PREFIX}-electronics-vectors}"
+ENCRYPTION_POLICY_NAME="${PROJECT_PREFIX}-electronics-enc"
+NETWORK_POLICY_NAME="${PROJECT_PREFIX}-electronics-net"
+ACCESS_POLICY_NAME="${PROJECT_PREFIX}-electronics-access"
 KB_ROLE_NAME="AmazonBedrockExecutionRoleForKnowledgeBase_${REGION}"
 COLLECTION_TIMEOUT_SECONDS="${COLLECTION_TIMEOUT_SECONDS:-600}"
 
@@ -210,7 +210,7 @@ if [ -z "$status" ]; then
     aws opensearchserverless create-collection \
         --name "$COLLECTION_NAME" \
         --type VECTORSEARCH \
-        --description "Vector store for the SPBC bakery knowledge bases" \
+        --description "Vector store for the SPBC Tech Assistant knowledge bases" \
         --tags key=Project,value=SPBC >/dev/null
 else
     kb_ok "Collection ${COLLECTION_NAME} already exists (status ${status})"

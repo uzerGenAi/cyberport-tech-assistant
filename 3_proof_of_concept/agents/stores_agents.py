@@ -1,4 +1,4 @@
-"""Stores agent for Specialty Bakeries & Pastry Cafés — store locations and policies.
+"""Stores agent for the Cyberport Tech Assistant — store locations, hours and services.
 
 Store data comes from the StoresDB.stores table in Aurora MySQL. Two access paths:
   - RDS Data API (production): set STORES_DB_CLUSTER_ARN and STORES_DB_SECRET_ARN (outputs of the
@@ -153,7 +153,7 @@ _STORE_COLUMNS = (
 
 
 @tool(name="stores_kb_retrieve",
-      description="A tool to retrieve data from the bakery stores knowledge base")
+      description="A tool to retrieve store services and policies (repairs, recycling, opening rules) from the stores knowledge base")
 def stores_kb_retrieve(query: str) -> str:
     """Search the stores knowledge base using retrieve_and_generate."""
     params = {
@@ -181,7 +181,7 @@ def stores_kb_retrieve(query: str) -> str:
         return f"Failed to retrieve information: {str(e)}"
 
 
-@tool(name="list_stores", description="A tool to retrieve the list of all bakery locations")
+@tool(name="list_stores", description="A tool to retrieve the list of all store locations with address, opening hours and pickup station")
 def list_stores(query: str = "") -> list:  # pylint: disable=unused-argument
     """Return all store locations from the database."""
     try:
@@ -191,7 +191,7 @@ def list_stores(query: str = "") -> list:  # pylint: disable=unused-argument
         return [{"error": str(e)}]
 
 
-@tool(name="get_store_by_id", description="A tool to find a bakery location by its store ID")
+@tool(name="get_store_by_id", description="A tool to find a store by its store ID, for example spbc-de-001")
 def get_store_by_id(store_id: str) -> dict:
     """Return a single store record by store ID."""
     try:
@@ -206,7 +206,7 @@ def get_store_by_id(store_id: str) -> dict:
 
 
 @tool(name="search_store_by_name",
-      description="A tool to find a bakery location by name or city")
+      description="A tool to find stores by name or city")
 def search_store_by_name(name: str) -> list:
     """Search stores by partial name or city match."""
     try:
@@ -224,13 +224,18 @@ def search_store_by_name(name: str) -> list:
 stores_agent = Agent(
     model=BedrockModel(model_id=MODEL_ID, region_name=REGION),
     system_prompt="""
-        - You are 'Stores Assistant' for Specialty Bakeries & Pastry Cafés, an expert in
-          our bakery locations and store policies.
+        - You are 'Stores Assistant' for the Cyberport Tech Assistant, an expert in our
+          electronics stores in Germany and Austria, their opening hours, services and policies.
+        - Always include the store_id (for example spbc-de-001) when you name a store.
+        - Stores are open Monday to Saturday from hours_start to hours_end and closed on Sundays
+          and public holidays.
+        - The has_drive_thru column means the store has a 24/7 pickup station for click & collect
+          orders. Call it a pickup station, never a drive-thru.
         - Always wrap your answer in <answer> tags.
         - Give 1-2 sentence answers only. Be brief.
         - Only answer using information obtained using available tools. Do not use your own information.
         - If errors occur, acknowledge it politely.
-        - When you receive a query, determine if it is about a bakery location or store policy.
+        - When you receive a query, determine if it is about a store location, opening hours, store services or a store policy.
         - For queries not related to stores or locations, respond with 'Sorry, I cannot answer this question'.
         - For store or location queries, use: list_stores, get_store_by_id, or search_store_by_name.
         - Only if necessary and after trying all other tools, use stores_kb_retrieve for policy questions.

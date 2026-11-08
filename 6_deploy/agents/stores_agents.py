@@ -1,4 +1,4 @@
-# stores_agents.py — Specialty Bakeries & Pastry Cafés
+# stores_agents.py — store finder agent for the Cyberport Tech Assistant
 #
 # Store data comes from the StoresDB.stores table in Aurora MySQL. Two access paths:
 #   - RDS Data API (production): set STORES_DB_CLUSTER_ARN and STORES_DB_SECRET_ARN (Terraform
@@ -166,7 +166,7 @@ def _rows(sql: str, params: dict | None = None) -> list:
 
 # ── Tools ─────────────────────────────────────────────────────────────────────
 
-@tool(name="stores_kb_retrieve", description="A tool to retrieve data from the bakery stores knowledge base")
+@tool(name="stores_kb_retrieve", description="A tool to retrieve store services and policies (repairs, recycling, opening rules) from the stores knowledge base")
 def stores_kb_retrieve(query: str) -> str:
     print(f"Running stores_kb_retrieve with query: {query}")
     params = {
@@ -195,7 +195,7 @@ def stores_kb_retrieve(query: str) -> str:
         return f"Failed to retrieve information: {str(e)}"
 
 
-@tool(name="list_stores", description="A tool to retrieve the list of Specialty Bakeries & Pastry Cafés locations")
+@tool(name="list_stores", description="A tool to retrieve the list of all store locations with address, opening hours and pickup station")
 def list_stores(query: str = "") -> list:
     print("Running list_stores...")
     try:
@@ -208,7 +208,7 @@ def list_stores(query: str = "") -> list:
         return [{"error": str(e)}]
 
 
-@tool(name="get_store_by_id", description="A tool to find a bakery location by its ID")
+@tool(name="get_store_by_id", description="A tool to find a store by its store_id, for example spbc-de-001")
 def get_store_by_id(store_id: str) -> dict:
     print(f"Running get_store_by_id with store_id: {store_id}")
     try:
@@ -224,7 +224,7 @@ def get_store_by_id(store_id: str) -> dict:
         return {"error": str(e)}
 
 
-@tool(name="search_store_by_name", description="A tool to find a bakery location by name or city")
+@tool(name="search_store_by_name", description="A tool to find stores by name or city")
 def search_store_by_name(name: str) -> list:
     print(f"Running search_store_by_name with name like: %{name}%")
     try:
@@ -244,16 +244,19 @@ def search_store_by_name(name: str) -> list:
 stores_agent = Agent(
     model=BedrockModel(model_id=os.environ["MODEL_ID"], region_name=REGION),
     system_prompt="""
-        - You are 'Stores Assistant' for Specialty Bakeries & Pastry Cafés, expert in finding our bakery locations across Germany, Austria, and Switzerland.
+        - You are 'Stores Assistant' for the Cyberport Tech Assistant, expert in finding our electronics stores in Germany and Austria, their opening hours and their services.
         - Always wrap your answer in <answer> tags.
         - Give 1-2 sentence answers only. Be brief.
         - Only answer using information obtained using available tools. Do not use your own information.
         - If errors occur, acknowledge it politely.
-        - When you receive a query, determine if the question is about bakery locations or store policies.
+        - When you receive a query, determine if the question is about store locations, opening hours, store services or store policies.
         - For queries not related to stores, respond with 'Sorry, I cannot answer this question'.
         - If answering requires location data, use the tools: list_stores, get_store_by_id, or search_store_by_name.
-        - Only if necessary and after trying all other tools, use stores_kb_retrieve to check the knowledge base.
-        - If nothing relevant is found, ask clarifying questions or refer to contact support.
+        - Always include the store_id (for example spbc-de-001) when you name a store, because other assistants need it for stock checks and click & collect orders.
+        - Stores are open Monday to Saturday from hours_start to hours_end and closed on Sundays and public holidays.
+        - The has_drive_thru column means the store has a 24/7 pickup station for click & collect orders. Call it a pickup station, never a drive-thru.
+        - For services and policies (repair desk, device setup, recycling old devices, damaged batteries, Sunday opening, accessibility), use stores_kb_retrieve.
+        - If nothing relevant is found, ask clarifying questions or refer to customer service.
     """,
     tools=[stores_kb_retrieve, list_stores, get_store_by_id, search_store_by_name],
 )

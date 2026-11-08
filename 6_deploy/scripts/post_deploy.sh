@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# post_deploy.sh — Specialty Bakeries & Pastry Cafés
+# post_deploy.sh — Cyberport Tech Assistant
 #
-# Runs every step required after `make deploy` to make the system fully live:
+# Runs every step required after the backends and knowledge bases exist to make the system
+# fully live:
 #   1. Set up Cognito User Pool + Identity Pool → writes cognito-config.json
 #   2. Launch AgentCore runtime → writes agentcore-config.json + AGENT_RUNTIME_ARN
 #   3. Re-deploy the Amplify frontend with the freshly populated configs
@@ -72,7 +73,7 @@ fi
 
 echo ""
 echo -e "\033[0;36m══════════════════════════════════════════════════════\033[0m"
-echo -e "\033[0;32m🥐 Specialty Bakeries & Pastry Cafés — Post-Deploy Setup\033[0m"
+echo -e "\033[0;32m📱 Cyberport Tech Assistant — Post-Deploy Setup\033[0m"
 echo -e "\033[0;36m══════════════════════════════════════════════════════\033[0m"
 echo ""
 
@@ -89,6 +90,14 @@ run_cognito_setup() {
 
 if [[ "$FORCE" = "1" ]]; then
   log "--force: running Cognito setup regardless of the existing config"
+  # A redeploy of an existing stack already has its sign-in user: don't prompt for another one
+  if [[ -s "$COGNITO_CONFIG" ]] && python3 -c "
+import json, sys
+d = json.load(open('$COGNITO_CONFIG'))
+sys.exit(0 if d.get('UserPoolId') and d.get('ClientId') else 1)
+" 2>/dev/null; then
+    COGNITO_ARGS+=(--skip-user)
+  fi
   run_cognito_setup
 elif [[ -s "$COGNITO_CONFIG" ]]; then
   # Check if it contains real values (not just empty braces)
@@ -139,7 +148,24 @@ AGENTCORE_CONFIG="$WEB_APP_DIR/agentcore-config.json"
 # artifact; AWS does not allow switching an existing runtime's artifact type, so a runtime that
 # was previously created from a zip must be deleted first (deploy_agentcore.sh teardown) before
 # the first container launch recreates it under the same name.
+ensure_memory() {
+  # AgentCore Memory is an enhancement, not a requirement: create it when missing (idempotent), and
+  # carry on without it if that fails. The runtime then keeps in-session memory only.
+  if [[ -n "${MEMORY_ID:-}" ]]; then
+    ok "AgentCore Memory already configured: $MEMORY_ID"
+    return 0
+  fi
+  log "Ensuring the AgentCore Memory exists (idempotent; a new one takes a few minutes)..."
+  if (cd "$AGENTS_DIR" && REGION="$REGION" python3 create_memory.py); then
+    # create_memory.py records MEMORY_ID in the env file; configure_runtime.py reads the environment
+    # shellcheck disable=SC1090
+    [[ -f "$ENV_FILE" ]] && source "$ENV_FILE"
+  else
+    warn "Could not create the AgentCore Memory: continuing without it (retry later: make memory)"
+  fi
+}
 launch_runtime() {
+  ensure_memory
   (cd "$AGENTS_DIR" && python3 configure_runtime.py)
 }
 
@@ -194,7 +220,7 @@ ok "STEP 3 complete — Amplify frontend deployed"
 # ────────────────────────────────────────────────────────────────────────────
 echo ""
 echo -e "\033[0;36m══════════════════════════════════════════════════════\033[0m"
-echo -e "\033[0;32m🥐 Post-deploy complete — system is fully live!\033[0m"
+echo -e "\033[0;32m📱 Post-deploy complete — system is fully live!\033[0m"
 echo -e "\033[0;36m══════════════════════════════════════════════════════\033[0m"
 echo ""
 RUNTIME_ARN=$(python3 -c "import json; print(json.load(open('$AGENTCORE_CONFIG'))['agentRuntimeArn'])" 2>/dev/null || echo "(see agentcore-config.json)")

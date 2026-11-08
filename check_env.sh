@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Script to check if required environment variables are set for
-# Specialty Bakeries & Pastry Cafés production deployment
+# Cyberport Tech Assistant production deployment
 
 echo "=== SPBC Environment Variables Check ==="
 echo

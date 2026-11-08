@@ -3,7 +3,7 @@
 resource "aws_codecommit_repository" "this" {
   repository_name = var.repository_name
   default_branch  = "main"
-  description     = "SPBC Pastry Concierge source. Push to ${var.branch_name} to trigger the pipeline."
+  description     = "SPBC Tech Assistant source. Push to ${var.branch_name} to trigger the pipeline."
 }
 
 resource "aws_s3_bucket" "artifacts" {

@@ -2,8 +2,9 @@
 env.sh
 6_deploy/web-app/agentcore-config.json
 6_deploy/web-app/cognito-config.json
-6_deploy/web-app/observability-config.json
 6_deploy/web-app/backup_*/
+# Written by the AgentCore starter toolkit (configure_runtime.py); holds account IDs and ARNs
+.bedrock_agentcore.yaml
 
 # ── Terraform ──
 .terraform/
@@ -57,3 +58,6 @@ kubeconfig
 # ── Internal workflow / tool artifacts (never project source) ──
 .agents/
 .bob/
+
+# ── Raw Kaggle downloads (rebuilt by 2_data_strategy/build_from_kaggle.py) ──
+2_data_strategy/kaggle_source/

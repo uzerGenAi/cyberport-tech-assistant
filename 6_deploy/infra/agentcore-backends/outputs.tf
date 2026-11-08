@@ -32,7 +32,11 @@ output "promotions_api_invoke_arn" {
 }
 
 output "orders_table_name" {
-  value = var.create_orders_table ? aws_dynamodb_table.orders[0].name : "${var.name_prefix}-orders-table (managed by the EKS stack)"
+  value = aws_dynamodb_table.orders.name
+}
+
+output "sessions_table_name" {
+  value = aws_dynamodb_table.sessions.name
 }
 
 output "agentcore_runtime_env" {

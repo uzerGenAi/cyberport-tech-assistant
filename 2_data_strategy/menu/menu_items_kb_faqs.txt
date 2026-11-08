@@ -1,89 +1,61 @@
-Frequently Asked Questions — Specialty Bakeries & Pastry Cafés
+**Product Buying Guide KB and FAQs — Cyberport Tech Assistant**
 
-1. What is the difference between a croissant and a pain au chocolat?
-Both are made from the same laminated butter dough. A plain croissant is shaped into a crescent and has no filling. A pain au chocolat is rectangular and contains one or two dark chocolate batons inside.
+1. **What products can I ask about?**
+   The Tech Assistant covers our smartphone and laptop range: everyday, business, premium and gaming laptops, refurbished laptops, and smartphones from Apple, Samsung, Google, Xiaomi, Motorola, OnePlus, OPPO, Honor, POCO, Realme, Nothing, Nokia, Sony, Vivo and Doro. Prices, specifications and store stock come from the live product catalog.
 
-2. Are your pastries baked fresh daily?
-Yes. All viennoiserie, patisserie, and breads are baked on-site every morning. Availability of specific items may be limited and items sell out during peak hours. We recommend arriving before 10:00 for the widest selection.
+2. **How much storage do I need on a smartphone?**
+   64GB suits light use (messaging, calls, a few apps). 128GB is the right choice for most people. Choose 256GB or more if you record a lot of 4K video, keep large photo libraries offline, or play big games. Most iPhones and many Android phones have no memory-card slot, so storage cannot be added later.
 
-3. Do you offer gluten-free options?
-Our macarons are naturally gluten-free. Custom cakes and certain tarts can be made gluten-free on advance request. Please inform our team of any dietary requirements when ordering.
+3. **Why do storage sizes of the same phone have different prices?**
+   Each storage size is a separate variant with its own price. The catalog lists the price for every available size, and the Tech Assistant always quotes the price of the size you choose.
 
-4. What allergens are present in your products?
-Most of our baked goods contain gluten, dairy, and eggs. Nut allergens are present in almond croissants, macarons, opéra cake, and stollen. We cannot guarantee a completely allergen-free environment due to shared production areas. A full allergen list is available at the counter.
+4. **How much RAM does a laptop need?**
+   8GB is enough for web browsing, office work and video calls. 16GB is recommended for gaming, photo editing, programming and heavy multitasking. 32GB is for video editing, 3D work and large virtual machines. RAM in many thin laptops is soldered and cannot be upgraded.
 
-5. Can I order a custom celebration cake?
-Yes. Custom cakes require a minimum of 3 days advance notice. Please speak to our team in-store or contact us via the app to discuss size (6-inch, 8-inch, or 10-inch), flavour, and decoration. Full payment is required at time of order.
+5. **What do Intel Core i3, i5, i7 and i9 mean?**
+   They are performance tiers. i3 suits basic tasks, i5 is the best value for most users, i7 suits demanding work and gaming, and i9 is for top-end gaming and content creation. AMD Ryzen 3, 5, 7 and 9 follow the same pattern. The letter at the end of an Intel or AMD model matters too: U is power-efficient for long battery life, P is balanced, and H or HX is high performance for gaming and creative work.
 
-6. What sizes do your pastries come in?
-Most individual pastries are sold as a single piece. Croissants and pain au chocolat are also available as a box of 4. Tarts are sold by the individual or as a larger 6-inch whole tart. Breads are available as a half loaf or full loaf.
+6. **What is the difference between Apple M1, M2 and M2 Pro chips?**
+   They are Apple's own processors for MacBooks. They combine high performance with long battery life. M2 is faster than M1, and M2 Pro adds more processor and graphics cores for video editing and other heavy work. MacBooks run macOS, not Windows.
 
-7. Are there vegan options available?
-Our sourdough loaf and dark rye bread are vegan. We are developing additional vegan patisserie options. Please ask a team member for the current vegan selection.
+7. **Do I need a dedicated graphics card (GPU)?**
+   Integrated graphics are fine for office work, streaming and light photo editing. A dedicated GPU is needed for modern games and 3D or video work. NVIDIA GeForce RTX 3050 or RTX 4050 is entry level for 1080p gaming, RTX 3060 or RTX 4060 handles most games at high settings, and RTX 4070 to RTX 4090 are for high refresh rates and demanding creative work.
 
-8. How should I store my baked goods at home?
-Viennoiserie (croissants, pain au chocolat) are best eaten on the day of purchase. Breads stay fresh for 2–3 days wrapped at room temperature, or can be frozen. Tarts and cakes should be refrigerated and consumed within 2 days.
+8. **SSD or eMMC storage, what is the difference?**
+   An SSD is much faster and is standard on most laptops. eMMC is slower, smaller flash storage used in low-cost laptops and Chromebooks. It is fine for web apps and cloud storage, but not for large programs or games.
 
-9. Do you serve coffee and hot drinks?
-Yes. We offer espresso, cappuccino, flat white, filter coffee, café latte, hot chocolate, chai latte, and matcha latte. All milk-based drinks can be made with oat milk, soy milk, or almond milk on request.
+9. **What is a Chromebook?**
+   A Chromebook runs Google ChromeOS. It is designed for web apps, Google Workspace and Android apps, starts quickly, gets automatic updates and usually costs less. It cannot run most Windows software, so check that the programs you need are available.
 
-10. What seasonal pastries do you offer?
-We feature a rotating seasonal menu: Christmas Stollen Slice (November–December), Galette des Rois (January), Hot Cross Buns (March–April), Strawberry Mille-Feuille (May–July), and Pumpkin Spice Brioche (September–November).
+10. **Which laptop is best for students?**
+    For most students, a laptop with an Intel Core i5 or AMD Ryzen 5 processor, 8 to 16GB RAM, a 256GB or larger SSD and a 13 to 15.6 inch screen is a good balance of price, weight and battery life. Students can use the Student Laptop Discount (code STUDENT10).
 
-Plain Croissant: A hand-laminated butter croissant made with pure French butter. Crisp on the outside, soft and honeycomb-layered inside. Available as a single or box of 4. Best served warm. Allergens: gluten, dairy, eggs. Popularity: 95%.
+11. **What makes a laptop a business laptop?**
+    Business models such as Lenovo ThinkPad and ThinkBook, HP EliteBook and ProBook, Dell Latitude and Vostro, ASUS ExpertBook and Acer TravelMate are built for durability, security features and easy IT management. They often include a fingerprint reader, a privacy camera shutter and longer manufacturer support.
 
-Almond Croissant: A twice-baked croissant filled and topped with almond frangipane and toasted flaked almonds. Sweet, rich, and nutty. Available single or box of 4. Allergens: gluten, dairy, eggs, nuts. Popularity: 92%.
+12. **What screen size should I choose?**
+    13 to 14 inches is the most portable for travel and university. 15.6 to 16 inches gives more screen space and often a number pad. 17 inches suits a desk replacement. OLED screens show deeper blacks and stronger colours, which is good for films and photo editing.
 
-Pain au Chocolat: Buttery laminated dough wrapped around two dark chocolate batons. Best served slightly warm. Available single or box of 4. Allergens: gluten, dairy, eggs, soy. Popularity: 93%.
+13. **What is a 2-in-1 or convertible laptop?**
+    A 2-in-1 has a touchscreen and either a hinge that folds back 360 degrees or a detachable keyboard, so it can be used as a tablet. Examples include the HP ENVY x360, HP Spectre x360 and Microsoft Surface Pro. Look for "touchscreen: true" in the product details.
 
-Brioche Loaf: An enriched bread made with butter and eggs, yielding a golden, pillowy crumb. Ideal for French toast or simply with jam. Available as half or full loaf. Allergens: gluten, dairy, eggs. Popularity: 88%.
+14. **What does refurbished mean?**
+    Refurbished laptops are pre-owned or returned devices that have been tested, cleaned, repaired where needed and reset to factory settings. They are sold at a lower price, show "condition: Refurbished" in the catalog, and come with a 12-month warranty.
 
-Sourdough Loaf: Long-fermented naturally leavened bread with a crisp crust and open crumb. Dairy-free and vegan. Available as half or full loaf. Allergens: gluten only. Popularity: 91%.
+15. **Do new phones come with a charger?**
+    Many manufacturers no longer include a charger in the box, only a USB cable. Since 28 December 2024, new phones sold in the EU must have a USB-C charging port, and the same rule applies to new laptops from 28 April 2026. iPhone models up to the iPhone 14 use Apple's Lightning port.
 
-Dark Rye Bread: Dense, slightly sour rye loaf baked in the Northern European tradition. Dairy-free and vegan. Available as half or full loaf. Allergens: gluten only. Popularity: 82%.
+16. **What is the EU energy label on smartphones?**
+    Since 20 June 2025, smartphones and tablets sold in the EU carry an energy label. It shows an energy efficiency class from A to G, battery life per charge, the number of charge cycles the battery is rated for, a repairability class from A to E, and drop and dust and water resistance.
 
-Chocolate Éclair: Choux pastry filled with silky chocolate pastry cream and glazed with dark chocolate. Available as a single piece. Allergens: gluten, dairy, eggs. Popularity: 90%.
+17. **What is a foldable phone?**
+    A foldable phone, such as the Samsung Galaxy Z Flip4, has a flexible screen that folds in half. Flip-style phones fold into a small square. Foldables cost more than standard phones of similar performance and need a little more care with the screen.
 
-Vanilla Éclair: Choux pastry filled with bourbon vanilla pastry cream and finished with a pale fondant glaze. Available as a single piece. Allergens: gluten, dairy, eggs. Popularity: 87%.
+18. **Can I connect a laptop to an external monitor?**
+    Most laptops have an HDMI port for a monitor or TV. Many also support monitors over USB-C with DisplayPort or Thunderbolt, which can carry video, data and charging over one cable. Check the laptop's ports before buying an adapter or docking station.
 
-Fresh Fruit Tart: Crisp sweet shortcrust pastry shell filled with vanilla crème pâtissière and topped with seasonal fresh fruit. Available as individual or large 6-inch. Allergens: gluten, dairy, eggs. Popularity: 89%.
+19. **How do I check if a product is in stock at my store?**
+    Ask the Tech Assistant for the product and the store. Stock is held per store in the product catalog, so the assistant can tell you whether a product is available in a specific store and how many units are left.
 
-Lemon Tart: Classic tarte au citron with a bright, tangy lemon curd filling in a buttery shortcrust shell. Available as individual or large 6-inch. Allergens: gluten, dairy, eggs. Popularity: 86%.
-
-Macaron (Assorted Flavours): French macarons with crisp meringue shells and a soft ganache or buttercream filling. Flavours rotate and include pistachio, raspberry, salted caramel, and vanilla. Naturally gluten-free. Available single, box of 6, or box of 12. Allergens: dairy, eggs, nuts. Popularity: 94%.
-
-Opéra Cake Slice: A classic French layered cake of coffee-soaked almond sponge (joconde), coffee buttercream, and chocolate ganache. Rich and elegant. Available by the slice. Allergens: gluten, dairy, eggs, nuts. Popularity: 85%.
-
-Black Forest Cake Slice: Layers of chocolate sponge, whipped cream, and morello cherries, finished with chocolate shavings. Available by the slice. Allergens: gluten, dairy, eggs. Popularity: 88%.
-
-Custom Celebration Cake: Fully bespoke cakes in your choice of sponge (vanilla, chocolate, lemon, red velvet), filling, and decoration. Minimum 3 days advance order required. Available in 6-inch, 8-inch, and 10-inch. Allergens vary by specification. Popularity: 96%.
-
-Quiche Lorraine: A classic savoury tart filled with eggs, cream, and smoked lardons in a buttery shortcrust shell. Available by the slice or as a whole 8-inch. Allergens: gluten, dairy, eggs. Popularity: 83%.
-
-Spinach & Feta Pastry: Flaky pastry filled with wilted spinach, feta cheese, and fresh herbs. Available as a single piece. Allergens: gluten, dairy, eggs. Popularity: 80%.
-
-Espresso: A concentrated shot of coffee brewed under pressure. Single or double shot. Served hot only. Caffeine: ~90 mg. Popularity: 90%.
-
-Cappuccino: Espresso topped with equal parts steamed and frothed milk. Available small or large. Served hot only. Caffeine: ~120 mg. Popularity: 91%.
-
-Flat White: A double ristretto shot with a small amount of microfoamed milk, stronger than a latte. Available small or large. Served hot only. Caffeine: ~130 mg. Popularity: 89%.
-
-Filter Coffee: Slow-drip brewed coffee, smooth and clean-tasting. Dairy-free by default. Available small, medium, large. Caffeine: ~110 mg. Popularity: 78%.
-
-Café Latte: Espresso with a generous pour of steamed milk and a light layer of foam. Can be served hot or iced. Available small, medium, large. Caffeine: ~150 mg. Popularity: 88%.
-
-Hot Chocolate: Rich dark chocolate melted into steamed milk. Comforting and indulgent. Available small or large. Served hot only. Popularity: 84%.
-
-Chai Latte: Spiced black tea concentrate with steamed milk. Available hot or iced, small or large. Caffeine: ~60 mg. Popularity: 79%.
-
-Matcha Latte: Japanese ceremonial grade matcha whisked with steamed milk. Available hot or iced, small or large. Caffeine: ~45 mg. Popularity: 81%.
-
-Christmas Stollen Slice: A traditional German yeasted fruit bread enriched with marzipan, dried fruits, and dusted with icing sugar. Available November–December. Allergens: gluten, dairy, eggs, nuts. Popularity: 93%.
-
-Hot Cross Bun: Spiced sweet bun with currants and a white cross, traditionally served at Easter. Available March–April. Single or box of 6. Allergens: gluten, dairy, eggs. Popularity: 90%.
-
-Galette des Rois: A French Kings' Cake filled with almond frangipane in flaky puff pastry. Traditionally served in January. Available by the slice or whole 8-inch. Allergens: gluten, dairy, eggs, nuts. Popularity: 88%.
-
-Strawberry Mille-Feuille: Layers of caramelised puff pastry, vanilla crème légère, and fresh strawberries. Available May–July as an individual portion. Allergens: gluten, dairy, eggs. Popularity: 92%.
-
-Pumpkin Spice Brioche: Enriched brioche infused with warming pumpkin spice blend. Available September–November as single or box of 4. Allergens: gluten, dairy, eggs. Popularity: 87%.
+20. **Are prices the same online and in store?**
+    Prices in the catalog apply both online and in store. Promotions can change the final price at checkout. Ask the Tech Assistant about current promotions.

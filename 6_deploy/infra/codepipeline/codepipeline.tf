@@ -32,12 +32,6 @@ resource "aws_codepipeline" "this" {
   }
 
   variable {
-    name          = "TOGGLE_DEPLOY_EKS"
-    default_value = var.toggle_deploy_eks ? "true" : "false"
-    description   = "Build the web image and do a blue/green EKS rollout."
-  }
-
-  variable {
     name          = "TOGGLE_SMOKE"
     default_value = var.toggle_smoke ? "true" : "false"
     description   = "Run the frontend smoke test (requires SMOKE_TEST_URL)."
@@ -116,7 +110,6 @@ resource "aws_codepipeline" "this" {
           { name = "TOGGLE_PROVISION_BACKENDS", value = "#{variables.TOGGLE_PROVISION_BACKENDS}", type = "PLAINTEXT" },
           { name = "TOGGLE_SETUP_KNOWLEDGE_BASES", value = "#{variables.TOGGLE_SETUP_KNOWLEDGE_BASES}", type = "PLAINTEXT" },
           { name = "TOGGLE_DEPLOY_AGENT", value = "#{variables.TOGGLE_DEPLOY_AGENT}", type = "PLAINTEXT" },
-          { name = "TOGGLE_DEPLOY_EKS", value = "#{variables.TOGGLE_DEPLOY_EKS}", type = "PLAINTEXT" },
           { name = "TOGGLE_SMOKE", value = "#{variables.TOGGLE_SMOKE}", type = "PLAINTEXT" },
         ])
       }

@@ -98,16 +98,16 @@ else
 fi
 unset _stores_cluster_arn _stores_secret_arn
 
-# Promotions API: HTTP API spbcBakeryAPI from the same stack (IAM-authorized GET /prod/promotions)
+# Promotions API: HTTP API spbcPromotionsAPI from the same stack (IAM-authorized GET /prod/promotions)
 echo "Looking for the promotions API..."
 _promos_endpoint=$(aws apigatewayv2 get-apis --region "$REGION" \
-    --query "Items[?Name=='spbcBakeryAPI'].ApiEndpoint | [0]" --output text 2>/dev/null || true)
+    --query "Items[?Name=='spbcPromotionsAPI'].ApiEndpoint | [0]" --output text 2>/dev/null || true)
 if [ -n "$_promos_endpoint" ] && [ "$_promos_endpoint" != "None" ]; then
     echo "export PROMOS_API_URL=${_promos_endpoint}/prod/promotions" >> $ENV_FILE
     echo "✅ Found promotions API: ${_promos_endpoint}/prod/promotions"
 else
     unset PROMOS_API_URL
-    echo "⚠️  Promotions API spbcBakeryAPI not found: promotions come from the promos knowledge base only"
+    echo "⚠️  Promotions API spbcPromotionsAPI not found: promotions come from the promos knowledge base only"
 fi
 unset _promos_endpoint
 
@@ -118,7 +118,7 @@ if [ -n "$ORDERS_TABLE" ]; then
     echo "export ORDERS_TABLE=$ORDERS_TABLE" >> $ENV_FILE
     echo "✅ Found Orders Table: $ORDERS_TABLE"
 else
-    echo "❌ Orders table not found (expected: spbc-orders-table)"
+    echo "❌ Orders table not found (expected: spbc-orders-table; created by make backends)"
 fi
 
 SESSIONS_TABLE=$(aws dynamodb list-tables --query 'TableNames[?starts_with(@, `spbc-sessions-table`)]' --output text 2>/dev/null | head -1 || true)
@@ -126,12 +126,12 @@ if [ -n "$SESSIONS_TABLE" ]; then
     echo "export SESSIONS_TABLE=$SESSIONS_TABLE" >> $ENV_FILE
     echo "✅ Found Sessions Table: $SESSIONS_TABLE"
 else
-    echo "❌ Sessions table not found (expected: spbc-sessions-table)"
+    echo "❌ Sessions table not found (expected: spbc-sessions-table; created by make backends)"
 fi
 
 # Discover OpenSearch collection
 echo "Looking for OpenSearch collection..."
-OPENSEARCH_COLLECTION=$(aws opensearchserverless list-collections --query 'collectionSummaries[?starts_with(name, `spbc-`) || contains(name, `bakery`) || contains(name, `pastry`)].name' --output text 2>/dev/null | head -1 || true)
+OPENSEARCH_COLLECTION=$(aws opensearchserverless list-collections --query 'collectionSummaries[?starts_with(name, `spbc-`) || contains(name, `electronics`)].name' --output text 2>/dev/null | head -1 || true)
 if [ -n "$OPENSEARCH_COLLECTION" ]; then
     # Get collection endpoint
     AOSSENDPOINT=$(aws opensearchserverless batch-get-collection --names "$OPENSEARCH_COLLECTION" --query 'collectionDetails[0].collectionEndpoint' --output text 2>/dev/null || true)
@@ -185,6 +185,19 @@ for domain in menu orders payments stores promos; do
         echo "❌ spbc-${domain}-knowledge-base not found (required by the agent runtime)"
     fi
 done
+
+# AgentCore Memory (optional): created by 6_deploy/agents/create_memory.py (make memory). The id
+# is <name>-<suffix>, so find it by name prefix. Without it the runtime keeps in-process memory only.
+echo "Looking for the AgentCore Memory..."
+_memory_id=$(aws bedrock-agentcore-control list-memories --region "$REGION" \
+    --query 'memories[?starts_with(id, `spbc_tech_assistant_memory-`)].id | [0]' --output text 2>/dev/null || true)
+if [ -n "$_memory_id" ] && [ "$_memory_id" != "None" ]; then
+    echo "export MEMORY_ID=$_memory_id" >> $ENV_FILE
+    echo "✅ Found AgentCore Memory: $_memory_id"
+else
+    echo "ℹ️  No AgentCore Memory (run: make memory) — the runtime keeps in-session memory only"
+fi
+unset _memory_id
 
 # Guardrail (optional) — stored in SSM by 5_security_rai/create_and_store_guardrail.sh
 # The guardrail is optional and may not be in SSM. The `|| true` keeps a missing parameter

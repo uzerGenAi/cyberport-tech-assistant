@@ -12,7 +12,7 @@ MODEL_ARN = os.environ.get("MODEL_ARN", "")
 # Promotions API (Terraform stack 6_deploy/infra/agentcore-backends): IAM-authorized GET /promotions.
 # Without PROMOS_API_URL the API is looked up by name (legacy lab setup).
 PROMOS_API_URL = os.environ.get("PROMOS_API_URL", "").strip()
-PROMOS_API_NAME = "spbcBakeryAPI"
+PROMOS_API_NAME = "spbcPromotionsAPI"
 PROMOS_API_PATH = "/prod/promotions"
 # Optional. When set, the agent can answer from the promotions knowledge base, which keeps
 # promotions working when the API is missing or unreachable.
@@ -23,7 +23,7 @@ _session = boto3.Session(region_name=REGION)
 
 
 def _discover_api_url() -> str | None:
-    """Legacy: find spbcBakeryAPI by name (HTTP API first, then REST API)."""
+    """Legacy: find spbcPromotionsAPI by name (HTTP API first, then REST API)."""
     http_apis = boto3.client('apigatewayv2', region_name=REGION).get_apis(MaxResults="500")
     for api in http_apis.get('Items', []):
         if api.get('Name') == PROMOS_API_NAME:
@@ -101,14 +101,15 @@ _promos_tools = [list_promotions] + ([promos_kb_retrieve] if PROMOS_KNOWLEDGE_BA
 promos_agent = Agent(
     model=BedrockModel(model_id=os.environ["MODEL_ID"], region_name=REGION),
     system_prompt="""
-        You are 'Promotions Assistant' for Specialty Bakeries & Pastry Cafés, expert in current deals and discounts available as promotions.
+        You are 'Promotions Assistant' for the Cyberport Tech Assistant, expert in current deals, discounts, trade-in offers, financing offers and business-customer offers.
 
         Your primary responsibilities:
         - Accurately describe active promotions and their conditions
         - Explain how customers can qualify for each promotion
         - Check if specific orders qualify for promotions
-        - Provide information about limited-time offers and seasonal specials
-        - Answer questions about loyalty programs and rewards
+        - Provide information about limited-time offers such as Black Friday week
+        - Explain the trade-in bonus, student discount, 0% financing offer and manufacturer cashback
+        - Answer questions about business-customer and customer-account offers
 
         When responding:
         - Always wrap your answers in <answer> tags

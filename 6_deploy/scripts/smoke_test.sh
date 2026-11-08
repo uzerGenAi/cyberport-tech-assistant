@@ -19,7 +19,7 @@ set -euo pipefail
 set -euo pipefail
 
 URL="${SMOKE_TEST_URL:-}"
-EXPECT="${SMOKE_EXPECT:-Specialty Bakeries}"
+EXPECT="${SMOKE_EXPECT:-Cyberport Tech Assistant}"
 TIMEOUT="${SMOKE_TIMEOUT:-10}"
 RETRIES="${SMOKE_RETRIES:-5}"
 

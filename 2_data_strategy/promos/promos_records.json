@@ -1,58 +1,74 @@
 [
   {
-    "title": "Fresh Pastry Tuesdays",
-    "description": "Every Tuesday, get a free plain croissant with any hot drink purchase.",
+    "title": "Trade-in Bonus",
+    "description": "Trade in your old smartphone or laptop and get an extra €50 on top of its trade-in value when you buy a new smartphone or laptop over €400.",
     "valid_from": "2026-01-01",
     "valid_to": "2027-12-31",
-    "eligibility": "All customers",
-    "promo_code": "TUESDAYCROISSANT"
+    "eligibility": "All customers trading in a working or repairable device",
+    "promo_code": "TRADEIN50"
   },
   {
-    "title": "Pastry Rewards — Double Points Weekend",
-    "description": "Earn 2× Pastry Rewards points on all purchases over €15 every Saturday and Sunday.",
+    "title": "Accessory Bundle Deal",
+    "description": "10% off cases, chargers and screen protectors bought together with a new smartphone, when you order with your Cyberport customer account.",
     "valid_from": "2026-01-01",
     "valid_to": "2027-12-31",
-    "eligibility": "Pastry Rewards members",
+    "eligibility": "Customers ordering with a Cyberport customer account",
     "promo_code": ""
   },
   {
-    "title": "New Customer Welcome",
-    "description": "€5 off your first order of €15 or more when you register in the app.",
-    "valid_from": "2026-01-01",
-    "valid_to": "2027-12-31",
-    "eligibility": "New customers (first order only)",
-    "promo_code": "WELCOME5"
-  },
-  {
-    "title": "Student Discount",
-    "description": "10% off your entire order with a valid student ID or university email.",
+    "title": "Student Laptop Discount",
+    "description": "10% off any new laptop, up to €150 off, with a valid student ID or university email address.",
     "valid_from": "2026-09-01",
     "valid_to": "2027-07-31",
     "eligibility": "Students only",
     "promo_code": "STUDENT10"
   },
   {
-    "title": "Birthday Cake Offer",
-    "description": "Receive a complimentary 6-inch celebration cake slice on your birthday month when you are a Pastry Rewards member.",
+    "title": "Business Volume Discount",
+    "description": "5% off orders of five or more laptops for business customers who order with a company name and VAT ID.",
     "valid_from": "2026-01-01",
     "valid_to": "2027-12-31",
-    "eligibility": "Pastry Rewards members (birthday month only)",
+    "eligibility": "Business customers with a VAT ID",
+    "promo_code": "BUSINESS5"
+  },
+  {
+    "title": "Gaming Laptop Bundle",
+    "description": "Get a free gaming headset with any gaming laptop over €1,000.",
+    "valid_from": "2026-10-01",
+    "valid_to": "2026-12-31",
+    "eligibility": "All customers, while stocks last",
+    "promo_code": "GAMERBUNDLE"
+  },
+  {
+    "title": "Refurbished Week",
+    "description": "An extra 5% off all refurbished laptops.",
+    "valid_from": "2026-11-01",
+    "valid_to": "2026-11-15",
+    "eligibility": "All customers",
+    "promo_code": "REFURB5"
+  },
+  {
+    "title": "0% Financing",
+    "description": "Spread purchases of €299 or more over 6, 12 or 24 months at 0% interest, subject to a credit check by our financing partner.",
+    "valid_from": "2026-01-01",
+    "valid_to": "2027-12-31",
+    "eligibility": "Customers aged 18 or over, resident in Germany or Austria",
     "promo_code": ""
   },
   {
-    "title": "Office Catering Bundle",
-    "description": "Order a catering package for 10 or more people and receive a complimentary assorted macaron box (12 pieces).",
+    "title": "Newsletter Welcome Offer",
+    "description": "€10 off your first online order of €100 or more after signing up for the newsletter.",
     "valid_from": "2026-01-01",
     "valid_to": "2027-12-31",
-    "eligibility": "Catering orders of 10+ people",
-    "promo_code": "CATERINGBONUS"
+    "eligibility": "New newsletter subscribers (first online order only)",
+    "promo_code": "WELCOME10"
   },
   {
-    "title": "Seasonal Pastry Launch — 20% Off",
-    "description": "20% off all new seasonal pastries during the first week of each seasonal launch.",
-    "valid_from": "2026-01-01",
-    "valid_to": "2027-12-31",
+    "title": "Black Friday Week",
+    "description": "Up to 20% off selected smartphones and laptops. Discounted products are marked in the shop.",
+    "valid_from": "2026-11-23",
+    "valid_to": "2026-11-30",
     "eligibility": "All customers",
-    "promo_code": "SEASONLAUNCH"
+    "promo_code": ""
   }
 ]

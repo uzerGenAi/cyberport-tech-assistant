@@ -4,7 +4,7 @@ aws_region  = "eu-central-1"
 environment = "production"
 
 # The CodeCommit repository name and the pipeline source.
-repository_name = "spbc-pastry-concierge"
+repository_name = "spbc-tech-assistant"
 
 # Optional sign-in user for the agent deploy. Leave both empty to pass --skip-user to
 # post_deploy.sh. cognito_admin_password_secret_id is a Secrets Manager id, not the password.
@@ -18,5 +18,5 @@ repository_name = "spbc-pastry-concierge"
 # approval_email = "ops@example.com"
 
 # execution_role_name_patterns rarely needs overriding; the default covers every role the
-# deploy path creates/updates/passes (SPBC-*, Cognito_*, the Bedrock KB execution role, the
-# EKS stack roles, and the AgentCore starter-toolkit role).
+# deploy path creates/updates/passes (SPBC-*, Cognito_*, the Bedrock KB execution role, and
+# the AgentCore starter-toolkit role).

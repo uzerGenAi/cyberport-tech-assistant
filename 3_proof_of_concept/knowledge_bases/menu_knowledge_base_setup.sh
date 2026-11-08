@@ -5,8 +5,8 @@ source ~/environment/env.sh
 
 REGION="${REGION:-eu-central-1}"
 
-echo "Creating OpenSearch index for bakery menu..."
-awscurl --service aoss --region "$REGION" -H "Content-Type: application/json" -X PUT "$AOSSENDPOINT/bakery_menu_index" -d '{
+echo "Creating OpenSearch index for the product catalog..."
+awscurl --service aoss --region "$REGION" -H "Content-Type: application/json" -X PUT "$AOSSENDPOINT/electronics_menu_index" -d '{
   "settings": {
     "index": {
       "knn": true,
@@ -38,7 +38,7 @@ export MENU_KNOWLEDGE_BASE_ID=$(aws bedrock-agent create-knowledge-base \
   --role-arn "$ROLE_ARN" \
   --region "$REGION" \
   --knowledge-base-configuration 'type=VECTOR,vectorKnowledgeBaseConfiguration={embeddingModelArn="arn:aws:bedrock:'"${REGION}"'::foundation-model/amazon.titan-embed-text-v2:0",embeddingModelConfiguration={bedrockEmbeddingModelConfiguration={dimensions=1024}}}' \
-  --storage-configuration "type=OPENSEARCH_SERVERLESS,opensearchServerlessConfiguration={collectionArn='${OPENSEARCH_COLLECTION_ARN}',vectorIndexName='bakery_menu_index',fieldMapping={vectorField='documentid',textField='spbc-data',metadataField='spbc-metadata'}}" \
+  --storage-configuration "type=OPENSEARCH_SERVERLESS,opensearchServerlessConfiguration={collectionArn='${OPENSEARCH_COLLECTION_ARN}',vectorIndexName='electronics_menu_index',fieldMapping={vectorField='documentid',textField='spbc-data',metadataField='spbc-metadata'}}" \
   | jq -r '.knowledgeBase.knowledgeBaseId') && \
 echo "export MENU_KNOWLEDGE_BASE_ID=$MENU_KNOWLEDGE_BASE_ID" >> ~/environment/env.sh && \
 echo "Menu Knowledge Base ID: $MENU_KNOWLEDGE_BASE_ID"
@@ -47,7 +47,7 @@ aws bedrock-agent create-data-source \
   --knowledge-base-id "$MENU_KNOWLEDGE_BASE_ID" \
   --name spbc-menu-kb-data-source \
   --region "$REGION" \
-  --data-source-configuration 'type=S3,s3Configuration={bucketArn='"${OPENSEARCH_S3_BUCKET_ARN}"',inclusionPrefixes=["bakery_menu/"]}'
+  --data-source-configuration 'type=S3,s3Configuration={bucketArn='"${OPENSEARCH_S3_BUCKET_ARN}"',inclusionPrefixes=["electronics_menu/"]}'
 
 export MENU_DATA_SOURCE_ID=$(aws bedrock-agent list-data-sources \
   --knowledge-base-id "$MENU_KNOWLEDGE_BASE_ID" \

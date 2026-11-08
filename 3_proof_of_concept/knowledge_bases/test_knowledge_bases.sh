@@ -34,18 +34,18 @@ run_query() {
 
 log_query "Querying Orders Knowledge Base"
 log_query "Using inference profile: ${NOVA_PRO_PROFILE_ARN}"
-run_query "What if my drink arrives cold?" "$ORDERS_KNOWLEDGE_BASE_ID"
+run_query "Can I return a laptop I bought online?" "$ORDERS_KNOWLEDGE_BASE_ID"
 
 log_query "Querying Menu Knowledge Base"
-run_query "How much caffeine is in a typical drink?" "$MENU_KNOWLEDGE_BASE_ID"
+run_query "How much RAM do I need for gaming?" "$MENU_KNOWLEDGE_BASE_ID"
 
 log_query "Querying Stores Knowledge Base"
-run_query "Does stores have public restrooms?" "$STORES_KNOWLEDGE_BASE_ID"
+run_query "Can I bring my old phone for recycling?" "$STORES_KNOWLEDGE_BASE_ID"
 
 log_query "Querying Payments Knowledge Base"
 run_query "What are the different payment methods I can use?" "$PAYMENTS_KNOWLEDGE_BASE_ID"
 
 log_query "Querying Promos Knowledge Base"
-run_query "How can I use the promotions?" "$PROMOS_KNOWLEDGE_BASE_ID"
+run_query "How does the trade-in bonus work?" "$PROMOS_KNOWLEDGE_BASE_ID"
 
 echo -e "\n=== All queries completed ==="

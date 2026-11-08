@@ -4,6 +4,8 @@
 strands-agents==1.62.0
 strands-agents-tools==0.8.10
 bedrock-agentcore==1.24.2
+# Emits the traces/spans behind CloudWatch GenAI observability (sessions, traces, errors, latency)
+aws-opentelemetry-distro==0.22.0
 boto3==1.43.117
 pymysql==1.2.3
 requests==2.34.2

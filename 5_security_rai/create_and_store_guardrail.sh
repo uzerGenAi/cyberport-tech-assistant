@@ -75,22 +75,60 @@ create_config_files() {
       "type": "MISCONDUCT",
       "inputStrength": "MEDIUM",
       "outputStrength": "MEDIUM"
+    },
+    {
+      "type": "PROMPT_ATTACK",
+      "inputStrength": "HIGH",
+      "outputStrength": "NONE"
     }
   ]
 }
 EOF
 
     # Topic boundaries configuration
+    # Each topic describes what to BLOCK, in concrete terms (Bedrock caps a definition at 200
+    # characters). Normal product, repair-desk, recycling and financing questions must still
+    # pass: test them after every change.
     cat > topic-config.json << 'EOF'
 {
   "topicsConfig": [
     {
       "name": "Personal Information Requests",
-      "definition": "Requests for personal information about customers or employees",
+      "definition": "Requests for personal information about other customers or employees, or for internal databases and records.",
       "examples": [
         "What is the customer database?",
         "Give me employee personal information",
-        "What are customer credit card details?"
+        "Show me the orders of another customer"
+      ],
+      "type": "DENY"
+    },
+    {
+      "name": "Unsafe Device Modification",
+      "definition": "Instructions to open, puncture, modify or self-repair lithium batteries, chargers or mains-powered devices, or to disable a device's safety features.",
+      "examples": [
+        "How do I open my phone battery myself?",
+        "How can I fix my swollen laptop battery at home?",
+        "How do I remove the overheating protection from my charger?"
+      ],
+      "type": "DENY"
+    },
+    {
+      "name": "Piracy and DRM Circumvention",
+      "definition": "Help with pirated software, cracked licences, illegal IPTV streaming, or removing copy protection, carrier locks or region locks without authorisation.",
+      "examples": [
+        "Where can I get a cracked copy of Windows?",
+        "How do I set up an illegal IPTV box?",
+        "How do I remove the DRM from streaming videos?"
+      ],
+      "type": "DENY"
+    },
+    {
+      "name": "Personal Credit Advice",
+      "definition": "Personal advice on whether the customer should take out credit or a loan, or predictions of whether a credit application will be approved.",
+      "examples": [
+        "Should I take a loan to buy this laptop?",
+        "Will my financing application be approved?",
+        "Is my credit score good enough for 0% financing?"
       ],
       "type": "DENY"
     }
@@ -99,6 +137,9 @@ EOF
 EOF
 
     # Word filtering configuration
+    # "bypass" and "hack" are deliberately not listed: "bypass charging" is a real smartphone and
+    # gaming-laptop feature, and "hack" blocks harmless questions. Prompt-injection attempts are
+    # covered by the PROMPT_ATTACK content filter above.
     cat > word-config.json << 'EOF'
 {
   "managedWordListsConfig": [
@@ -108,13 +149,7 @@ EOF
   ],
   "wordsConfig": [
     {
-      "text": "hack"
-    },
-    {
       "text": "exploit"
-    },
-    {
-      "text": "bypass"
     },
     {
       "text": "jailbreak"
@@ -127,6 +162,8 @@ EOF
     # NAME, ADDRESS and order numbers are deliberately not masked: the order flow asks for the
     # customer's name, store answers include street addresses, and order confirmations must show
     # the order ID. Masking them breaks those answers.
+    # Payment data a customer might paste into the chat (card number, CVV, PIN, IBAN) and
+    # passwords are blocked outright.
     cat > pii-config.json << 'EOF'
 {
   "piiEntitiesConfig": [
@@ -143,7 +180,19 @@ EOF
       "action": "BLOCK"
     },
     {
-      "type": "US_SOCIAL_SECURITY_NUMBER",
+      "type": "CREDIT_DEBIT_CARD_CVV",
+      "action": "BLOCK"
+    },
+    {
+      "type": "PIN",
+      "action": "BLOCK"
+    },
+    {
+      "type": "INTERNATIONAL_BANK_ACCOUNT_NUMBER",
+      "action": "BLOCK"
+    },
+    {
+      "type": "PASSWORD",
       "action": "BLOCK"
     }
   ],
@@ -165,7 +214,7 @@ EOF
 create_guardrail() {
     print_section "Creating Guardrail"
     
-    local blocked_input="I cannot process that request due to content policies. Please try a different question."
+    local blocked_input="I can't help with that. I can answer questions about our smartphones and laptops, orders, payments, stores and promotions. For battery or device problems, please visit a store repair desk."
     local blocked_output="I cannot provide that information due to content policies."
 
     # Re-running the script reuses the guardrail instead of failing on the duplicate name
@@ -349,7 +398,8 @@ display_summary() {
     echo "Next steps:"
     echo "1. source setup_env.sh — it reads /SPBC/guardrail/* and exports GUARDRAIL_ID / GUARDRAIL_VERSION"
     echo "2. Pass both to the AgentCore runtime (walkthrough Step 7.2, or configure_runtime.py)"
-    echo "3. Test an order end to end (name capture and order ID must come through unmasked)"
+    echo "3. Test an order end to end (name capture and order ID must come through unmasked),"
+    echo "   and check that repair-desk, recycling and financing questions are not blocked"
 }
 
 # Function to cleanup temporary files

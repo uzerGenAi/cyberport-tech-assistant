@@ -65,8 +65,9 @@ def strip_internal_reasoning(text):
 
 # === Tool Wrappers ===
 @tool(name="orders_agent_tool",
-      description="A tool for checking order status, placing new bakery orders, "
-                  "and answering questions about orders.")
+      description="A tool for checking the status of an existing order (needs the customer name or ID "
+                  "and the order ID), placing new click & collect orders, and answering questions "
+                  "about delivery, cancellation, returns and warranty.")
 def orders_agent_tool(query: str) -> str:
     """Handle order-related queries."""
     try:
@@ -80,9 +81,10 @@ def orders_agent_tool(query: str) -> str:
 
 
 @tool(name="menu_agent_tool",
-      description="A tool to answer questions about the bakery menu, pastries, breads, and drinks")
+      description="A tool to answer questions about our smartphones and laptops: specs, comparisons, "
+                  "recommendations, prices and order totals in Euros (€), and stock per store.")
 def menu_agent_tool(query: str) -> str:
-    """Handle menu-related queries."""
+    """Handle product catalog queries."""
     try:
         response = menu_agents.menu_agent(query)
         if isinstance(response, dict) and "text" in response:
@@ -90,12 +92,12 @@ def menu_agent_tool(query: str) -> str:
         return str(response)
     except (ValueError, ConnectionError, KeyError) as e:
         strands_logger.error("menu_agent_tool error: %s", str(e))
-        return f"Sorry, I could not retrieve menu information: {str(e)}"
+        return f"Sorry, I could not retrieve product information: {str(e)}"
 
 
 @tool(name="payments_policy_agent_tool",
-      description="A tool to answer questions about payment policies, order pricing in Euros (€), "
-                  "and transaction support for Specialty Bakeries & Pastry Cafés.")
+      description="A tool to answer questions about payment methods, 0% financing, refunds, "
+                  "invoices and gift cards.")
 def payments_policy_agent_tool(query: str) -> str:
     """Handle payment policy and pricing queries."""
     try:
@@ -109,7 +111,8 @@ def payments_policy_agent_tool(query: str) -> str:
 
 
 @tool(name="stores_agent_tool",
-      description="A tool to answer questions about bakery locations, opening hours, and store policies.")
+      description="A tool to answer questions about store locations, opening hours, pickup stations, "
+                  "and store services such as repairs and recycling. It returns store IDs.")
 def stores_agent_tool(query: str) -> str:
     """Handle store-related queries."""
     try:
@@ -123,8 +126,8 @@ def stores_agent_tool(query: str) -> str:
 
 
 @tool(name="promos_agent_tool",
-      description="A tool to answer questions about promotions, Pastry Rewards loyalty programme, "
-                  "and seasonal launch offers.")
+      description="A tool to answer questions about promotions, trade-in offers, student discounts, "
+                  "the 0% financing offer and business-customer offers.")
 def promos_agent_tool(query: str) -> str:
     """Handle promotion-related queries."""
     try:
@@ -139,44 +142,55 @@ def promos_agent_tool(query: str) -> str:
 
 # === Orchestrator ===
 orchestrator_prompt = """
-You are the Pastry Concierge for Specialty Bakeries & Pastry Cafés, helping customers
-with orders, menu enquiries, promotions, bakery locations, and payment questions.
+You are the Tech Assistant for Cyberport, helping customers choose smartphones and laptops,
+check stock in a store, place click & collect orders, track orders, and answer questions
+about payments, financing, returns, warranty, promotions and store services.
 All prices are in Euros (€).
 
 You respond to queries following these routing guidelines:
 - Respond directly to general enquiries that do not require tools
-- For domain-specific queries (menu, stores, orders, payments, promotions), use the appropriate tool
+- For domain-specific queries (products, stores, orders, payments, promotions), use the appropriate tool
 
 Route queries to the appropriate tool:
-- Order status, placing orders, order history → orders_agent_tool
-- Menu items, ingredients, allergens, seasonal availability → menu_agent_tool
-- Item prices and order totals (always in €) → menu_agent_tool (it owns calculate_order_total)
-- Payment methods and payment policy → payments_policy_agent_tool
-- Bakery locations, opening hours, services → stores_agent_tool
-- Promotions, Pastry Rewards, seasonal launch offers → promos_agent_tool
+- Product specs, comparisons and recommendations → menu_agent_tool
+- Product prices and order totals (always in €) → menu_agent_tool (it owns calculate_order_total)
+- Stock in a store → stores_agent_tool to find the store_id, then menu_agent_tool with that store_id
+- Order status, placing orders, delivery, cancellation, returns, warranty → orders_agent_tool
+- Payment methods, 0% financing, refunds, invoices, gift cards → payments_policy_agent_tool
+- Store locations, opening hours, pickup stations, repairs, recycling → stores_agent_tool
+- Promotions, trade-in, student and business discounts → promos_agent_tool
 
-When a new order request is received:
-- Use menu_agent_tool to confirm items exist AND check seasonal availability
-- Use menu_agent_tool to calculate the total cost in Euros (€)
-- Prices are per item. Pass menu_agent_tool each item by its menu name (e.g.
-  "Almond Croissant"), a quantity, and a size only when the customer gave one
-  (e.g. "large", "8inch", "box_of_4"). Do not invent a size.
+When a customer asks for a recommendation:
+- Ask what they will use the device for and their budget if they have not said
+- Recommend at most three products from menu_agent_tool and explain why each fits
+
+When a new click & collect order request is received:
+- Use menu_agent_tool to confirm the products exist and to calculate the total in Euros (€)
+- Pass menu_agent_tool each product by its catalog name (e.g. "Apple iPhone 14"), a
+  quantity, and for smartphones the storage variant only when the customer gave one
+  (e.g. "128GB", "256GB"). Do not invent a variant.
 - If the pricing result lists any unpriced items, do not quote a total — ask the
   customer to clarify those items first
 - Display items and total cost BEFORE asking for personal information
-- Ask for the customer's name or Pastry Rewards member ID
-- Use store_id 'SPBC-STORE-001' as default if not specified
+- Ask which store they want to collect from; use stores_agent_tool to get its store_id.
+  Use store_id 'spbc-de-001' (Cyberport Store Dresden) only if the customer has no preference
+- Ask for the customer's name or Cyberport customer number
 - Use orders_agent_tool to place the order
-- Order confirmation MUST include Order ID AND total cost in €
+- Order confirmation MUST include the Order ID AND the total in € returned by the order tool
+
+When a customer asks about an existing order:
+- Ask for both the order ID and the name or customer ID used on the order before checking
+- Never share details of an order unless both match
 
 Your responses should:
-- Be direct and to the point, 1-2 sentences where possible
+- Be direct and to the point, 1-3 sentences where possible
 - Not mention document IDs, scores, or routing details
 - Only use tool-sourced information for domain-specific topics
 - Format prices clearly in Euros (€)
 - Begin all responses with a newline
 - Acknowledge conflicting or missing information
 - Never mention internal routing to specialised agents
+- Never ask for card numbers, CVV codes, PINs, passwords or IBANs
 """
 
 gr_id = os.getenv("GUARDRAIL_ID")
@@ -191,33 +205,88 @@ if gr_id and gr_ver:
     if gr_trc:
         opt["guardrail_trace"] = gr_trc
 
-orchestrator = Agent(
-    # Explicit region: Strands otherwise falls back to us-west-2 when AWS_REGION is unset.
-    model=BedrockModel(model_id=model_id, region_name=REGION, **opt),
-    system_prompt=orchestrator_prompt,
-    tools=[
-        orders_agent_tool,
-        menu_agent_tool,
-        payments_policy_agent_tool,
-        stores_agent_tool,
-        promos_agent_tool,
-    ],
-)
+_ORCHESTRATOR_TOOLS = [
+    orders_agent_tool,
+    menu_agent_tool,
+    payments_policy_agent_tool,
+    stores_agent_tool,
+    promos_agent_tool,
+]
+
+
+def build_orchestrator(session_manager=None):
+    """Build the orchestrator; with a session manager its history lives in AgentCore Memory."""
+    return Agent(
+        # Explicit region: Strands otherwise falls back to us-west-2 when AWS_REGION is unset.
+        model=BedrockModel(model_id=model_id, region_name=REGION, **opt),
+        system_prompt=orchestrator_prompt,
+        tools=_ORCHESTRATOR_TOOLS,
+        session_manager=session_manager,
+    )
+
+
+# AgentCore Memory (optional): set MEMORY_ID (make memory). Short-term events hold every turn;
+# long-term strategies keep customer preferences, facts and session summaries per actor.
+MEMORY_ID = os.environ.get("MEMORY_ID", "").strip()
+# Without MEMORY_ID one shared orchestrator keeps the conversation in process for the session.
+orchestrator = None if MEMORY_ID else build_orchestrator()
+
+_CTX_USER_RE = re.compile(r"\[\[CTX\]\]\s*userId=([^\s;]+)")
+_ACTOR_UNSAFE_RE = re.compile(r"[^a-zA-Z0-9_/-]")
+
+
+def actor_id_from_prompt(prompt):
+    """Customer id the web app puts in the [[CTX]] block, made safe for use as a memory actor id.
+
+    The value is supplied by the browser, so it separates one demo user's memories from another's
+    but is not an authenticated identity: use the Cognito subject claim for production.
+    """
+    match = _CTX_USER_RE.search(prompt or "")
+    actor = _ACTOR_UNSAFE_RE.sub("_", match.group(1)) if match else "anonymous"
+    return actor[:200] or "anonymous"
+
+
+def orchestrator_for(session_id, actor_id):
+    """Orchestrator whose conversation is stored in, and restored from, AgentCore Memory."""
+    if not MEMORY_ID:
+        return orchestrator
+    # Imported here so the runtime still starts if the memory integration is unavailable.
+    from bedrock_agentcore.memory.integrations.strands.config import (  # pylint: disable=import-outside-toplevel
+        AgentCoreMemoryConfig, RetrievalConfig)
+    from bedrock_agentcore.memory.integrations.strands.session_manager import (  # pylint: disable=import-outside-toplevel
+        AgentCoreMemorySessionManager)
+    config = AgentCoreMemoryConfig(
+        memory_id=MEMORY_ID,
+        session_id=session_id,
+        actor_id=actor_id,
+        retrieval_config={
+            "/preferences/{actorId}/": RetrievalConfig(top_k=5, relevance_score=0.5),
+            "/facts/{actorId}/": RetrievalConfig(top_k=5, relevance_score=0.4),
+            "/summaries/{actorId}/": RetrievalConfig(top_k=3, relevance_score=0.4),
+        },
+    )
+    return build_orchestrator(AgentCoreMemorySessionManager(config, region_name=REGION))
 
 
 # === AgentCore entrypoint ===
 @app.entrypoint
-def pastry_concierge_agent(payload, context):
+def tech_assistant_agent(payload, context):
     """Main entrypoint for the Bedrock AgentCore runtime."""
     user_input = payload.get("prompt") if isinstance(payload, dict) else None
     if not isinstance(user_input, str) or not user_input.strip():
-        return 'Please send a JSON payload such as {"prompt": "What pastries are on the menu today?"}'
+        return 'Please send a JSON payload such as {"prompt": "Which laptops do you have for students?"}'
     os.environ["BYPASS_TOOL_CONSENT"] = "true"
 
     strands_logger.info("Session ID: %s", context.session_id)
 
     try:
-        response = orchestrator(user_input)
+        try:
+            agent = orchestrator_for(context.session_id, actor_id_from_prompt(user_input))
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            # Memory is an enhancement: a memory outage must not take the assistant down.
+            strands_logger.error("AgentCore Memory unavailable, answering without it: %s", e)
+            agent = build_orchestrator()
+        response = agent(user_input)
         raw_text = getattr(response, "text", None) or str(response)
         assistant_text = strip_internal_reasoning(raw_text)
         # DEBUG only: responses can include customer names and order details.

@@ -34,13 +34,13 @@ fi
 # Set proper permissions for all application files
 sudo chown -R ec2-user:ec2-user "/home/ec2-user/environment/4_monitor_and_evaluate/"
 sudo chown -R ec2-user:ec2-user "/home/ec2-user/environment/4_monitor_and_evaluate/cloudwatchagent/logs" 
-chmod +x "/home/ec2-user/environment/3_proof_of_concept/agents/barista_supervisor_agent.py"
+chmod +x "/home/ec2-user/environment/3_proof_of_concept/agents/tech_assistant_agent.py"
 chmod +x "/home/ec2-user/environment/4_monitor_and_evaluate/cloudwatchagent/metricsutils.py"
 
 # Setting environment variables
 echo 'export CLOUDWATCH_AGENT_UTILS_PATH="/home/ec2-user/environment/4_monitor_and_evaluate/cloudwatchagent"' >> ~/environment/env.sh
-echo 'export LOG_FILE="/home/ec2-user/environment/4_monitor_and_evaluate/cloudwatchagent/logs/barista_supervisor_agents_sdk.log"' >> ~/environment/env.sh
-echo 'export METRICS_FILE="/home/ec2-user/environment/4_monitor_and_evaluate/cloudwatchagent/logs/barista_supervisor_metrics.json"' >> ~/environment/env.sh
+echo 'export LOG_FILE="/home/ec2-user/environment/4_monitor_and_evaluate/cloudwatchagent/logs/tech_assistant_agents_sdk.log"' >> ~/environment/env.sh
+echo 'export METRICS_FILE="/home/ec2-user/environment/4_monitor_and_evaluate/cloudwatchagent/logs/tech_assistant_metrics.json"' >> ~/environment/env.sh
 echo "export ENABLE_OTEL_TRACING=false" >> ~/environment/env.sh
 
 echo "Environment variables set"

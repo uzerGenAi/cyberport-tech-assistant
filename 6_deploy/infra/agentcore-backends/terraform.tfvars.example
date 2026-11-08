@@ -10,8 +10,8 @@ aurora_max_acu               = 4
 aurora_backup_retention_days = 7
 aurora_deletion_protection   = true # set false and apply before terraform destroy
 
-# Set true only if the EKS stack (make provision) does NOT already own spbc-orders-table
-create_orders_table = false
+# Orders and sessions tables
+dynamodb_deletion_protection = true # set false and apply before terraform destroy
 
 # Reuse an existing VPC instead of the isolated one this stack creates (optional)
 # existing_vpc_id     = "vpc-0123456789abcdef0"

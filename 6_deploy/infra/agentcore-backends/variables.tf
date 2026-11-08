@@ -142,10 +142,10 @@ variable "promotions_api_burst_limit" {
   default     = 20
 }
 
-# ── Orders table ──────────────────────────────────────────────────────────────
+# ── DynamoDB tables ───────────────────────────────────────────────────────────
 
-variable "create_orders_table" {
-  description = "Create spbc-orders-table here. Leave false if the EKS stack (make provision) already created it; two stacks can't own the same table."
+variable "dynamodb_deletion_protection" {
+  description = "Deletion protection on the orders and sessions tables. Keep true for anything real; set false (apply first, then destroy) to tear the stack down."
   type        = bool
-  default     = false
+  default     = true
 }

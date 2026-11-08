@@ -5,22 +5,23 @@ set -euo pipefail
 ROOT_DIR="$(git -C "$(dirname "$0")" rev-parse --show-toplevel 2>/dev/null || { cd "$(dirname "$0")/../.." && pwd; })"
 cd "${ROOT_DIR}"
 
-# fmt-check only git-TRACKED terraform files for a stack dir. Using `git ls-files`
-# (the source of truth for "tracked") instead of `terraform fmt -check -recursive`
-# keeps a developer's gitignored, auto-generated local terraform.tfvars (written by
-# terraform_backend_setup.sh) from breaking CI, while still enforcing fmt on every
-# real tracked .tf / .tftest.hcl (including nested dirs such as tests/).
+# fmt-check the terraform files of a stack dir that git knows about: tracked files plus new
+# files that are not ignored, skipping any that were deleted from disk but not yet committed.
+# Using git (instead of `terraform fmt -check -recursive`) keeps a developer's gitignored local
+# terraform.tfvars from breaking CI, while still enforcing fmt on every real .tf and
+# .tftest.hcl file (including nested dirs such as tests/) and on files not committed yet.
 fmt_check_tracked() {
     local dir="$1"
-    local files
-    files="$(git -C "${ROOT_DIR}" ls-files "${dir}/*.tf" "${dir}/*.tftest.hcl")"
-    if [ -z "${files}" ]; then
-        echo "WARNING: no tracked terraform files found under ${dir}" >&2
+    local files=() f
+    while IFS= read -r f; do
+        [ -f "${ROOT_DIR}/${f}" ] && files+=("${f}")
+    done < <(git -C "${ROOT_DIR}" ls-files --cached --others --exclude-standard -- "${dir}/*.tf" "${dir}/*.tftest.hcl")
+    if [ "${#files[@]}" -eq 0 ]; then
+        echo "WARNING: no terraform files found under ${dir}" >&2
         return 0
     fi
     # Paths from git ls-files are relative to ROOT_DIR (our cwd); check them in place.
-    # shellcheck disable=SC2086
-    terraform fmt -check ${files}
+    terraform fmt -check "${files[@]}"
 }
 
 echo "Running CI validations"
@@ -29,14 +30,6 @@ PYCACHE_DIR="$(mktemp -d)"
 trap 'rm -rf "$PYCACHE_DIR"' EXIT
 PYTHONPYCACHEPREFIX="$PYCACHE_DIR" python3 -m compileall -q \
     3_proof_of_concept 4_monitor_and_evaluate 2_data_strategy 6_deploy
-
-echo "Validating Terraform files (EKS stack)"
-fmt_check_tracked 6_deploy/infra/terraform
-(
-    cd 6_deploy/infra/terraform
-    terraform init -backend=false >/dev/null
-    terraform validate >/dev/null
-)
 
 echo "Validating and testing Terraform files (AgentCore backends; mocked providers)"
 fmt_check_tracked 6_deploy/infra/agentcore-backends
@@ -53,8 +46,21 @@ fmt_check_tracked 6_deploy/infra/agentcore-backends
     # bug and the installed version) instead of failing all of CI. Any other non-zero
     # exit is a real test failure and still fails CI. This is the ONLY permitted skip.
     TF_VER="$(terraform version | head -1)"
+
+    # `terraform test` auto-loads terraform.tfvars, so a developer's gitignored, cost-tuned
+    # local settings (one instance, no deletion protection) would change the defaults the
+    # suite asserts. Run it on a copy without *.tfvars instead. The copy keeps the repo-relative
+    # layout because promotions.tf reads ../../../2_data_strategy/promos/promos_records.json.
+    TEST_ROOT="$(mktemp -d)"
+    trap 'rm -rf "$TEST_ROOT"' EXIT
+    mkdir -p "$TEST_ROOT/6_deploy/infra" "$TEST_ROOT/2_data_strategy"
+    cp -R "${ROOT_DIR}/2_data_strategy/promos" "$TEST_ROOT/2_data_strategy/"
+    tar -C "${ROOT_DIR}/6_deploy/infra" -cf - --exclude=.terraform --exclude='*.tfvars' \
+        --exclude=.build agentcore-backends | tar -C "$TEST_ROOT/6_deploy/infra" -xf -
+    ln -s "$PWD/.terraform" "$TEST_ROOT/6_deploy/infra/agentcore-backends/.terraform"
+
     set +e
-    test_out="$(terraform test 2>&1)"
+    test_out="$(cd "$TEST_ROOT/6_deploy/infra/agentcore-backends" && terraform test 2>&1)"
     test_rc=$?
     set -e
     printf '%s\n' "$test_out"

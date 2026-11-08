@@ -1,72 +1,46 @@
-STORES EXPERT KNOWLEDGE BASE — Specialty Bakeries & Pastry Cafés
+**Stores and Services KB — Cyberport Tech Assistant**
 
-HOLIDAY AND SPECIAL HOURS:
-Some bakeries may operate on reduced hours or close entirely on German, Austrian, and Swiss public holidays such as Christmas (December 25–26), New Year's Day, Easter Monday, and regional bank holidays. Hours may also vary during local events or severe weather. Customers are advised to check the bakery's current hours via the app or website, which are updated in real-time. Push notifications may also alert customers of upcoming changes.
+1. **When are your stores open?**
+   Our stores in Germany are open Monday to Saturday from 10:00 until 20:00, and the store in Vienna from 10:00 until 19:00. Ask the Tech Assistant for a specific store's hours.
 
-FRESH BAKING SCHEDULE:
-All locations bake fresh on-site every morning. The full range of viennoiserie, patisserie, and breads is typically available from opening until mid-morning. Popular items such as croissants, pain au chocolat, and seasonal pastries often sell out by 11:00–12:00. Arriving early is recommended for the widest selection. Some locations offer a pre-order option via the app to guarantee availability.
+2. **Where are your stores?**
+   Cyberport sells online and through a small network of stores in Germany and Austria, for example in Dresden, Berlin, Hamburg, Leipzig, Dortmund, Bochum, Munich, Cologne and Vienna. Ask the Tech Assistant for the address of a store.
 
-SERVICES AVAILABLE PER LOCATION:
-Services vary by location and may include:
-- Click-and-collect (advance order via app)
-- In-store seating and café tables
-- Outdoor terrace seating (seasonal)
-- Free Wi-Fi
-- Take-away packaging
-- Catering and corporate order fulfilment
-- Custom cake consultation appointments
+3. **Are stores open on Sundays and public holidays?**
+   No. Stores in Germany and Austria are closed on Sundays and public holidays, except on special shopping Sundays approved by the city, which are announced in advance. Regional public holidays differ between federal states.
 
-ACCESSIBILITY:
-Most locations are equipped with accessibility features, including:
-- Step-free entrances and wheelchair-accessible counters
-- Allergen information displayed at the counter and available in the app
-- Staff trained to assist customers with accessibility needs
-- Braille menus available on request at selected locations
+4. **Which services are available in store?**
+   All stores have a click & collect counter, product demo areas and expert advice. Most stores also offer a repair desk, device setup and data transfer, and a returns and warranty counter. Selected stores have a 24/7 pickup station. If there is no store near you, you can use all services by phone or online.
 
-PARKING AND ACCESS:
-Parking availability varies by city location. Most of our bakeries are in city centre or high-street locations well-served by public transport (U-Bahn, S-Bahn, tram). A small number of suburban locations offer adjacent parking. Drive-thru service is available at selected locations (see the app for details).
+5. **What can the repair desk do?**
+   The repair desk handles smartphone screen and battery replacements, laptop diagnostics and warranty repairs. Simple repairs on popular smartphone models can often be done the same day. For other repairs the device is sent to a service partner, and you are notified when it is ready.
 
-CATERING AND ADVANCE ORDERS:
-We offer catering services for corporate events, office breakfasts, and celebrations. Custom celebration cakes require a minimum of 3 days advance notice. Large catering orders should be placed at least 5 days in advance. Please contact the store directly or submit a catering enquiry via the app.
+6. **Can you set up my new phone or laptop?**
+   Yes. Our device setup service transfers your contacts, photos and apps from your old phone, sets up email and accounts, and installs updates. On laptops we can install Microsoft 365 and antivirus software and transfer your files from an old computer.
 
-FRANCHISE VS. COMPANY-OWNED BAKERIES:
-Some locations are franchise-operated. Franchise locations may have minor variations in menu availability, pricing, or opening hours. All locations follow unified allergen, food safety, and quality standards. The app clearly identifies company-owned vs. franchise locations.
+7. **Can I bring my old devices for recycling?**
+   Yes. Under German electronics law (ElektroG), larger electronics retailers, including online shops, must take back old electrical devices free of charge. You can hand in small old devices with no side longer than 25 cm, such as phones, chargers and headphones, in our stores, up to three items per device type and without buying anything. When you buy a new device, we also take back an old device of the same type free of charge.
 
-REGIONAL MENU VARIATIONS:
-Certain bakeries may stock region-specific items. For example, southern German locations may carry Bretzel and Dampfnudel; Austrian bakeries carry traditional Kipferl and Strudel; Swiss locations may offer Gipfeli and Zürichbrötchen. Regional items are marked in the app menu.
+8. **Do I need to delete my data before recycling or trade-in?**
+   Yes. Back up your data, sign out of all accounts and reset the device to factory settings before you hand it in. You are responsible for removing personal data from devices you recycle.
 
-ENVIRONMENTAL PRACTICES:
-Our bakeries use compostable packaging and offer a discount to customers bringing their own reusable bags or coffee cups. Eco-certified locations are marked with a green badge in the app. We work with local suppliers to minimise food miles and reduce waste.
+9. **What about damaged or swollen batteries?**
+   Do not charge or use a device with a swollen or damaged battery, and do not try to open it. Bring it to the store in a closed, non-flammable container and tell the staff at the entrance. Never put lithium batteries in household waste.
 
-WASTE REDUCTION:
-Unsold baked goods at end of day are offered at a reduced price in the final hour before closing. Any remaining items are donated to local food banks or composted. We do not throw away food.
+10. **What is a pickup station?**
+   A pickup station is a 24/7 locker outside the store for click & collect orders. When your order is ready, you receive a code and can collect it at any time. The Tech Assistant can tell you which stores have one.
 
-STORE CONTACT:
-Most individual bakeries do not have direct public phone lines. All enquiries should be made via the in-app chat or through our central support contact. For catering enquiries, a callback can be arranged.
+11. **Can I test products before buying?**
+    Yes. Our demo areas let you try smartphones and laptops. Staff can show you the differences between models and help you compare specifications.
 
-TEMPORARY CLOSURES OR RENOVATIONS:
-If a bakery is temporarily closed for refurbishment or operational reasons, it will be marked unavailable in the app with an expected reopening date where known.
+12. **Do you offer advice for business customers?**
+    Yes. Business customers, schools and self-employed customers can get advice in any store or from the business sales team by phone. The team helps with bulk orders, business laptops, device setup and invoices with VAT.
 
-LOYALTY PROGRAMME:
-Customers can earn Pastry Rewards points at all eligible locations by scanning the app at checkout. Points can be redeemed for discounts on future purchases. Some franchise locations may have limited redemption options — the app will notify you before checkout.
+13. **Are your stores accessible?**
+    Most stores have step-free access, lifts between floors and accessible toilets. Staff can help you carry purchases to your car.
 
-PET POLICY:
-Service animals are welcome in all of our bakeries. Some locations with outdoor terraces are pet-friendly. Pets are not permitted inside the bakery unless they are service animals.
+14. **Is parking available?**
+    Our stores are in city centres, so they are easiest to reach by public transport. Public car parks are nearby.
 
-LANGUAGE SUPPORT:
-Staff at German locations primarily speak German and English. Austrian and Swiss staff may additionally speak French, Italian, or local dialects. Allergen information and menus are available in English at all locations.
-
-STORE EVENTS:
-Selected bakeries host occasional events such as pastry-making workshops, seasonal tasting events, and artisan bread demonstrations. Events are promoted through the app, email newsletter, and in-store signage.
-
-CUSTOMER REVIEWS:
-Customers can leave store-specific ratings and reviews through the app. Ratings are reviewed by the regional quality team and help drive continuous improvement.
-
-LOST AND FOUND:
-Items left at a bakery may be held at the counter for up to 3 days. After that, unclaimed items are handed to the store's local management office. Please contact the store via the app to enquire about lost items.
-
-NOISE AND ATMOSPHERE:
-Our bakeries aim to provide a calm, welcoming environment. Background music is kept at a low volume. Some locations designate quiet seating zones, particularly in the morning. Please check the store profile in the app for details.
-
-DELIVERY PARTNERS:
-Selected locations fulfil delivery orders via third-party platforms (e.g., Lieferando, Uber Eats). Item availability may differ from the in-store menu for delivery orders. Check the relevant delivery platform for availability in your area.
+15. **Can I order online and get advice in store?**
+    Yes. You can reserve a product with click & collect and ask the store team for help when you collect it, for example with setup or data transfer.

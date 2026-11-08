@@ -49,8 +49,8 @@
     text-align: center;
 }
 
-/* Concierge header with connection status */
-.concierge-header {
+/* Assistant header with connection status */
+.assistant-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -59,7 +59,7 @@
     gap: 1rem;
 }
 
-.concierge-header h2 {
+.assistant-header h2 {
     font-size: 2.5rem;
     margin: 0;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
@@ -67,8 +67,8 @@
     text-align: left;
 }
 
-/* Connection status in the concierge section */
-.concierge-header .connection-status {
+/* Connection status in the assistant section */
+.assistant-header .connection-status {
     display: inline-block;
     padding: 8px 16px;
     border-radius: 20px;
@@ -83,19 +83,19 @@
     text-align: center;
 }
 
-.concierge-header .connection-status.connected {
+.assistant-header .connection-status.connected {
     background: rgba(76, 175, 80, 0.8);
     border-color: rgba(76, 175, 80, 0.6);
     color: white;
 }
 
-.concierge-header .connection-status.disconnected {
+.assistant-header .connection-status.disconnected {
     background: rgba(244, 67, 54, 0.8);
     border-color: rgba(244, 67, 54, 0.6);
     color: white;
 }
 
-.concierge-header .connection-status.error {
+.assistant-header .connection-status.error {
     background: rgba(255, 193, 7, 0.8);
     border-color: rgba(255, 193, 7, 0.6);
     color: white;
@@ -372,11 +372,9 @@ header {
   }
 }
 
-/* The café photo is rendered as a hero <img> in index.html (.hero-image), not as a
-   background here. The old `main { background: url('image.jpg') ... }` rule targeted a
-   <main> element the redesigned page no longer has, so the image never showed. Removed. */
+/* The hero image is rendered as an <img> in index.html (.hero-image). */
 
-/* Menu section styling when positioned below chatbot */
+/* Product catalog section styling when positioned below chatbot */
 .products {
   margin-top: 3rem;
   padding: 2rem;
@@ -516,13 +514,13 @@ header {
     font-size: 2rem;
   }
   
-  .concierge-header {
+  .assistant-header {
     flex-direction: column;
     text-align: center;
     gap: 0.5rem;
   }
   
-  .concierge-header h2 {
+  .assistant-header h2 {
     font-size: 2rem;
     text-align: center;
   }

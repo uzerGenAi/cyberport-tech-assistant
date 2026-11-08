@@ -1,6 +1,6 @@
-# Backends for the AgentCore Pastry Concierge runtime: the stores database (Aurora MySQL,
-# queried through the RDS Data API), the promotions API and, optionally, the orders table.
-# Independent of the EKS stack in ../terraform, with its own state.
+# Backends for the AgentCore Tech Assistant runtime: the stores database (Aurora MySQL,
+# queried through the RDS Data API), the promotions API and the orders and sessions tables.
+# Has its own state, independent of the pipeline stack in ../codepipeline.
 
 terraform {
   # NOTE: `terraform test` on this stack can hit a known Terraform 1.16.x engine bug
@@ -11,10 +11,10 @@ terraform {
   # RECOMMENDED (UNVERIFIED): run CI on a Terraform build without this bug.
   required_version = ">= 1.10.0"
 
-  # The bucket can be overridden at init: -backend-config="bucket=<name>" (agentcore_backends.sh
-  # passes TF_STATE_BUCKET). S3 native locking replaces the deprecated dynamodb_table setting.
+  # The bucket is deliberately not set here (bucket names are global): init supplies it with
+  # -backend-config="bucket=spbc-tfstate-<account-id>" (agentcore_backends.sh does this; TF_STATE_BUCKET
+  # overrides the name). S3 native locking replaces the deprecated dynamodb_table setting.
   backend "s3" {
-    bucket       = "spbc-tfstate-eu-central-1"
     key          = "prod/agentcore-backends.tfstate"
     region       = "eu-central-1"
     encrypt      = true
@@ -42,7 +42,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project     = "SpecialtyBakeriesCafe"
+      Project     = "CyberportTechAssistant"
       Component   = "AgentCoreBackends"
       Environment = var.environment
       ManagedBy   = "Terraform"

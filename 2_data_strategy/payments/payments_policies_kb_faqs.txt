@@ -1,67 +1,43 @@
-**Payments Support KB and FAQs — Specialty Bakeries & Pastry Cafés**
+**Payments Support KB and FAQs — Cyberport Tech Assistant**
 
-1. **Can I pay with cash at the bakery?**
-   Yes, we accept cash at all store locations. Please have the correct amount ready where possible as change availability may be limited during busy periods.
+1. **Which payment methods do you accept?**
+   Online: Visa, Mastercard and American Express credit and debit cards, PayPal, Apple Pay, Google Pay and bank transfer (prepayment). In store: cash, debit cards (girocard in Germany), credit cards and contactless payment with Apple Pay and Google Pay. All prices are in euros (€) and include VAT.
 
-2. **What digital payments do you support?**
-   We accept all major credit and debit cards (Visa, Mastercard, Amex), as well as Apple Pay, Google Pay, and other NFC contactless payment methods.
+2. **Can I pay when I collect a click & collect order?**
+   Yes. You can pay online when you order or pay at the click & collect counter when you pick it up.
 
-3. **Can I pay online and collect in store?**
-   Yes. You can place and pay for your order online or via the app and select click-and-collect at your preferred bakery location. Your order will be prepared and ready at the agreed collection time.
+3. **Do you offer financing or instalment payments?**
+   Yes. Purchases of €299 or more can be spread over 6, 12 or 24 months at 0% interest through our financing partner. You apply online at checkout or in store, and the partner bank runs a credit check. The Tech Assistant can explain how financing works but cannot tell you whether you will be approved or advise you on whether to take credit.
 
-4. **Do you offer refunds for incorrect orders?**
-   Yes. If there is an issue with your order, please contact us within 24 hours of collection or delivery. Verified issues will be refunded to your original payment method within 3–5 business days.
+4. **What do I need to apply for financing?**
+   You must be 18 or over and live in Germany or Austria. You need a valid ID, a bank account in your name (IBAN) and a contact address. Never share your IBAN or card details in the chat. Enter them only in the secure application form.
 
-5. **Can I split a payment between two methods?**
-   Yes. In-store you can split payments between two cards or a combination of cash and card. Please inform the team member at the till before payment is processed.
+5. **How long do refunds take?**
+   Once a return has been checked, the refund is sent to your original payment method. Card and PayPal refunds usually appear within 5 to 10 business days. Bank transfer refunds take up to 5 business days.
 
-6. **Is tipping supported on card payments?**
-   Yes. You will be prompted to add a gratuity when completing a card payment in-store. Tipping is entirely optional but very much appreciated by our team.
+6. **Can I get an invoice with VAT for my company?**
+   Yes. Business customers can enter the company name and VAT ID at checkout and will receive an invoice showing VAT. For in-store purchases, ask at the till for a company invoice.
 
-7. **Can I use gift cards to pay?**
-   Yes. We accept both physical and digital gift cards issued by our bakeries. Enter the code at checkout in the app or present the physical card in-store.
+7. **Can I pay with a gift card?**
+   Yes. Gift cards can be used online and in store, together with another payment method if the gift card does not cover the full amount. Gift cards are valid for 3 years from the end of the year they were bought.
 
-8. **Why was my card declined?**
-   Your card may be declined due to insufficient funds, incorrect billing details, or bank-side fraud prevention. Please try a different payment method or contact your bank directly.
+8. **Can I split a payment between two methods?**
+   In store you can combine cash, a card and a gift card. Online you can combine a gift card with one other payment method.
 
-9. **Do you store my payment information?**
-   No. We never store your card details. All transactions are processed securely by our certified payment provider. We are PCI-DSS compliant.
+9. **Why was my card declined?**
+   A card can be declined because of insufficient funds, an expired card, wrong card details, a spending limit, or a failed 3-D Secure check with your bank. Try another payment method or contact your bank.
 
-10. **Can I receive a receipt by email or SMS?**
-    Yes. Digital receipts are available after every purchase. You can opt to receive one via email or SMS at the point of sale or through the app settings.
+10. **Do you store my card details?**
+    No. Card payments are processed by a PCI DSS certified payment provider, and we never store full card numbers. Online card payments use 3-D Secure authentication from your bank.
 
-11. **Can I use loyalty points to pay for my order?**
-    Yes. If you are enrolled in our Pastry Rewards programme, you can redeem accumulated points for discounts at checkout, either in-store or through the app.
+11. **I was charged twice. What should I do?**
+    Contact customer service with your order ID. Often the second amount is only a temporary authorisation that your bank releases within a few days. If you were actually charged twice, we refund the duplicate payment.
 
-12. **What happens if I am charged twice?**
-    If you notice a duplicate charge, please contact us immediately with your transaction reference. Once verified, we will issue a full refund for the extra charge within 3–5 business days.
+12. **Can I use a voucher or promo code?**
+    Yes. Enter one promo code per order at checkout, online or in store. Discounts without a code, such as the Accessory Bundle Deal, are applied automatically. Ask the Tech Assistant about current promotions.
 
-13. **Is there a minimum purchase amount for card payments?**
-    No. There is no minimum spend required when paying by card or digital wallet.
+13. **Is there a minimum order value for card payments?**
+    No. There is no minimum amount for card or digital wallet payments.
 
-14. **Do you charge any transaction or service fees?**
-    No. The price you see is the price you pay. We do not add service charges, surcharges, or booking fees to orders placed via the app.
-
-15. **How do I update my saved payment method in the app?**
-    Go to Account → Payment Methods in the app. You can add, update, or securely delete saved payment methods from there.
-
-16. **Can I cancel an order and get my money back?**
-    Yes. For standard orders, cancellations are allowed within 5 minutes of placing the order. For custom celebration cakes, cancellations must be made at least 48 hours before the collection date. Refunds are processed to your original payment method.
-
-17. **Are prepaid cards accepted?**
-    Yes. Most prepaid Visa, Mastercard, or Amex cards are accepted just like regular credit or debit cards.
-
-18. **Do you accept mobile wallets like Samsung Pay?**
-    Yes. We accept Samsung Pay and any other mobile wallet that supports NFC contactless transactions.
-
-19. **What if my gift card does not work?**
-    Please check that the balance is valid and the code has been entered correctly. If the problem persists, contact our support team with the card number and we will investigate and adjust the balance if needed.
-
-20. **Is full prepayment required for catering and custom cake orders?**
-    Yes. All catering orders and custom celebration cakes must be paid in full at the time of booking to confirm your order. This allows us to source ingredients and allocate production time. The deposit is non-refundable for cancellations within 48 hours of the collection date.
-
-21. **Do you offer business invoices?**
-    Yes. For corporate catering orders or B2B accounts, we can issue a full VAT invoice. Please contact us in advance to set up a business account.
-
-22. **What currency do you accept for in-store payments?**
-    We accept payment in Euros (€) at all of our European locations. We do not accept foreign currency cash in-store.
+14. **Can I pay with cryptocurrency or buy now and pay later in store?**
+    No. Cryptocurrency is not accepted. In store, the 0% financing offer is the only way to pay in instalments.

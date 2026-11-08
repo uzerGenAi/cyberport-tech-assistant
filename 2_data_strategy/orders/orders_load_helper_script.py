@@ -23,6 +23,10 @@ def load_orders():
             'store_id': {'S': order['store_id']},
             'total_amount': {'N': str(order['total_amount'])}
         }
+        # Optional fields in the electronics sample data (get_order_status returns fulfilment)
+        for field in ('fulfilment', 'payment_method'):
+            if order.get(field):
+                item[field] = {'S': order[field]}
         # Same table the agent runtime reads and writes (orders_agents.py, place_order.py)
         client.put_item(TableName='spbc-orders-table', Item=item)
     print("Orders transactions loaded in to DynamoDB table successfully.")

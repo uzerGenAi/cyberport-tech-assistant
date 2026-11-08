@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Enhanced Cognito Authentication Setup Script
-# This script creates Cognito User Pool + Identity Pool + IAM roles for direct EKS to Bedrock AgentCore communication
+# This script creates Cognito User Pool + Identity Pool + IAM roles for direct browser to Bedrock AgentCore communication
 # Combines all authentication setup into a single comprehensive script
 #
 # Usage:
@@ -467,7 +467,7 @@ update_agentcore_runtime() {
     cd "$agents_dir"
     
     # Check if we have the necessary files
-    if [ ! -f "Dockerfile" ] || [ ! -f "barista_supervisor_agent.py" ]; then
+    if [ ! -f "Dockerfile" ] || [ ! -f "tech_assistant_agent.py" ]; then
         print_warning "Required agent files not found. Skipping agent code update."
         cd - > /dev/null
         return 0
@@ -778,7 +778,7 @@ display_summary() {
     echo "   1. Frontend authenticates with User Pool → Gets ID token"
     echo "   2. ID token exchanged with Identity Pool → Gets AWS credentials"
     echo "   3. Frontend uses AWS credentials → Calls Bedrock AgentCore directly"
-    echo "   4. No WebSocket/Lambda overhead → Direct EKS to AgentCore communication"
+    echo "   4. No WebSocket/Lambda overhead → Direct browser to AgentCore communication"
     echo ""
     if [[ "$AUTHENTICATED_ROLE_ARN" == *"RUNTIME_NAME"* ]]; then
         echo "🔧 **IMPORTANT NOTE:**"
@@ -798,7 +798,7 @@ main() {
     echo "  • Cognito User Pool for user authentication"
     echo "  • Cognito Identity Pool for AWS credential exchange"
     echo "  • IAM role with Bedrock AgentCore permissions"
-    echo "  • Configuration files for direct EKS → AgentCore communication"
+    echo "  • Configuration files for direct browser → AgentCore communication"
     echo "  • Update AgentCore runtime with latest agent code"
     echo ""
     

@@ -23,7 +23,7 @@ environment_variables_file = os.path.expanduser("~/environment/env.sh")
 #   2. AGENTCORE_EXECUTION_ROLE_NAME / ROLE_NAME — a role name in this account
 #   3. a CloudFormation stack output (the original lab path)
 # Only (3) needs the stack to exist. STACK_NAME/OUTPUT_NAME stay overridable by env.
-STACK_NAME = os.environ.get("AGENTCORE_STACK_NAME", "spbc-pastry-cafe-production")
+STACK_NAME = os.environ.get("AGENTCORE_STACK_NAME", "spbc-tech-assistant-production")
 OUTPUT_NAME = os.environ.get("AGENTCORE_STACK_OUTPUT", "CloudAgeRoleArn")
 DEFAULT_EXECUTION_ROLE_NAME = "SPBC-AgentCore-ExecutionRole"
 
@@ -46,6 +46,7 @@ REQUIRED_ENV_KEYS = [
 ]
 OPTIONAL_ENV_KEYS = [
     "PROMOS_KNOWLEDGE_BASE_ID",
+    "MEMORY_ID",
     "GUARDRAIL_ID",
     "GUARDRAIL_VERSION",
     "GUARDRAIL_TRACE",
@@ -224,6 +225,16 @@ def backends_policy(env: dict, account_id: str):
         statements.append(
             {"Sid": "PromotionsApi", "Effect": "Allow", "Action": "execute-api:Invoke",
              "Resource": f"arn:aws:execute-api:{api_region}:{account_id}:{api_id}/{stage}/GET/promotions"})
+    memory_id = env.get("MEMORY_ID")
+    if memory_id:
+        # Events (short-term turns) and long-term record retrieval for this one memory only
+        statements.append(
+            {"Sid": "AgentCoreMemory", "Effect": "Allow",
+             "Action": ["bedrock-agentcore:CreateEvent", "bedrock-agentcore:ListEvents",
+                        "bedrock-agentcore:GetEvent", "bedrock-agentcore:ListSessions",
+                        "bedrock-agentcore:ListActors", "bedrock-agentcore:RetrieveMemoryRecords",
+                        "bedrock-agentcore:ListMemoryRecords", "bedrock-agentcore:GetMemoryRecord"],
+             "Resource": f"arn:aws:bedrock-agentcore:{env.get('REGION', 'eu-central-1')}:{account_id}:memory/{memory_id}"})
     return {"Version": "2012-10-17", "Statement": statements} if statements else None
 
 
@@ -327,7 +338,7 @@ def main():
     print("Passing env vars to AgentCore:", list(env_vars.keys()))
 
     rt = Runtime()
-    agent_name = "pastry_concierge_agent"
+    agent_name = "tech_assistant_agent"
 
     iam = boto3.client("iam", region_name=region)
 
@@ -344,7 +355,7 @@ def main():
 
     print("Configuring runtime with specified execution role...")
     resp = rt.configure(
-        entrypoint="barista_supervisor_agent.py",  # Pastry Concierge supervisor
+        entrypoint="tech_assistant_agent.py",  # Tech Assistant supervisor
         execution_role=exec_role_arn,
         auto_create_execution_role=False,
         auto_create_ecr=True,

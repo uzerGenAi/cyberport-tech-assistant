@@ -1,10 +1,10 @@
-# Promotions API: HTTP API "spbcBakeryAPI", route GET /promotions, IAM (SigV4) authorization.
+# Promotions API: HTTP API "spbcPromotionsAPI", route GET /promotions, IAM (SigV4) authorization.
 # A Lambda function serves the promotions bundled from 2_data_strategy/promos/promos_records.json
 # and returns only those whose validity window contains today's date.
 # To change promotions, edit that file and run terraform apply.
 
 locals {
-  promotions_api_name  = "spbcBakeryAPI"
+  promotions_api_name  = "spbcPromotionsAPI"
   promotions_stage     = "prod"
   promotions_route     = "GET /promotions"
   promotions_data_file = "${path.module}/../../../2_data_strategy/promos/promos_records.json"
@@ -67,7 +67,7 @@ resource "aws_iam_role_policy" "promotions_lambda" {
 
 resource "aws_lambda_function" "promotions" {
   function_name    = "${var.name_prefix}-promotions-api"
-  description      = "GET /promotions for the SPBC Pastry Concierge"
+  description      = "GET /promotions for the SPBC Tech Assistant"
   role             = aws_iam_role.promotions_lambda.arn
   runtime          = "python3.12"
   architectures    = ["arm64"]
@@ -86,7 +86,7 @@ resource "aws_lambda_function" "promotions" {
 
 resource "aws_apigatewayv2_api" "promotions" {
   name          = local.promotions_api_name
-  description   = "SPBC bakery API (promotions). IAM-authorized; called by the AgentCore runtime."
+  description   = "SPBC promotions API. IAM-authorized; called by the AgentCore runtime."
   protocol_type = "HTTP"
 }
 
@@ -137,7 +137,7 @@ resource "aws_apigatewayv2_stage" "prod" {
 }
 
 resource "aws_lambda_permission" "promotions_api" {
-  statement_id  = "AllowSpbcBakeryApiInvoke"
+  statement_id  = "AllowSpbcPromotionsApiInvoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.promotions.function_name
   principal     = "apigateway.amazonaws.com"

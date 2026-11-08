@@ -3,7 +3,7 @@ set -euo pipefail
 ###############################################################################
 # deploy_agentcore.sh — AWS CLI equivalent of AgentCore_Console_Deployment_Walkthrough.md
 #
-# Project : SPBC Pastry Concierge (Amazon Bedrock AgentCore Runtime)
+# Project : SPBC Tech Assistant (Amazon Bedrock AgentCore Runtime)
 # Region  : eu-central-1
 # Models  : Nova Pro via the EU cross-Region inference profile eu.amazon.nova-pro-v1:0
 #           (no in-Region on-demand capacity in eu-central-1)
@@ -53,8 +53,8 @@ PROJECT_PREFIX="${PROJECT_PREFIX:-spbc}"
 # Naming
 ROLE_NAME="${ROLE_NAME:-SPBC-AgentCore-ExecutionRole}"
 BUCKET_NAME="${BUCKET_NAME:-spbc-kb-docs-${ACCOUNT_ID}}"
-ECR_REPO_NAME="${ECR_REPO_NAME:-spbc-pastry-concierge}"
-RUNTIME_NAME="${RUNTIME_NAME:-pastry_concierge_agent}"
+ECR_REPO_NAME="${ECR_REPO_NAME:-spbc-tech-assistant}"
+RUNTIME_NAME="${RUNTIME_NAME:-tech_assistant_agent}"
 GUARDRAIL_NAME="${GUARDRAIL_NAME:-SPBC-Guardrail}"
 
 # Artifact: "container" (ECR image) or "zip" (direct code deployment, no Docker).
@@ -66,7 +66,7 @@ GUARDRAIL_NAME="${GUARDRAIL_NAME:-SPBC-Guardrail}"
 ARTIFACT_TYPE="${ARTIFACT_TYPE:-container}"
 PYTHON_VERSION="3.11"
 PYTHON_RUNTIME="PYTHON_3_11"
-ENTRYPOINT_FILE="barista_supervisor_agent.py"
+ENTRYPOINT_FILE="tech_assistant_agent.py"
 
 # Network: PUBLIC unless both are set. With the Terraform backends (RDS Data API, IAM-authorized
 # promotions API) PUBLIC is enough. Only the legacy MySQL store lookup needs VPC mode to reach a
@@ -76,7 +76,7 @@ SECURITY_GROUP_IDS="${SECURITY_GROUP_IDS:-}" # comma-separated security group ID
 
 # Backends (Terraform stack 6_deploy/infra/agentcore-backends). Unset values are read from its
 # outputs; without them the agents fall back to legacy discovery (a cluster named
-# spbc-aurora-cluster* over MySQL, an API named spbcBakeryAPI).
+# spbc-aurora-cluster* over MySQL, an API named spbcPromotionsAPI).
 STORES_DB_CLUSTER_ARN="${STORES_DB_CLUSTER_ARN:-}"
 STORES_DB_SECRET_ARN="${STORES_DB_SECRET_ARN:-}"
 STORES_DB_NAME="${STORES_DB_NAME:-}"
@@ -92,7 +92,7 @@ KB_DOMAINS=("menu" "orders" "payments" "stores" "promos")
 REQUIRED_KB_DOMAINS="menu orders payments stores"
 
 # The agent modules the runtime imports (all are required)
-AGENT_MODULES=("barista_supervisor_agent.py" "menu_agents.py" "orders_agents.py" "place_order.py"
+AGENT_MODULES=("tech_assistant_agent.py" "menu_agents.py" "orders_agents.py" "place_order.py"
                "payments_policy_agents.py" "stores_agents.py" "promos_agents.py")
 
 # Paths (relative to this script)
@@ -388,7 +388,7 @@ preflight() {
     if [ -n "$PROMOS_API_URL" ]; then
         log "Promos:   ${PROMOS_API_URL}"
     else
-        warn "Promos:   legacy lookup of an API named spbcBakeryAPI"
+        warn "Promos:   legacy lookup of an API named spbcPromotionsAPI"
     fi
     echo ""
 }
@@ -639,14 +639,15 @@ step3_s3_bucket() {
     log "Public access blocked"
 
     # source (relative to 2_data_strategy) | S3 key
-    # menu/menu_records.json is read by the menu agent's get_menu tool; the rest are KB documents.
+    # menu/menu_records.json is the product catalog, read by the catalog agent's get_menu tool
+    # (menu_agents.py keeps the original domain key); the rest are KB documents.
     local uploads=(
         "menu/menu_records.json|menu/menu_records.json"
-        "menu/menu_items_kb_faqs.txt|bakery_menu/menu_items_kb_faqs.txt"
-        "orders/orders_policies_kb_faqs.txt|bakery_orders/orders_policies_kb_faqs.txt"
-        "payments/payments_policies_kb_faqs.txt|bakery_payments/payments_policies_kb_faqs.txt"
-        "stores/store_kb_faqs.txt|bakery_stores/store_kb_faqs.txt"
-        "promos/promos_kb_faqs.txt|bakery_promos/promos_kb_faqs.txt"
+        "menu/menu_items_kb_faqs.txt|electronics_menu/menu_items_kb_faqs.txt"
+        "orders/orders_policies_kb_faqs.txt|electronics_orders/orders_policies_kb_faqs.txt"
+        "payments/payments_policies_kb_faqs.txt|electronics_payments/payments_policies_kb_faqs.txt"
+        "stores/store_kb_faqs.txt|electronics_stores/store_kb_faqs.txt"
+        "promos/promos_kb_faqs.txt|electronics_promos/promos_kb_faqs.txt"
     )
     local pair src key
     for pair in "${uploads[@]}"; do
@@ -683,7 +684,7 @@ step5_knowledge_bases() {
     info "  bash 3_proof_of_concept/knowledge_bases/bootstrap_vector_store.sh   (collection + role)"
     info "  bash 3_proof_of_concept/knowledge_bases/setup_knowledge_bases.sh    (all five domains)"
     info "Or in the console (walkthrough Step 4B): quick-create an Amazon OpenSearch Serverless vector"
-    info "store, Titan Text Embeddings V2 (1024), S3 URI s3://${BUCKET_NAME}/bakery_<domain>/."
+    info "store, Titan Text Embeddings V2 (1024), S3 URI s3://${BUCKET_NAME}/electronics_<domain>/."
     echo ""
 
     local problems="" domain kb_name kb_id env_var ds_id job_id status stats scanned failed indexed elapsed
@@ -694,7 +695,7 @@ step5_knowledge_bases() {
 
         if [ -z "$kb_id" ]; then
             if [ "$domain" = "promos" ]; then
-                warn "${kb_name} not found (optional — promos then relies on the spbcBakeryAPI only)"
+                warn "${kb_name} not found (optional — promos then relies on the spbcPromotionsAPI only)"
             else
                 err "${kb_name} not found"
                 problems="${problems} ${kb_name}"
@@ -740,7 +741,7 @@ step5_knowledge_bases() {
 
         if [ "$status" != "COMPLETE" ] || [ "$scanned" -eq 0 ] || [ "$failed" -gt 0 ]; then
             err "${kb_name}: sync ${status} (scanned ${scanned}, indexed ${indexed}, failed ${failed})"
-            err "  Check the data source S3 URI is s3://${BUCKET_NAME}/bakery_${domain}/ and the file is there."
+            err "  Check the data source S3 URI is s3://${BUCKET_NAME}/electronics_${domain}/ and the file is there."
             if [ "$domain" != "promos" ]; then
                 problems="${problems} ${kb_name}"
             fi
@@ -775,25 +776,52 @@ step6_guardrail() {
 
     local existing_gr gr_result description topic_policy content_policy pii_policy
 
-    description="Content guardrail for SPBC Pastry Concierge — blocks out-of-scope topics and card numbers"
+    description="Content guardrail for SPBC Tech Assistant — blocks out-of-scope and unsafe topics and payment data"
 
-    # The denied topic must describe what to BLOCK, in concrete terms. An earlier version
-    # defined it by negation ("anything other than pastries, breads, ... store hours"), which
-    # listed every bakery subject inside the deny definition and so blocked the very questions
-    # the agent exists to answer: menu, promos and stores all came back with the blocked-input
-    # or blocked-output message. Keep this list positive and specific.
+    # Each denied topic must describe what to BLOCK, in concrete terms. An earlier version
+    # defined scope by negation ("anything other than ..."), which listed every in-scope subject
+    # inside the deny definition and so blocked the very questions the agent exists to answer.
+    # Keep these positive and specific, and never deny "software" or "IT help" in general:
+    # laptop and smartphone questions are full of both.
     # Bedrock caps a topic definition at 200 characters, so the detail lives in the examples.
+    # Keep this policy in step with 5_security_rai/create_and_store_guardrail.sh.
     topic_policy='{
         "topicsConfig": [
             {
                 "name": "OutOfScopeRequests",
-                "definition": "Subjects outside food and drink retail: software and IT help, crypto or investment advice, medical, legal or tax advice, politics, travel booking, or homework and essay writing.",
+                "definition": "Subjects unrelated to buying or using consumer electronics: crypto or investment advice, medical, legal or tax advice, politics, travel booking, or homework and essay writing.",
                 "examples": [
                     "Tell me about cryptocurrency",
-                    "Help me write Python code",
                     "What is your opinion on the election",
                     "Write my history essay for me",
                     "What stocks should I buy?"
+                ],
+                "type": "DENY"
+            },
+            {
+                "name": "UnsafeDeviceModification",
+                "definition": "Instructions to open, puncture, modify or self-repair lithium batteries, chargers or mains-powered devices, or to disable a device'"'"'s safety features.",
+                "examples": [
+                    "How do I open my phone battery myself?",
+                    "How can I fix my swollen laptop battery at home?"
+                ],
+                "type": "DENY"
+            },
+            {
+                "name": "PiracyAndDRMCircumvention",
+                "definition": "Help with pirated software, cracked licences, illegal IPTV streaming, or removing copy protection, carrier locks or region locks without authorisation.",
+                "examples": [
+                    "Where can I get a cracked copy of Windows?",
+                    "How do I set up an illegal IPTV box?"
+                ],
+                "type": "DENY"
+            },
+            {
+                "name": "PersonalCreditAdvice",
+                "definition": "Personal advice on whether the customer should take out credit or a loan, or predictions of whether a credit application will be approved.",
+                "examples": [
+                    "Should I take a loan to buy this laptop?",
+                    "Will my financing application be approved?"
                 ],
                 "type": "DENY"
             }
@@ -812,11 +840,16 @@ step6_guardrail() {
     }'
 
     # NAME is deliberately not a PII filter: the order flow asks for the customer's name.
+    # Payment data a customer might paste into the chat, and passwords, are blocked.
     pii_policy='{
         "piiEntitiesConfig": [
             { "type": "EMAIL",         "action": "ANONYMIZE" },
             { "type": "PHONE",         "action": "ANONYMIZE" },
-            { "type": "CREDIT_DEBIT_CARD_NUMBER", "action": "BLOCK" }
+            { "type": "CREDIT_DEBIT_CARD_NUMBER", "action": "BLOCK" },
+            { "type": "CREDIT_DEBIT_CARD_CVV",    "action": "BLOCK" },
+            { "type": "PIN",                      "action": "BLOCK" },
+            { "type": "INTERNATIONAL_BANK_ACCOUNT_NUMBER", "action": "BLOCK" },
+            { "type": "PASSWORD",                 "action": "BLOCK" }
         ]
     }'
 
@@ -834,7 +867,7 @@ step6_guardrail() {
             --guardrail-identifier "$existing_gr" \
             --name "$GUARDRAIL_NAME" \
             --description "$description" \
-            --blocked-input-messaging "I'm sorry, I can only help with bakery and pastry-related questions." \
+            --blocked-input-messaging "I'm sorry, I can only help with questions about our smartphones and laptops, orders, payments, stores and promotions. For battery or device problems, please visit a store repair desk." \
             --blocked-outputs-messaging "I'm sorry, I cannot provide that information." \
             --topic-policy-config "$topic_policy" \
             --content-policy-config "$content_policy" \
@@ -847,7 +880,7 @@ step6_guardrail() {
             --region "$REGION" \
             --name "$GUARDRAIL_NAME" \
             --description "$description" \
-            --blocked-input-messaging "I'm sorry, I can only help with bakery and pastry-related questions." \
+            --blocked-input-messaging "I'm sorry, I can only help with questions about our smartphones and laptops, orders, payments, stores and promotions. For battery or device problems, please visit a store repair desk." \
             --blocked-outputs-messaging "I'm sorry, I cannot provide that information." \
             --topic-policy-config "$topic_policy" \
             --content-policy-config "$content_policy" \
@@ -964,7 +997,7 @@ step7_ecr_build_push() {
     if [ ! -f "${AGENTS_DIR}/Dockerfile" ]; then
         warn "No Dockerfile found — creating the standard one"
         cat > "${AGENTS_DIR}/Dockerfile" <<'DOCKERFILE_CONTENT'
-# AgentCore Runtime container for the SPBC Pastry Concierge (AgentCore requires linux/arm64).
+# AgentCore Runtime container for the SPBC Tech Assistant (AgentCore requires linux/arm64).
 FROM --platform=linux/arm64 public.ecr.aws/docker/library/python:3.11-slim
 ARG AWS_REGION=eu-central-1
 ENV DOCKER_CONTAINER=1 \
@@ -974,10 +1007,10 @@ ENV DOCKER_CONTAINER=1 \
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY barista_supervisor_agent.py menu_agents.py orders_agents.py place_order.py \
+COPY tech_assistant_agent.py menu_agents.py orders_agents.py place_order.py \
      payments_policy_agents.py stores_agents.py promos_agents.py ./
 EXPOSE 8080
-CMD ["python", "barista_supervisor_agent.py"]
+CMD ["python", "tech_assistant_agent.py"]
 DOCKERFILE_CONTENT
     fi
 
@@ -1221,31 +1254,32 @@ step9_test_runtime() {
     for domain in menu orders payments promos stores; do
         case "$domain" in
             menu)
-                prompt="Do you have an Almond Croissant, and what does it cost?"
-                # A price, not just the item name: naming the pastry while failing to price it
-                # is what a broken menu/price tool looks like
+                prompt="Do you have the Apple iPhone 14 with 128GB, and what does it cost?"
+                # A price, not just the product name: naming the phone while failing to price it
+                # is what a broken catalog/price tool looks like
                 expect="[0-9]+[.,][0-9]{2}|€ ?[0-9]|[0-9] ?(EUR|euro)"
                 requirement="required" ;;
             orders)
-                prompt="What is the status of the most recent order for user_001?"
-                # Either a real status or an explicit "nothing found" is a working path
-                expect="order|status|no recent|not found|couldn't find|could not find"
+                prompt="What is the status of order ord_2055_023 for customer_2055?"
+                # A real status from the seed data (SHIPPED), or an explicit "nothing found" when
+                # the table has not been seeded, is a working path
+                expect="shipped|order|status|no order|not found|couldn't find|could not find"
                 requirement="required" ;;
             payments)
-                prompt="Can I pay with cash at the bakery?"
+                prompt="Can I pay with PayPal when I order online?"
                 # Must actually answer: "payment" alone matches the apology for a failed lookup
-                expect="(yes|accept|can pay|do take|welcome).{0,60}(cash|card)|cash.{0,40}(accepted|welcome|fine)"
+                expect="(yes|accept|can pay|do take|welcome).{0,60}(paypal|card)|paypal.{0,40}(accepted|welcome|fine|available)"
                 requirement="required" ;;
             promos)
-                prompt="What do I get on Fresh Pastry Tuesdays?"
-                expect="croissant|free|discount|tuesday|%"
+                prompt="Is there a student discount on laptops?"
+                expect="student|10 ?%|STUDENT10|discount"
                 # Answerable from the API or the KB; optional when neither is configured
                 requirement="optional"
                 if [ -n "$PROMOS_API_URL" ] || [ -n "${PROMOS_KNOWLEDGE_BASE_ID:-}" ]; then
                     requirement="required"
                 fi ;;
             stores)
-                prompt="What are the opening hours of your Frankfurt am Main bakery?"
+                prompt="What are the opening hours of your store in Dresden?"
                 expect="[0-9]{1,2}:[0-9]{2}"
                 # Needs the stores database; without it the store FAQ may still answer
                 requirement="optional"
@@ -1502,8 +1536,8 @@ usage() {
     echo "  ACCOUNT_ID          (default: auto-detected)"
     echo "  ROLE_NAME           (default: SPBC-AgentCore-ExecutionRole)"
     echo "  BUCKET_NAME         (default: spbc-kb-docs-<account-id>)"
-    echo "  ECR_REPO_NAME       (default: spbc-pastry-concierge)"
-    echo "  RUNTIME_NAME        (default: pastry_concierge_agent)"
+    echo "  ECR_REPO_NAME       (default: spbc-tech-assistant)"
+    echo "  RUNTIME_NAME        (default: tech_assistant_agent)"
     echo "  ARTIFACT_TYPE       container | zip (default: container)"
     echo "  CODE_S3_KEY / IMAGE_URI   artifact to deploy (default: latest uploaded/pushed)"
     echo "  SUBNET_IDS, SECURITY_GROUP_IDS   comma-separated; enables VPC mode"

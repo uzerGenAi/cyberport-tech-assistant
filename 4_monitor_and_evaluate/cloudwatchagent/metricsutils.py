@@ -6,8 +6,8 @@ import time
 import json
 
 # The CloudWatch agent ships METRICS_FILE to this log group (cloudwatch_agentconfig.json)
-METRICS_LOG_GROUP = "barista_supervisor-agent-metrics"
-DEFAULT_AGENT_NAME = "barista_supervisor-agent"
+METRICS_LOG_GROUP = "tech_assistant-agent-metrics"
+DEFAULT_AGENT_NAME = "tech_assistant-agent"
 
 
 def extract_metrics(metrics_summary, agent_name=DEFAULT_AGENT_NAME):

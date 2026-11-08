@@ -3,7 +3,7 @@ frontend:
   phases:
     preBuild:
       commands:
-        - echo "Preparing Specialty Bakeries & Pastry Cafés web app for Amplify deployment"
+        - echo "Preparing Cyberport Tech Assistant web app for Amplify deployment"
         - |
           if [ -f "6_deploy/web-app/cognito-config.json" ] && [ -s "6_deploy/web-app/cognito-config.json" ]; then
             echo "cognito-config.json found"

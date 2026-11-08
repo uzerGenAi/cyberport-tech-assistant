@@ -1,208 +1,421 @@
 [
-    {
-      "user_id": "user_001",
-      "order_timestamp": "2025-05-01T10:15:00Z",
-      "order_id": "order_1001",
-      "status": "DELIVERED",
-      "items": [
-        {
-          "item_id": "latte",
-          "customizations": {
-            "size": "12oz",
-            "milk": "oat",
-            "temperature": "hot",
-            "syrup": "vanilla",
-            "shots": 1
-          }
-        },
-        {
-          "item_id": "donut_glazed",
-          "customizations": {}
-        }
-      ],
-      "store_id": "store_123",
-      "total_amount": 7.5
-    },
-    {
-      "user_id": "user_001",
-      "order_timestamp": "2025-05-02T08:45:00Z",
-      "order_id": "order_1002",
-      "status": "PLACED",
-      "items": [
-        {
-          "item_id": "coldbrew",
-          "customizations": {
-            "size": "16oz",
-            "milk": "almond",
-            "ice": "less",
-            "sweetener": "none"
-          }
-        }
-      ],
-      "store_id": "store_101",
-      "total_amount": 4.25
-    },
-    {
-      "user_id": "user_002",
-      "order_timestamp": "2025-05-03T12:30:00Z",
-      "order_id": "order_2001",
-      "status": "CANCELLED",
-      "items": [
-        {
-          "item_id": "donut_chocolate",
-          "customizations": {}
-        }
-      ],
-      "store_id": "store_321",
-      "total_amount": 2.95
-    },
-    {
-      "user_id": "user_003",
-      "order_timestamp": "2025-05-04T09:00:00Z",
-      "order_id": "order_3001",
-      "status": "DELIVERED",
-      "items": [
-        {
-          "item_id": "americano",
-          "customizations": {
-            "size": "16oz",
-            "temperature": "hot"
-          }
-        }
-      ],
-      "store_id": "store_222",
-      "total_amount": 3.5
-    },
-    {
-      "user_id": "user_003",
-      "order_timestamp": "2025-05-05T14:20:00Z",
-      "order_id": "order_3002",
-      "status": "PLACED",
-      "items": [
-        {
-          "item_id": "donut_maple",
-          "customizations": {}
-        },
-        {
-          "item_id": "latte",
-          "customizations": {
-            "size": "8oz",
-            "milk": "soy",
-            "temperature": "hot"
-          }
-        }
-      ],
-      "store_id": "store_222",
-      "total_amount": 6.0
-    },
-    {
-      "user_id": "user_004",
-      "order_timestamp": "2025-05-06T07:50:00Z",
-      "order_id": "order_4001",
-      "status": "DELIVERED",
-      "items": [
-        {
-          "item_id": "coldbrew",
-          "customizations": {
-            "size": "12oz",
-            "milk": "none",
-            "ice": "normal",
-            "sweetener": "stevia"
-          }
-        }
-      ],
-      "store_id": "store_555",
-      "total_amount": 3.95
-    },
-    {
-      "user_id": "user_005",
-      "order_timestamp": "2025-05-07T11:00:00Z",
-      "order_id": "order_5001",
-      "status": "PLACED",
-      "items": [
-        {
-          "item_id": "donut_glazed",
-          "customizations": {}
-        }
-      ],
-      "store_id": "store_123",
-      "total_amount": 2.25
-    },
-    {
-      "user_id": "user_006",
-      "order_timestamp": "2025-05-07T12:45:00Z",
-      "order_id": "order_6001",
-      "status": "DELIVERED",
-      "items": [
-        {
-          "item_id": "latte",
-          "customizations": {
-            "size": "16oz",
-            "milk": "whole",
-            "temperature": "hot"
-          }
-        }
-      ],
-      "store_id": "store_888",
-      "total_amount": 4.75
-    },
-    {
-      "user_id": "user_005",
-      "order_timestamp": "2025-05-08T10:15:00Z",
-      "order_id": "order_5002",
-      "status": "DELIVERED",
-      "items": [
-        {
-          "item_id": "americano",
-          "customizations": {
-            "size": "12oz",
-            "temperature": "iced"
-          }
-        },
-        {
-          "item_id": "donut_chocolate",
-          "customizations": {}
-        }
-      ],
-      "store_id": "store_123",
-      "total_amount": 6.25
-    },
-    {
-      "user_id": "user_007",
-      "order_timestamp": "2025-05-08T13:00:00Z",
-      "order_id": "order_7001",
-      "status": "CANCELLED",
-      "items": [
-        {
-          "item_id": "coldbrew",
-          "customizations": {
-            "size": "16oz",
-            "ice": "none",
-            "sweetener": "honey"
-          }
-        }
-      ],
-      "store_id": "store_666",
-      "total_amount": 4.0
-    },
-    {
-      "user_id": "user_008",
-      "order_timestamp": "2025-05-09T08:30:00Z",
-      "order_id": "order_8001",
-      "status": "PLACED",
-      "items": [
-        {
-          "item_id": "latte",
-          "customizations": {
-            "size": "8oz",
-            "milk": "skim",
-            "temperature": "hot",
-            "syrup": "caramel"
-          }
-        }
-      ],
-      "store_id": "store_999",
-      "total_amount": 3.95
-    }
-  ]
-  
+  {
+    "user_id": "customer_8626",
+    "order_timestamp": "2023-09-27T11:07:00Z",
+    "order_id": "ord_8626_001",
+    "status": "DELIVERED",
+    "items": [
+      {
+        "item_id": "laptop_acer_aspire_3_a315_34",
+        "name": "Acer Aspire 3 A315-34",
+        "quantity": 1
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "Cash",
+    "total_amount": 306.99
+  },
+  {
+    "user_id": "customer_1349",
+    "order_timestamp": "2023-10-01T12:14:00Z",
+    "order_id": "ord_1349_002",
+    "status": "COLLECTED",
+    "items": [
+      {
+        "item_id": "phone_apple_iphone_11",
+        "name": "Apple iPhone 11",
+        "quantity": 1,
+        "variant": "64GB"
+      }
+    ],
+    "store_id": "spbc-de-001",
+    "fulfilment": "click_and_collect",
+    "payment_method": "Credit Card",
+    "total_amount": 348.0
+  },
+  {
+    "user_id": "customer_7484",
+    "order_timestamp": "2023-10-16T13:21:00Z",
+    "order_id": "ord_7484_003",
+    "status": "COLLECTED",
+    "items": [
+      {
+        "item_id": "phone_google_pixel_6a",
+        "name": "Google Pixel 6A",
+        "quantity": 1,
+        "variant": "128GB"
+      }
+    ],
+    "store_id": "spbc-de-004",
+    "fulfilment": "click_and_collect",
+    "payment_method": "Debit Card",
+    "total_amount": 419.0
+  },
+  {
+    "user_id": "customer_9074",
+    "order_timestamp": "2023-11-06T14:28:00Z",
+    "order_id": "ord_9074_004",
+    "status": "DELIVERED",
+    "items": [
+      {
+        "item_id": "phone_xiaomi_redmi_note_10_pro",
+        "name": "Xiaomi Redmi Note 10 Pro",
+        "quantity": 1,
+        "variant": "64GB"
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "Debit Card",
+    "total_amount": 199.99
+  },
+  {
+    "user_id": "customer_5655",
+    "order_timestamp": "2023-11-29T15:35:00Z",
+    "order_id": "ord_5655_005",
+    "status": "DELIVERED",
+    "items": [
+      {
+        "item_id": "phone_apple_iphone_14",
+        "name": "Apple iPhone 14",
+        "quantity": 1,
+        "variant": "128GB"
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "Debit Card",
+    "total_amount": 1009.0
+  },
+  {
+    "user_id": "customer_1998",
+    "order_timestamp": "2023-12-14T16:42:00Z",
+    "order_id": "ord_1998_006",
+    "status": "CANCELLED",
+    "items": [
+      {
+        "item_id": "phone_samsung_galaxy_a13",
+        "name": "Samsung Galaxy A13",
+        "quantity": 2,
+        "variant": "32GB"
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "Credit Card",
+    "total_amount": 292.0
+  },
+  {
+    "user_id": "customer_8168",
+    "order_timestamp": "2023-12-30T17:49:00Z",
+    "order_id": "ord_8168_007",
+    "status": "DELIVERED",
+    "items": [
+      {
+        "item_id": "laptop_lenovo_thinkpad_l13_gen_2",
+        "name": "Lenovo ThinkPad L13 Gen 2",
+        "quantity": 1
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "Credit Card",
+    "total_amount": 799.0
+  },
+  {
+    "user_id": "customer_16718",
+    "order_timestamp": "2024-01-22T18:56:00Z",
+    "order_id": "ord_16718_008",
+    "status": "CANCELLED",
+    "items": [
+      {
+        "item_id": "laptop_hp_elitebook_840_g8",
+        "name": "HP EliteBook 840 G8",
+        "quantity": 1
+      }
+    ],
+    "store_id": "spbc-at-001",
+    "fulfilment": "click_and_collect",
+    "payment_method": "Bank Transfer",
+    "total_amount": 750.73
+  },
+  {
+    "user_id": "customer_16007",
+    "order_timestamp": "2024-01-30T10:03:00Z",
+    "order_id": "ord_16007_009",
+    "status": "COLLECTED",
+    "items": [
+      {
+        "item_id": "laptop_razer_blade_15_qhd",
+        "name": "Razer Blade 15 QHD",
+        "quantity": 1
+      }
+    ],
+    "store_id": "spbc-de-007",
+    "fulfilment": "click_and_collect",
+    "payment_method": "Credit Card",
+    "total_amount": 2799.99
+  },
+  {
+    "user_id": "customer_16278",
+    "order_timestamp": "2024-02-12T11:10:00Z",
+    "order_id": "ord_16278_010",
+    "status": "CANCELLED",
+    "items": [
+      {
+        "item_id": "laptop_asus_tuf_gaming_f15_fx506lhb_hn359",
+        "name": "ASUS TUF Gaming F15 Fx506lhb-hn359",
+        "quantity": 1
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "Bank Transfer",
+    "total_amount": 719.01
+  },
+  {
+    "user_id": "customer_14483",
+    "order_timestamp": "2024-02-17T12:17:00Z",
+    "order_id": "ord_14483_011",
+    "status": "CANCELLED",
+    "items": [
+      {
+        "item_id": "laptop_asus_rog_strix_g15_g513rc_hn180",
+        "name": "ASUS ROG Strix G15 G513RC-HN180",
+        "quantity": 1
+      }
+    ],
+    "store_id": "spbc-de-002",
+    "fulfilment": "click_and_collect",
+    "payment_method": "Bank Transfer",
+    "total_amount": 909.99
+  },
+  {
+    "user_id": "customer_15391",
+    "order_timestamp": "2024-02-26T13:24:00Z",
+    "order_id": "ord_15391_012",
+    "status": "COLLECTED",
+    "items": [
+      {
+        "item_id": "phone_xiaomi_redmi_note_12_pro_5g",
+        "name": "Xiaomi Redmi Note 12 Pro 5G",
+        "quantity": 1,
+        "variant": "128GB"
+      }
+    ],
+    "store_id": "spbc-de-004",
+    "fulfilment": "click_and_collect",
+    "payment_method": "PayPal",
+    "total_amount": 289.95
+  },
+  {
+    "user_id": "customer_4577",
+    "order_timestamp": "2024-03-23T14:31:00Z",
+    "order_id": "ord_4577_013",
+    "status": "DELIVERED",
+    "items": [
+      {
+        "item_id": "phone_vivo_y76_5g",
+        "name": "Vivo Y76 5G",
+        "quantity": 1,
+        "variant": "128GB"
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "Cash",
+    "total_amount": 306.0
+  },
+  {
+    "user_id": "customer_9375",
+    "order_timestamp": "2024-03-29T15:38:00Z",
+    "order_id": "ord_9375_014",
+    "status": "CANCELLED",
+    "items": [
+      {
+        "item_id": "phone_samsung_galaxy_s22_ultra_5g",
+        "name": "Samsung Galaxy S22 Ultra 5G",
+        "quantity": 1,
+        "variant": "128GB"
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "PayPal",
+    "total_amount": 844.0
+  },
+  {
+    "user_id": "customer_6553",
+    "order_timestamp": "2024-03-31T16:45:00Z",
+    "order_id": "ord_6553_015",
+    "status": "DELIVERED",
+    "items": [
+      {
+        "item_id": "laptop_lenovo_100e_chromebook_gen_3",
+        "name": "Lenovo 100e Chromebook Gen 3",
+        "quantity": 1
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "Credit Card",
+    "total_amount": 327.0
+  },
+  {
+    "user_id": "customer_11693",
+    "order_timestamp": "2024-04-25T17:52:00Z",
+    "order_id": "ord_11693_016",
+    "status": "COLLECTED",
+    "items": [
+      {
+        "item_id": "laptop_acer_predator_triton_300_se_pt316_51s_74lt",
+        "name": "Acer Predator Triton 300 SE PT316-51s-74LT",
+        "quantity": 1
+      }
+    ],
+    "store_id": "spbc-at-001",
+    "fulfilment": "click_and_collect",
+    "payment_method": "PayPal",
+    "total_amount": 1589.01
+  },
+  {
+    "user_id": "customer_14148",
+    "order_timestamp": "2024-05-03T18:59:00Z",
+    "order_id": "ord_14148_017",
+    "status": "COLLECTED",
+    "items": [
+      {
+        "item_id": "laptop_microsoft_surface_go_3",
+        "name": "Microsoft Surface GO 3",
+        "quantity": 1
+      }
+    ],
+    "store_id": "spbc-de-004",
+    "fulfilment": "click_and_collect",
+    "payment_method": "Credit Card",
+    "total_amount": 599.01
+  },
+  {
+    "user_id": "customer_5532",
+    "order_timestamp": "2024-05-18T10:06:00Z",
+    "order_id": "ord_5532_018",
+    "status": "CANCELLED",
+    "items": [
+      {
+        "item_id": "phone_realme_gt2",
+        "name": "Realme GT2",
+        "quantity": 1,
+        "variant": "128GB"
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "Credit Card",
+    "total_amount": 552.59
+  },
+  {
+    "user_id": "customer_16768",
+    "order_timestamp": "2024-05-26T11:13:00Z",
+    "order_id": "ord_16768_019",
+    "status": "DELIVERED",
+    "items": [
+      {
+        "item_id": "laptop_samsung_chromebook_4_xe310xba_k01es",
+        "name": "Samsung Chromebook 4 XE310XBA-K01ES",
+        "quantity": 1
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "Credit Card",
+    "total_amount": 365.9
+  },
+  {
+    "user_id": "customer_8740",
+    "order_timestamp": "2024-06-21T12:20:00Z",
+    "order_id": "ord_8740_020",
+    "status": "DELIVERED",
+    "items": [
+      {
+        "item_id": "laptop_msi_creator_m16_b12udx_688xes",
+        "name": "MSI Creator M16 B12UDX-688XES",
+        "quantity": 1
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "Cash",
+    "total_amount": 1399.0
+  },
+  {
+    "user_id": "customer_7977",
+    "order_timestamp": "2026-11-03T13:27:00Z",
+    "order_id": "ord_7977_021",
+    "status": "PROCESSING",
+    "items": [
+      {
+        "item_id": "laptop_hp_15s_fq2095ns",
+        "name": "HP 15S-fq2095ns",
+        "quantity": 1
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "Debit Card",
+    "total_amount": 334.54
+  },
+  {
+    "user_id": "customer_17485",
+    "order_timestamp": "2026-11-04T14:34:00Z",
+    "order_id": "ord_17485_022",
+    "status": "READY_FOR_PICKUP",
+    "items": [
+      {
+        "item_id": "phone_samsung_galaxy_s21_fe_5g",
+        "name": "Samsung Galaxy S21 FE 5G",
+        "quantity": 1,
+        "variant": "128GB"
+      }
+    ],
+    "store_id": "spbc-de-003",
+    "fulfilment": "click_and_collect",
+    "payment_method": "PayPal",
+    "total_amount": 472.15
+  },
+  {
+    "user_id": "customer_2055",
+    "order_timestamp": "2026-11-05T15:41:00Z",
+    "order_id": "ord_2055_023",
+    "status": "SHIPPED",
+    "items": [
+      {
+        "item_id": "laptop_asus_expertbook_b1_b1502cba_ej0433",
+        "name": "ASUS ExpertBook B1 B1502CBA-EJ0433",
+        "quantity": 1
+      }
+    ],
+    "store_id": "online",
+    "fulfilment": "home_delivery",
+    "payment_method": "Credit Card",
+    "total_amount": 445.99
+  },
+  {
+    "user_id": "customer_3670",
+    "order_timestamp": "2026-11-06T16:48:00Z",
+    "order_id": "ord_3670_024",
+    "status": "READY_FOR_PICKUP",
+    "items": [
+      {
+        "item_id": "phone_poco_x5_5g",
+        "name": "POCO X5 5G",
+        "quantity": 1,
+        "variant": "128GB"
+      }
+    ],
+    "store_id": "spbc-de-006",
+    "fulfilment": "click_and_collect",
+    "payment_method": "Cash",
+    "total_amount": 261.66
+  }
+]
