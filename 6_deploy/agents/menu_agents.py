@@ -43,7 +43,7 @@ def menu_kb_retrieve(query: str) -> str:
         return f"Failed to retrieve information: {str(e)}"
 
 @tool(name="get_menu",
-      description="Fetch the full product catalog (smartphones and laptops) with prices, specs and stock")
+      description="Return the full product catalog (all smartphones and laptops with specs and prices). Use it to look up or compare specific products by name. NOT for laptop recommendations or 'best laptop under a budget' questions: call find_laptops for those.")
 def get_menu() -> dict:
     """Fetch the product catalog JSON from S3 and return it as a parsed object."""
     bucket = os.environ["S3_BUCKET_NAME"]
@@ -250,6 +250,75 @@ def price_items(items: list) -> dict:
     return result
 
 
+_CPU_TIERS = [            # (pattern, score): coarse performance tiers, best first
+    (r"\bi9\b|ryzen 9", 6), (r"apple m[23]|\bi7\b|ryzen 7", 5), (r"apple m1|\bi5\b|ryzen 5", 4),
+    (r"\bi3\b|ryzen 3", 2), (r"pentium|celeron|athlon|amd 30[12]\d|mediatek", 1),
+]
+_USE_CASE_CATEGORIES = {
+    "student":  ["everyday_laptops", "business_laptops", "premium_laptops"],
+    "everyday": ["everyday_laptops", "business_laptops", "premium_laptops"],
+    "business": ["business_laptops", "premium_laptops"],
+    "gaming":   ["gaming_laptops"],
+    "creative": ["premium_laptops", "gaming_laptops"],
+}
+
+
+def _laptop_score(attrs: dict) -> float:
+    cpu = str(attrs.get("cpu", "")).lower()
+    cpu_score = next((s for p, s in _CPU_TIERS if re.search(p, cpu)), 3)
+    ram = float(attrs.get("ram_gb") or 0)
+    storage = str(attrs.get("storage", "")).upper()
+    size = _STORAGE_IN_TEXT.search(storage)
+    gb = int(size.group(1)) * (1024 if size and size.group(2).upper() == "TB" else 1) if size else 0
+    ssd = 1 if "SSD" in storage else 0
+    return cpu_score * 3 + min(ram, 32) / 4 + min(gb, 1024) / 256 + ssd * 2
+
+
+def shortlist_laptops(max_price_eur, use_case="everyday", include_refurbished=False) -> dict:
+    """Deterministic laptop shortlist: filter by budget and use case, rank by spec score.
+
+    Used by find_laptops (products agent) and laptop_recommendation_tool (orchestrator).
+    """
+    try:
+        budget = float(max_price_eur)
+    except (TypeError, ValueError):
+        return {"error": "max_price_eur must be a number in euros"}
+    use = (use_case or "everyday").strip().lower()
+    categories = list(_USE_CASE_CATEGORIES.get(use, _USE_CASE_CATEGORIES["everyday"]))
+    if include_refurbished:
+        categories.append("refurbished_laptops")
+    candidates = []
+    for item in _load_priced_menu():
+        attrs = item.get("attributes_json") or {}
+        price = item.get("price_eur")
+        if item.get("category") not in categories or price is None or float(price) > budget:
+            continue
+        if use == "student" and float(attrs.get("ram_gb") or 0) < 8:
+            continue                          # students need 8GB RAM or more
+        candidates.append((_laptop_score(attrs), float(price), item, attrs))
+    candidates.sort(key=lambda c: (-c[0], c[1]))     # best specs first, cheaper wins a tie
+    top = [{
+        "name": item["name"], "price_eur": round(price, 2), "category": item["category"],
+        "cpu": attrs.get("cpu"), "ram_gb": attrs.get("ram_gb"), "storage": attrs.get("storage"),
+        "gpu": attrs.get("gpu"), "screen_inches": attrs.get("screen_inches"),
+        "condition": attrs.get("condition", "New"),
+    } for _, price, item, attrs in candidates[:3]]
+    if not top:
+        return {"results": [], "message": f"No {use} laptop under €{budget:.2f} in the catalog."}
+    return {"use_case": use, "budget_eur": budget, "results": top}
+
+
+@tool(
+    name="find_laptops",
+    description="Shortlist the best laptops within a budget for a use case (student, everyday, "
+                "business, gaming, creative). Ranks by specs (CPU, RAM, SSD), not by lowest price. "
+                "Use this for every 'best laptop under €X' or 'laptop for <use>' recommendation.",
+)
+def find_laptops(max_price_eur: float, use_case: str = "everyday", include_refurbished: bool = False) -> dict:
+    """Deterministic laptop shortlist (see shortlist_laptops)."""
+    return shortlist_laptops(max_price_eur, use_case, include_refurbished)
+
+
 @tool(
     name="calculate_order_total",
     description=(
@@ -310,6 +379,15 @@ menu_agent = Agent(
         - For product questions and recommendations, first fetch the catalog with get_menu and
           compare products on their specs (cpu, ram_gb, storage, gpu, screen_inches, segment,
           condition). Recommend at most three products and say why each fits.
+        - For any laptop recommendation ("best laptop under €X", "a laptop for studying, work or
+          gaming"), call find_laptops with the budget and the use case (student, everyday,
+          business, gaming, creative). Recommend its results in its order, with each price and
+          the specs it returns; do not swap in cheaper products from get_menu. Without a budget,
+          ask for one.
+        - When comparing products, state only attributes the catalog returns (price per storage
+          variant, segment, colours, RAM, CPU, storage, GPU, screen size when listed). If an
+          attribute such as the chip, camera or battery is not in the catalog, say it is not
+          listed; never fill it in from your own knowledge.
         - For any pricing or order-total query, use the calculate_order_total tool with the
           product name(s), quantity, and the storage variant when the customer gave one. Each
           product has its own price and smartphones have one price per storage size; never
@@ -322,5 +400,5 @@ menu_agent = Agent(
           storage someone needs), use menu_kb_retrieve.
         - If nothing relevant is found using any tool, ask clarifying questions or refer to customer service.
         """,
-    tools=[menu_kb_retrieve, get_menu, calculate_order_total, check_store_stock],
+    tools=[menu_kb_retrieve, get_menu, find_laptops, calculate_order_total, check_store_stock],
 )

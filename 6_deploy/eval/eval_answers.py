@@ -48,6 +48,10 @@ CASES = [
      [r"€\s?\d{3,4}(?:[.,]\d+)?\s*(?:for|is).*iphone 25"]),
     ("recommend_budget", "eval", ["Recommend a gaming laptop under 1000 euros."],
      [[r"IdeaPad Gaming 3", r"ROG Strix G15", r"TUF Gaming F15", r"Victus 16", r"Katana GF66"]], []),
+    ("student_laptop", "eval", ["Which laptop under €1,000 is best for a student?"],
+     [[r"Prestige 14", r"ZenBook 14", r"Yoga Slim 7"]], [r"Celeron", r"€\s?30[0-9][.,]\d\d"]),
+    ("compare_no_invented_specs", "eval", ["Compare the Apple iPhone 14 and the Samsung Galaxy S23."],
+     [[r"1009|1[.,]009"], [r"694[.,]9"]], [r"\bA1[56]\b", r"Snapdragon", r"\d+\s?MP\b", r"6[.,]1"]),
     ("stock_store", "eval", ["Is the Samsung Galaxy S21 FE 5G in stock at the Dresden store?"],
      [[r"\b5\b", r"in stock", r"available"]], [r"out of stock"]),
     # ── stores (Aurora via Data API + stores KB) ──

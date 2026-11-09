@@ -148,13 +148,48 @@
       <!-- Sample Prompts Section -->
       <div class="sample-prompts">
         <h3>Popular questions</h3>
-        <div class="prompt-buttons">
-          <button class="prompt-btn" onclick="sendSamplePrompt('Which laptop under €1,000 is best for a student?')">Which laptop under €1,000 is best for a student?</button>
-          <button class="prompt-btn" onclick="sendSamplePrompt('Compare the Apple iPhone 14 and the Samsung Galaxy S23')">Compare the Apple iPhone 14 and the Samsung Galaxy S23</button>
-          <button class="prompt-btn" onclick="sendSamplePrompt('Is the Apple iPhone 14 in stock at the Cyberport Store Dresden?')">Is the Apple iPhone 14 in stock at the Cyberport Store Dresden?</button>
-          <button class="prompt-btn" onclick="sendSamplePrompt('What is the status of order ord_2055_023 for customer_2055?')">What is the status of order ord_2055_023 for customer_2055?</button>
-          <button class="prompt-btn" onclick="sendSamplePrompt('Can I pay for a laptop in instalments?')">Can I pay for a laptop in instalments?</button>
-          <button class="prompt-btn" onclick="sendSamplePrompt('How does the trade-in bonus work?')">How does the trade-in bonus work?</button>
+        <p class="prompt-sub">Tap a question to ask the Tech Assistant. Each one uses a different part of the system.</p>
+        <div class="prompt-grid">
+          <button type="button" class="prompt-card" onclick="sendSamplePrompt('Which laptop under €1,000 is best for a student?')">
+            <span class="prompt-card-label"><span aria-hidden="true">💻</span> Products</span>
+            <span class="prompt-card-q">Which laptop under €1,000 is best for a student?</span>
+            <span class="prompt-card-src">Catalog, ranked by specs</span>
+          </button>
+          <button type="button" class="prompt-card" onclick="sendSamplePrompt('Compare the Apple iPhone 14 and the Samsung Galaxy S23')">
+            <span class="prompt-card-label"><span aria-hidden="true">⚖️</span> Compare</span>
+            <span class="prompt-card-q">Compare the Apple iPhone 14 and the Samsung Galaxy S23</span>
+            <span class="prompt-card-src">Catalog prices per storage size</span>
+          </button>
+          <button type="button" class="prompt-card" onclick="sendSamplePrompt('Is the Apple iPhone 14 in stock at my store?')">
+            <span class="prompt-card-label"><span aria-hidden="true">📦</span> Store stock</span>
+            <span class="prompt-card-q">Is the Apple iPhone 14 in stock at my store?</span>
+            <span class="prompt-card-src">Uses your selected store</span>
+          </button>
+          <button type="button" class="prompt-card" onclick="sendSamplePrompt('Which deals are running right now?')">
+            <span class="prompt-card-label"><span aria-hidden="true">🏷️</span> Deals</span>
+            <span class="prompt-card-q">Which deals are running right now?</span>
+            <span class="prompt-card-src">Live promotions API</span>
+          </button>
+          <button type="button" class="prompt-card" onclick="sendSamplePrompt('When is the Munich store open?')">
+            <span class="prompt-card-label"><span aria-hidden="true">📍</span> Stores</span>
+            <span class="prompt-card-q">When is the Munich store open?</span>
+            <span class="prompt-card-src">Store database</span>
+          </button>
+          <button type="button" class="prompt-card" onclick="sendSamplePrompt('Can I pay for a laptop in instalments?')">
+            <span class="prompt-card-label"><span aria-hidden="true">💳</span> Payments</span>
+            <span class="prompt-card-q">Can I pay for a laptop in instalments?</span>
+            <span class="prompt-card-src">Payments knowledge base</span>
+          </button>
+          <button type="button" class="prompt-card" onclick="sendSamplePrompt('What is the status of order ord_2055_023 for customer_2055?')">
+            <span class="prompt-card-label"><span aria-hidden="true">🚚</span> Orders</span>
+            <span class="prompt-card-q">What is the status of order ord_2055_023 for customer_2055?</span>
+            <span class="prompt-card-src">Orders database</span>
+          </button>
+          <button type="button" class="prompt-card" onclick="sendSamplePrompt('How long do I have to return an online order?')">
+            <span class="prompt-card-label"><span aria-hidden="true">↩️</span> Returns</span>
+            <span class="prompt-card-q">How long do I have to return an online order?</span>
+            <span class="prompt-card-src">Returns policy</span>
+          </button>
         </div>
       </div>
     </div>

@@ -325,3 +325,26 @@ a { color: inherit; }
 body > .cp-topbar, body > .cp-header { align-self: stretch; width: 100%; box-sizing: border-box; }
 body > .cp-header { position: static; }
 body:has(> .cp-topbar) { padding-top: 0 !important; margin-top: 0 !important; }
+
+/* ── Popular questions: one card per capability ───────────────────────── */
+.prompt-sub { text-align: center; color: var(--cp-ink-2); font-size: 0.88rem; margin: -6px 0 16px; }
+.prompt-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.prompt-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left;
+  background: #fff; border: 2px solid var(--cp-ink); border-radius: var(--cp-radius);
+  padding: 14px 16px; cursor: pointer; font-family: var(--cp-font); color: var(--cp-ink);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.prompt-card:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.12); }
+.prompt-card:focus-visible { outline: 3px solid var(--cp-blue); outline-offset: 2px; }
+.prompt-card-label {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  background: var(--cp-grey); border: 1px solid var(--cp-line); border-radius: 999px; padding: 3px 10px;
+}
+.prompt-card:first-child .prompt-card-label { background: var(--cp-orange); color: #fff; border-color: var(--cp-orange); }
+.prompt-card-q { font-size: 0.95rem; font-weight: 700; line-height: 1.35; flex: 1; }
+.prompt-card-src { font-size: 0.75rem; color: var(--cp-ink-2); }
+.prompt-card-src::before { content: "→ "; }
+@media (max-width: 1000px) { .prompt-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px)  { .prompt-grid { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .prompt-card, .prompt-card:hover { transition: none; transform: none; } }
