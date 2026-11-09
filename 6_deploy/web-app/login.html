@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cyberport Tech Assistant - Login</title>
-  <link href="https://fonts.googleapis.com/css?family=Montserrat:900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#1c1f2b">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,500&display=swap" rel="stylesheet">
   <style>
     /* Body styling to match main page */
     body {
@@ -228,14 +229,32 @@
       }
     }
   </style>
+  <!-- Cyberport-inspired theme (shared with index.html; no Cyberport logo or assets) -->
+  <link rel="stylesheet" href="cyberport-theme.css?v=1">
   <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
   <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1563.0.min.js"></script>
   <script src="cognito-enhanced.js?v=5"></script>
 </head>
 <body>
+  <div class="cp-topbar">
+    <div class="cp-wrap cp-topbar-inner">
+      <div class="cp-segment" role="group" aria-label="Customer type">
+        <span class="cp-segment-btn active">Private customers</span>
+        <span class="cp-segment-btn">Business customers</span>
+      </div>
+    </div>
+  </div>
+  <header class="cp-header">
+    <div class="cp-wrap cp-header-inner">
+      <span class="cp-wordmark" aria-label="Tech Assistant">
+        <span class="cp-mark" aria-hidden="true"></span>
+        <span class="cp-wordmark-text">tech assistant</span>
+      </span>
+    </div>
+  </header>
   <div class="login-header">
-    <h1>📱 Cyberport Tech Assistant</h1>
-    <p>Welcome back! Please sign in to continue.</p>
+    <h1>Welcome back</h1>
+    <p>Sign in to chat with your Tech Assistant: products, store stock, orders, payments and deals.</p>
   </div>
   
   <div class="login-container">

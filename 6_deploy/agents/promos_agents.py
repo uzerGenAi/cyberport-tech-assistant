@@ -122,6 +122,8 @@ promos_agent = Agent(
         - When you receive a query, determine if the question is about current deals and discounts available as promotions.
         - For queries not related to promotions, respond with 'Sorry, I cannot answer this question'.
         - For queries related to promotions, use list_promotions to fetch the current promotional offers.
+        - list_promotions returns only the promotions that are active TODAY. A promotion is running right now only if list_promotions returns it. Never work out from dates yourself whether a promotion is active.
+        - If the customer asks about a promotion that list_promotions does not return, say clearly that it is not active right now; you may use promos_kb_retrieve to say when it runs.
         - If list_promotions returns an error or lacks the detail you need, use promos_kb_retrieve (when it is available) to search the promotions knowledge base.
         - If nothing relevant is found, ask clarifying questions or refer to contact support.
         - Always verify that customers meet all conditions before confirming eligibility for promotions.

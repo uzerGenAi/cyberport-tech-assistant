@@ -224,8 +224,18 @@ def get_store_by_id(store_id: str) -> dict:
         return {"error": str(e)}
 
 
-@tool(name="search_store_by_name", description="A tool to find stores by name or city")
+# Customers write city names in English or without umlauts; the database uses the local names
+_CITY_ALIASES = {
+    "munich": "München", "muenchen": "München", "munchen": "München",
+    "cologne": "Köln", "koeln": "Köln", "koln": "Köln",
+    "vienna": "Wien", "nuremberg": "Nürnberg",
+}
+
+
+@tool(name="search_store_by_name", description="A tool to find stores by name or city (English city names such as Munich, Cologne or Vienna work too)")
 def search_store_by_name(name: str) -> list:
+    name = (name or "").strip()
+    name = _CITY_ALIASES.get(name.lower(), name)
     print(f"Running search_store_by_name with name like: %{name}%")
     try:
         pattern = f"%{name}%"

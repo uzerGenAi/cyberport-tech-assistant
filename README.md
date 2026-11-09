@@ -9,6 +9,8 @@ deployed to `eu-central-1` (Frankfurt).
 > stock, orders, promotions and policies are illustrative. See
 > [2_data_strategy/SOURCES.md](2_data_strategy/SOURCES.md).
 
+> **Deploy in one command:** `./deploy.sh`. Step-by-step runbook, troubleshooting and tear down: [DEPLOY.md](DEPLOY.md).
+
 ## What it does
 
 One orchestrator (the Tech Assistant) routes each customer question to five specialist agents, each
@@ -55,7 +57,7 @@ model, and order lookups require both the customer ID and the order ID.
 | Service setup | Bash and Python scripts | Knowledge bases, guardrail, AgentCore runtime, Cognito and Amplify are created by idempotent scripts, not Terraform |
 | CI/CD | **CodeCommit**, **CodePipeline** V2, **CodeBuild** (`amazonlinux2-x86_64-standard:5.0`) | Source, Validate (`make ci`), manual Approve, Deploy |
 | Observability | **CloudWatch** generative AI observability and Logs | AgentCore publishes runtime metrics (`AWS/Bedrock-AgentCore`) and logs without extra code |
-| Data and analysis tooling | Python, `pandas` (catalog builder), **Streamlit** (value model) | `pip install pandas` to run `2_data_strategy/build_from_kaggle.py`; it is not part of the runtime |
+| Data and analysis tooling | Python, `pandas` (catalog builder), **Streamlit** (value model) | `pip install pandas` to run `2_data_strategy/build_from_kaggle.py`, `pip install streamlit` then `streamlit run 1_business_modeling/business_value.py` for the value model; neither is part of the runtime |
 
 ---
 

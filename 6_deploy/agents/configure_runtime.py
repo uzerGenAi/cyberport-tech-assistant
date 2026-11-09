@@ -231,7 +231,8 @@ def backends_policy(env: dict, account_id: str):
         statements.append(
             {"Sid": "AgentCoreMemory", "Effect": "Allow",
              "Action": ["bedrock-agentcore:CreateEvent", "bedrock-agentcore:ListEvents",
-                        "bedrock-agentcore:GetEvent", "bedrock-agentcore:ListSessions",
+                        "bedrock-agentcore:GetEvent", "bedrock-agentcore:DeleteEvent",
+                        "bedrock-agentcore:ListSessions",
                         "bedrock-agentcore:ListActors", "bedrock-agentcore:RetrieveMemoryRecords",
                         "bedrock-agentcore:ListMemoryRecords", "bedrock-agentcore:GetMemoryRecord"],
              "Resource": f"arn:aws:bedrock-agentcore:{env.get('REGION', 'eu-central-1')}:{account_id}:memory/{memory_id}"})

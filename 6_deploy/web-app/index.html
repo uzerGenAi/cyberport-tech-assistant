@@ -4,62 +4,99 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cyberport Tech Assistant</title>
-  <!-- Montserrat font for flashy title -->
-  <link href="https://fonts.googleapis.com/css?family=Montserrat:900&display=swap" rel="stylesheet">
-  <!-- Enhanced styles -->
+  <meta name="theme-color" content="#1c1f2b">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="enhanced-styles.css">
+  <!-- Cyberport-inspired theme (overrides enhanced-styles.css; no Cyberport logo or assets are used) -->
+  <link rel="stylesheet" href="cyberport-theme.css?v=1">
   <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
   <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1563.0.min.js"></script>
   <script src="cognito-enhanced.js?v=5"></script>
 </head>
 <body>
-  <div class="main-container">
-    <!-- Top Header with Title and Sign Out -->
-    <div class="top-header">
-      <div class="header-content">
-        <h1 class="main-title">📱 Cyberport Tech Assistant</h1>
-        <p class="subtitle">Smartphones and laptops, expert advice, click &amp; collect — online and in store.</p>
+  <!-- Utility bar -->
+  <div class="cp-topbar">
+    <div class="cp-wrap cp-topbar-inner">
+      <div class="cp-segment" role="group" aria-label="Customer type">
+        <button type="button" class="cp-segment-btn active" aria-pressed="true">Private customers</button>
+        <button type="button" class="cp-segment-btn" aria-pressed="false"
+                onclick="sendSamplePrompt('What discounts do you have for business customers?')">Business customers</button>
       </div>
-      <button id="signOutButton" class="bubble-btn signout-btn compact top-signout">
-        <span class="btn-icon">👋</span>
-        <span class="btn-text">Sign Out</span>
-      </button>
+      <nav class="cp-toplinks" aria-label="Service links">
+        <a href="#chatbot" onclick="document.getElementById('storeLocatorButton').click()"><span aria-hidden="true">📍</span> Stores</a>
+        <a href="#chatbot" onclick="sendSamplePrompt('Which repair and recycling services do your stores offer?')"><span aria-hidden="true">🛠</span> Services</a>
+        <a href="#chatbot" onclick="sendSamplePrompt('How can I contact customer service?')"><span aria-hidden="true">💬</span> Contact</a>
+      </nav>
     </div>
-    
+  </div>
+
+  <!-- Main header: wordmark, ask bar, account -->
+  <header class="cp-header">
+    <div class="cp-wrap cp-header-inner">
+      <a class="cp-wordmark" href="#" aria-label="Tech Assistant home">
+        <span class="cp-mark" aria-hidden="true"></span>
+        <span class="cp-wordmark-text">tech assistant</span>
+      </a>
+      <form class="cp-search" id="cp-ask-form" role="search" onsubmit="event.preventDefault(); const q=document.getElementById('cp-ask-input'); if (q.value.trim()) { sendSamplePrompt(q.value.trim()); q.value=''; }">
+        <span class="cp-search-icon" aria-hidden="true"></span>
+        <label for="cp-ask-input" class="cp-sr-only">Ask the Tech Assistant</label>
+        <input id="cp-ask-input" type="search" placeholder="What are you looking for? Ask the Tech Assistant…" autocomplete="off">
+      </form>
+      <div class="cp-header-actions">
+        <span class="cp-account" id="cp-account" title="Signed in"><span aria-hidden="true">👤</span><span id="cp-account-name">Account</span></span>
+        <button id="signOutButton" class="cp-icon-btn top-signout" type="button">Sign out</button>
+      </div>
+    </div>
+    <nav class="cp-wrap cp-nav" aria-label="Product categories">
+      <div class="cp-nav-main">
+        <a href="#products" onclick="openCategory('smartphones')">Smartphones</a>
+        <a href="#products" onclick="openCategory('premium_laptops')">Premium laptops</a>
+        <a href="#products" onclick="openCategory('gaming_laptops')">Gaming</a>
+        <a href="#products" onclick="openCategory('business_laptops')">Business</a>
+        <a href="#products" onclick="openCategory('everyday_laptops')">Everyday laptops</a>
+        <a href="#products" onclick="openCategory('refurbished_laptops')">Refurbished</a>
+      </div>
+      <div class="cp-nav-side">
+        <a href="#chatbot" onclick="sendSamplePrompt('Which promotions are running right now?')">Deals</a>
+        <a href="#chatbot" onclick="sendSamplePrompt('Do you have refurbished laptops?')">Outlet</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="main-container">
     <!-- Filled in by script-enhanced.js when the app is in preview or limited mode.
          Hidden while everything is live. -->
     <div id="app-state-banner" class="app-state-banner" role="status" aria-live="polite" hidden></div>
-    
-    <div class="hero-panel">
-      <div class="hero-copy">
-        <p class="eyebrow">Powered by Amazon Bedrock AgentCore</p>
-        <h2>Find the right device, check store stock, and reserve it for click &amp; collect.</h2>
-        <p>Ask about specs, prices, store stock, orders, financing or promotions — your Tech Assistant is ready.</p>
-        <div class="hero-actions">
-          <a class="pill-link" href="#chatbot">Start chatting</a>
-          <span class="hero-note">Add <code>?preview=1</code> to browse sample data without live AWS credentials</span>
+
+    <section class="cp-hero" aria-label="Featured">
+      <div class="cp-hero-main">
+        <div class="cp-hero-copy">
+          <h1><em>Flexible</em> with<br>0% financing</h1>
+          <p>Spread purchases from €299 over 6, 12 or 24 months. Ask the Tech Assistant which devices qualify.</p>
+          <a class="cp-btn-dark" href="#chatbot" onclick="sendSamplePrompt('Can I pay for a laptop in instalments?')">Find out more</a>
         </div>
+        <div class="cp-hero-visual">
+          <span class="cp-blob" aria-hidden="true"></span>
+          <img src="hero-devices.svg" alt="A laptop and a smartphone" width="320" height="240" decoding="async">
+        </div>
+        <p class="cp-hero-note"><span aria-hidden="true">ⓘ</span> Please note: taking out credit costs money. Illustrative demo offer.</p>
       </div>
-      <img
-        class="hero-image"
-        src="hero-devices.svg"
-        alt="A laptop and a smartphone with a chat bubble"
-        loading="lazy"
-        decoding="async"
-        width="320"
-        height="240"
-      >
-      <div class="hero-stats">
-        <div class="stat-card"><strong>24/7</strong><span>Friendly support</span></div>
-        <div class="stat-card"><strong>9</strong><span>Stores (DE &amp; AT)</span></div>
-        <div class="stat-card"><strong>124</strong><span>Products</span></div>
-        <div class="stat-card"><strong>100%</strong><span>Local preview ready</span></div>
-      </div>
-    </div>
+      <aside class="cp-hero-list" aria-label="Quick questions">
+        <button type="button" class="active" onclick="sendSamplePrompt('Which laptop under €1,000 is best for a student?')">Best student laptop under €1,000</button>
+        <button type="button" onclick="sendSamplePrompt('Which promotions are running right now?')">% Deals this week %</button>
+        <button type="button" onclick="sendSamplePrompt('Compare the Apple iPhone 14 and the Samsung Galaxy S23')">iPhone 14 vs Galaxy S23</button>
+        <button type="button" onclick="sendSamplePrompt('Recommend a gaming laptop under 1000 euros')">Gaming laptops under €1,000</button>
+        <button type="button" onclick="sendSamplePrompt('How does the trade-in bonus work?')">Trade-in bonus: +€50</button>
+        <button type="button" onclick="sendSamplePrompt('Is the Black Friday sale on right now?')">BLACK NOVEMBER</button>
+        <button type="button" onclick="sendSamplePrompt('What is the status of order ord_2055_023 for customer_2055?')">Track an order</button>
+        <button type="button" onclick="sendSamplePrompt('Which stores have a 24/7 pickup station?')">Click &amp; collect stores</button>
+      </aside>
+    </section>
 
     <div class="chatbot-section">
       <div class="chatbot-header">
-        <h2>Tech Assistant</h2>
+        <h2 class="cp-section-title">Your Tech Assistant</h2>
         <div class="user-controls-header">
           <div class="connection-status" id="connection-status">Connecting...</div>
           
@@ -102,14 +139,15 @@
           <div class="bot-message" id="initial-greeting">Loading...</div>
         </div>
         <form class="chatbot-input-area" id="chatbot-form">
-          <input type="text" id="chatbot-input" placeholder="Type your message..." autocomplete="off" required>
+          <label for="chatbot-input" class="cp-sr-only">Message</label>
+          <input type="text" id="chatbot-input" placeholder="Ask about products, stock, orders, payments or deals…" autocomplete="off" required>
           <button type="submit">Send</button>
         </form>
       </div>
       
       <!-- Sample Prompts Section -->
       <div class="sample-prompts">
-        <h3>Try these sample prompts to test your Tech Assistant:</h3>
+        <h3>Popular questions</h3>
         <div class="prompt-buttons">
           <button class="prompt-btn" onclick="sendSamplePrompt('Which laptop under €1,000 is best for a student?')">Which laptop under €1,000 is best for a student?</button>
           <button class="prompt-btn" onclick="sendSamplePrompt('Compare the Apple iPhone 14 and the Samsung Galaxy S23')">Compare the Apple iPhone 14 and the Samsung Galaxy S23</button>
@@ -122,8 +160,8 @@
     </div>
 
     <!-- Product catalog section (the CSS classes keep their original menu-* names) -->
-    <div class="menu-section">
-      <h2>Our Products</h2>
+    <div class="menu-section" id="products">
+      <h2 class="cp-section-title">Our products</h2>
       <div class="menu-categories" id="menu-categories">
         <!-- Products are loaded dynamically -->
         <div class="loading-menu">Loading products...</div>
@@ -566,10 +604,12 @@
               <div class="menu-item-card" onclick="selectMenuItem('${item.item_id}', '${item.name}')">
                 <div class="item-header">
                   <h4>${item.name}</h4>
-                  <span class="popularity-badge">${item.attributes_json.popularity_score}% ⭐</span>
+                  ${item.attributes_json.popularity_score >= 90
+                    ? '<span class="popularity-badge hot">Popular</span>'
+                    : `<span class="popularity-badge">Popularity ${item.attributes_json.popularity_score}%</span>`}
                 </div>
                 <div class="item-details">
-                  <span class="detail-badge">from €${item.price_eur.toFixed(2)}</span>
+                  <span class="detail-badge price">from €${item.price_eur.toFixed(2)}</span>
                   ${item.spec ? `<span class="detail-badge">${item.spec}</span>` : ''}
                   ${item.attributes_json.condition === 'Refurbished' ? '<span class="detail-badge">♻️ Refurbished</span>' : ''}
                 </div>
@@ -613,6 +653,21 @@
       //   chatForm.dispatchEvent(new Event('submit'));
       // }
     }
+
+    // Header category links: open that product category and scroll to it
+    function openCategory(categoryKey) {
+      const items = document.getElementById(`category-${categoryKey}`);
+      if (!items) return;
+      if (items.style.display !== 'grid' && items.style.display !== 'block') toggleCategory(categoryKey);
+      items.parentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Show the signed-in user in the header (set by the login page)
+    document.addEventListener('DOMContentLoaded', function () {
+      const name = sessionStorage.getItem('username');
+      const el = document.getElementById('cp-account-name');
+      if (el && name) el.textContent = name;
+    });
   </script>
 </body>
 </html>

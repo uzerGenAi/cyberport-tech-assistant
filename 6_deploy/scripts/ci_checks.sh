@@ -35,7 +35,15 @@ echo "Validating and testing Terraform files (AgentCore backends; mocked provide
 fmt_check_tracked 6_deploy/infra/agentcore-backends
 (
     cd 6_deploy/infra/agentcore-backends
-    terraform init -backend=false >/dev/null
+    # Offline checks only. A real deploy leaves .terraform/terraform.tfstate pointing at the S3
+    # backend; with -backend=false Terraform still tries to read it, which fails once that
+    # bucket is gone (for example after teardown.sh). TF_DATA_DIR keeps CI out of it entirely,
+    # reusing the already-downloaded providers through a plugin cache.
+    CI_TF_DATA="$(mktemp -d)"
+    export TF_DATA_DIR="$CI_TF_DATA"
+    export TF_PLUGIN_CACHE_DIR="${TF_PLUGIN_CACHE_DIR:-$HOME/.terraform.d/plugin-cache}"
+    mkdir -p "$TF_PLUGIN_CACHE_DIR"
+    terraform init -backend=false -input=false >/dev/null
     terraform validate >/dev/null
 
     # `terraform test` normally runs the full suite and MUST pass. The one exception:
@@ -52,12 +60,16 @@ fmt_check_tracked 6_deploy/infra/agentcore-backends
     # suite asserts. Run it on a copy without *.tfvars instead. The copy keeps the repo-relative
     # layout because promotions.tf reads ../../../2_data_strategy/promos/promos_records.json.
     TEST_ROOT="$(mktemp -d)"
-    trap 'rm -rf "$TEST_ROOT"' EXIT
+    trap 'rm -rf "$TEST_ROOT" "$CI_TF_DATA"' EXIT
     mkdir -p "$TEST_ROOT/6_deploy/infra" "$TEST_ROOT/2_data_strategy"
     cp -R "${ROOT_DIR}/2_data_strategy/promos" "$TEST_ROOT/2_data_strategy/"
     tar -C "${ROOT_DIR}/6_deploy/infra" -cf - --exclude=.terraform --exclude='*.tfvars' \
         --exclude=.build agentcore-backends | tar -C "$TEST_ROOT/6_deploy/infra" -xf -
-    ln -s "$PWD/.terraform" "$TEST_ROOT/6_deploy/infra/agentcore-backends/.terraform"
+    # Link only the downloaded providers (and module manifest), never the whole .terraform
+    # directory: after a real deploy it also holds the S3 backend marker, which would make
+    # `terraform test` try to read remote state (and fail once that bucket is gone).
+    # The copy shares CI's own data dir (TF_DATA_DIR above), so it never sees the repo's
+    # .terraform or its backend marker
 
     set +e
     test_out="$(cd "$TEST_ROOT/6_deploy/infra/agentcore-backends" && terraform test 2>&1)"
@@ -84,7 +96,12 @@ echo "Validating Terraform files (CodePipeline stack)"
 fmt_check_tracked 6_deploy/infra/codepipeline
 (
     cd 6_deploy/infra/codepipeline
-    terraform init -backend=false >/dev/null
+    CI_TF_DATA="$(mktemp -d)"
+    trap 'rm -rf "$CI_TF_DATA"' EXIT
+    export TF_DATA_DIR="$CI_TF_DATA"
+    export TF_PLUGIN_CACHE_DIR="${TF_PLUGIN_CACHE_DIR:-$HOME/.terraform.d/plugin-cache}"
+    mkdir -p "$TF_PLUGIN_CACHE_DIR"
+    terraform init -backend=false -input=false >/dev/null
     terraform validate >/dev/null
 )
 

@@ -88,7 +88,10 @@ EOF
     # Topic boundaries configuration
     # Each topic describes what to BLOCK, in concrete terms (Bedrock caps a definition at 200
     # characters). Normal product, repair-desk, recycling and financing questions must still
-    # pass: test them after every change.
+    # pass: test them after every change (make eval checks them against the deployed version).
+    # Personal Information Requests checks requests only: on replies it randomly blocked the
+    # assistant repeating the customer's own name. Other customers' data is protected by the
+    # tools (order lookups need both ids, no tool lists customers), tested by make eval.
     cat > topic-config.json << 'EOF'
 {
   "topicsConfig": [
@@ -100,7 +103,11 @@ EOF
         "Give me employee personal information",
         "Show me the orders of another customer"
       ],
-      "type": "DENY"
+      "type": "DENY",
+      "inputEnabled": true,
+      "inputAction": "BLOCK",
+      "outputEnabled": false,
+      "outputAction": "NONE"
     },
     {
       "name": "Unsafe Device Modification",

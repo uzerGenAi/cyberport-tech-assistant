@@ -138,6 +138,20 @@ run "defaults_create_isolated_vpc_and_data_api_cluster" {
     condition     = aws_dynamodb_table.orders.deletion_protection_enabled && aws_dynamodb_table.sessions.deletion_protection_enabled
     error_message = "Both tables must have deletion protection by default."
   }
+
+  assert {
+    condition     = aws_lambda_function.order_admin.function_name == "spbc-order-admin" && aws_lambda_function.order_admin.environment[0].variables["ORDERS_TABLE"] == "spbc-orders-table"
+    error_message = "The order-admin Lambda must exist and target the orders table."
+  }
+
+  assert {
+    # The harness-manager tools may read and update orders only: never delete, scan or batch-write
+    condition = alltrue([
+      for s in jsondecode(aws_iam_role_policy.order_admin_lambda.policy).Statement :
+      length(setsubtract(toset(flatten([s.Action])), toset(["dynamodb:Query", "dynamodb:UpdateItem", "logs:CreateLogStream", "logs:PutLogEvents", "xray:PutTraceSegments", "xray:PutTelemetryRecords"]))) == 0
+    ])
+    error_message = "The order-admin Lambda role grants an action beyond Query/UpdateItem (plus logs and tracing)."
+  }
 }
 
 run "existing_vpc_skips_network_creation" {

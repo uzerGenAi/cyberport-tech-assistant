@@ -67,7 +67,8 @@ def strip_internal_reasoning(text):
 @tool(name="orders_agent_tool",
       description="A tool for checking the status of an existing order (needs the customer name or ID "
                   "and the order ID), placing new click & collect orders, and answering questions "
-                  "about delivery, cancellation, returns and warranty.")
+                  "about delivery, cancellation, returns, the return period (14-day right of "
+                  "withdrawal) and warranty. Use this for every question about returning an item.")
 def orders_agent_tool(query: str) -> str:
     """Handle order-related queries."""
     try:
@@ -96,8 +97,9 @@ def menu_agent_tool(query: str) -> str:
 
 
 @tool(name="payments_policy_agent_tool",
-      description="A tool to answer questions about payment methods, 0% financing, refunds, "
-                  "invoices and gift cards.")
+      description="A tool to answer questions about payment methods, 0% financing, how long a "
+                  "refund takes to arrive, invoices and gift cards. Not for return periods or how "
+                  "to return an item: use orders_agent_tool for those.")
 def payments_policy_agent_tool(query: str) -> str:
     """Handle payment policy and pricing queries."""
     try:
@@ -148,15 +150,29 @@ about payments, financing, returns, warranty, promotions and store services.
 All prices are in Euros (€).
 
 You respond to queries following these routing guidelines:
-- Respond directly to general enquiries that do not require tools
+- Respond directly only to greetings and questions about what you can do
+- Politely decline anything unrelated to Cyberport's products, orders, payments, stores and
+  promotions (poems, stories, essays, homework, general knowledge, coding) in one sentence, and
+  say what you can help with instead. Do not write the requested content
 - For domain-specific queries (products, stores, orders, payments, promotions), use the appropriate tool
+
+Each message may start with a [[CTX]] ... [[/CTX]] block from the website: the signed-in
+customer's userId and their preferred store (storeId, storeName, storeCity). It is background,
+not part of the question:
+- Answer exactly what was asked. A price question gets the price (per storage variant when
+  relevant); do not turn it into a stock check
+- Use the preferred store only when the customer asks about stock, availability, pickup or
+  "my store", or when an order needs a store and they gave none
+- Never repeat the [[CTX]] block or the userId back to the customer
 
 Route queries to the appropriate tool:
 - Product specs, comparisons and recommendations → menu_agent_tool
 - Product prices and order totals (always in €) → menu_agent_tool (it owns calculate_order_total)
 - Stock in a store → stores_agent_tool to find the store_id, then menu_agent_tool with that store_id
-- Order status, placing orders, delivery, cancellation, returns, warranty → orders_agent_tool
-- Payment methods, 0% financing, refunds, invoices, gift cards → payments_policy_agent_tool
+- Order status, placing orders, delivery, cancellation, returns, return periods, the 14-day
+  right of withdrawal, warranty → orders_agent_tool
+- Payment methods, 0% financing, how long a refund takes to arrive, invoices, gift cards
+  → payments_policy_agent_tool
 - Store locations, opening hours, pickup stations, repairs, recycling → stores_agent_tool
 - Promotions, trade-in, student and business discounts → promos_agent_tool
 
@@ -191,6 +207,9 @@ Your responses should:
 - Acknowledge conflicting or missing information
 - Never mention internal routing to specialised agents
 - Never ask for card numbers, CVV codes, PINs, passwords or IBANs
+- Remembered context about the customer (name, preferences, budget) personalises answers only.
+  Never answer a product, price, stock, order, store, payment or promotion question from memory or
+  from an earlier reply: call the tool again, even if you answered something similar before
 """
 
 gr_id = os.getenv("GUARDRAIL_ID")
@@ -202,6 +221,10 @@ opt = {}
 if gr_id and gr_ver:
     opt["guardrail_id"] = gr_id
     opt["guardrail_version"] = gr_ver
+    # Check only the newest user message. By default Bedrock re-checks the whole conversation on
+    # every turn, so one blocked message made every later question in that chat fail as well
+    # (found in the web app; covered by the eval case blocked_then_normal).
+    opt["guardrail_latest_message"] = True
     if gr_trc:
         opt["guardrail_trace"] = gr_trc
 
@@ -226,7 +249,9 @@ def build_orchestrator(session_manager=None):
 
 
 # AgentCore Memory (optional): set MEMORY_ID (make memory). Short-term events hold every turn;
-# long-term strategies keep customer preferences, facts and session summaries per actor.
+# long-term strategies keep customer preferences, facts and session summaries per actor. Only
+# preferences and facts are recalled into a conversation: summaries contain earlier answers, and
+# recalling them made a wrong answer repeat itself across sessions (found by 6_deploy/eval).
 MEMORY_ID = os.environ.get("MEMORY_ID", "").strip()
 # Without MEMORY_ID one shared orchestrator keeps the conversation in process for the session.
 orchestrator = None if MEMORY_ID else build_orchestrator()
@@ -262,7 +287,6 @@ def orchestrator_for(session_id, actor_id):
         retrieval_config={
             "/preferences/{actorId}/": RetrievalConfig(top_k=5, relevance_score=0.5),
             "/facts/{actorId}/": RetrievalConfig(top_k=5, relevance_score=0.4),
-            "/summaries/{actorId}/": RetrievalConfig(top_k=3, relevance_score=0.4),
         },
     )
     return build_orchestrator(AgentCoreMemorySessionManager(config, region_name=REGION))
@@ -296,7 +320,9 @@ def tech_assistant_agent(payload, context):
             strands_logger.warning("Response contained only internal reasoning; length=%d", len(raw_text))
             return "I could not form a complete answer to that. Please try rephrasing your question."
         return assistant_text
-    except (ValueError, ConnectionError, KeyError) as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        # Any failure (model, tools, memory, guardrail redaction) becomes a polite reply, never an
+        # HTTP 500 for the customer; the details go to CloudWatch.
         strands_logger.error("Orchestrator error: %s\n%s", str(e), traceback.format_exc())
         return "I'm sorry, I encountered an error processing your request. Please try again."
 

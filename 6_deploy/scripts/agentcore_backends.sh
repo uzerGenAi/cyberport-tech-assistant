@@ -240,6 +240,11 @@ destroy() {
     warn "The reader secret enters a 7-day recovery window; re-creating the stack within 7 days needs:"
     warn "  aws secretsmanager delete-secret --secret-id spbc-stores-db-reader --force-delete-without-recovery"
     warn "  (or restore it with: aws secretsmanager restore-secret --secret-id spbc-stores-db-reader)"
+    if [ "${AUTO_APPROVE:-0}" = "1" ]; then
+        # Used by teardown.sh, which has already asked for its own confirmation
+        tf destroy -input=false -auto-approve "$@"
+        return
+    fi
     read -r -p "Type the cluster name (${CLUSTER_ID}) to continue: " answer
     [ "$answer" = "$CLUSTER_ID" ] || die "Aborted; nothing was changed."
     # terraform shows the destroy plan and asks for its own confirmation

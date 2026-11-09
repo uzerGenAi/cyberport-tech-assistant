@@ -61,3 +61,4 @@ kubeconfig
 
 # ── Raw Kaggle downloads (rebuilt by 2_data_strategy/build_from_kaggle.py) ──
 2_data_strategy/kaggle_source/
+.deploy-logs/

@@ -14,7 +14,7 @@
 # is the unattended entry point; the four single-domain *_knowledge_base_setup.sh scripts
 # remain for following the lab by hand.
 #
-# Requires: aws CLI, jq, awscurl  (pip install awscurl — it is in requirements.txt)
+# Requires: aws CLI, jq, awscurl  (pip install awscurl — the venv setup in DEPLOY.md installs it)
 
 set -euo pipefail
 

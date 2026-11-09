@@ -73,3 +73,8 @@ data "aws_iam_policy_document" "runtime_backends" {
     resources = ["${aws_apigatewayv2_api.promotions.execution_arn}/${local.promotions_stage}/GET/promotions"]
   }
 }
+
+output "order_admin_lambda_arn" {
+  description = "Order-admin Lambda used as the harness-manager gateway target (6_deploy/harness)."
+  value       = aws_lambda_function.order_admin.arn
+}

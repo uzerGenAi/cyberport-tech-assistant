@@ -1,11 +1,14 @@
 SHELL := /bin/bash
 
-.PHONY: ci backend-setup post-deploy post-deploy-force amplify smoke help \
+.PHONY: deploy demo-user eval ci backend-setup post-deploy post-deploy-force amplify smoke help \
         backends-plan backends seed-stores backends-check backends-env knowledge-bases memory
 
 help:
 	@echo "Cyberport Tech Assistant — deployment targets:"
 	@echo ""
+	@echo "  make deploy          Deploy everything with one resumable command (see DEPLOY.md)"
+	@echo "  make eval            Check answers against known facts (live runtime, 3 runs per question)"
+	@echo "  make demo-user       Show the default web-app login (creates it if missing)"
 	@echo "  make backend-setup   Create the S3 bucket that holds the Terraform state  (run FIRST)"
 	@echo "  make ci              Run local validation checks (Python compile + Terraform validate/test)"
 	@echo ""
@@ -31,6 +34,18 @@ help:
 # Optional: AgentCore Memory (preferences, facts, session summaries) for the runtime
 memory:
 	cd 6_deploy/agents && python3 create_memory.py
+
+# One-command, resumable deployment (see DEPLOY.md)
+deploy:
+	./deploy.sh
+
+# Answer-quality evaluation against the live runtime (each case 3 times)
+eval:
+	python3 -u 6_deploy/eval/eval_answers.py --repeat 3
+
+# Show (and repair) the default web-app login
+demo-user:
+	python3 6_deploy/scripts/ensure_demo_user.py
 
 backend-setup:
 	bash 6_deploy/scripts/terraform_backend_setup.sh

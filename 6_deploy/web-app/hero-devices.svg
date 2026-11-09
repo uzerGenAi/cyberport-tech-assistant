@@ -1,40 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240" role="img" aria-labelledby="t">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 280" role="img" aria-labelledby="t">
   <title id="t">A laptop and a smartphone</title>
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1f2937"/>
-      <stop offset="1" stop-color="#111827"/>
-    </linearGradient>
     <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ef4444"/>
-      <stop offset="1" stop-color="#b91c1c"/>
+      <stop offset="0" stop-color="#7b3fe4"/>
+      <stop offset="0.5" stop-color="#c38bff"/>
+      <stop offset="1" stop-color="#7fe0c3"/>
     </linearGradient>
-    <linearGradient id="phone" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#60a5fa"/>
-      <stop offset="1" stop-color="#2563eb"/>
+    <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e6d4ff"/>
+      <stop offset="1" stop-color="#8f56f0"/>
+    </linearGradient>
+    <linearGradient id="alu" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4f5f7"/>
+      <stop offset="1" stop-color="#c9ccd3"/>
+    </linearGradient>
+    <linearGradient id="phone" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2347e8"/>
+      <stop offset="1" stop-color="#7fe0c3"/>
     </linearGradient>
   </defs>
-  <rect width="320" height="240" rx="18" fill="url(#bg)"/>
-  <!-- laptop -->
-  <rect x="44" y="58" width="176" height="112" rx="8" fill="#374151"/>
-  <rect x="52" y="66" width="160" height="96" rx="4" fill="url(#screen)"/>
-  <rect x="64" y="80" width="70" height="8" rx="4" fill="#fecaca"/>
-  <rect x="64" y="96" width="110" height="6" rx="3" fill="#fca5a5" opacity="0.8"/>
-  <rect x="64" y="108" width="92" height="6" rx="3" fill="#fca5a5" opacity="0.8"/>
-  <rect x="64" y="128" width="46" height="18" rx="9" fill="#ffffff"/>
-  <path d="M28 172 h208 l-10 14 h-188 z" fill="#4b5563"/>
-  <rect x="114" y="172" width="36" height="5" rx="2" fill="#6b7280"/>
+  <!-- laptop lid -->
+  <rect x="62" y="28" width="250" height="168" rx="12" fill="#1a1a1a"/>
+  <rect x="72" y="38" width="230" height="148" rx="4" fill="url(#screen)"/>
+  <!-- abstract screen pattern -->
+  <g opacity="0.9">
+    <rect x="86"  y="52" width="22" height="120" rx="11" fill="url(#bar)"/>
+    <rect x="116" y="60" width="22" height="104" rx="11" fill="url(#bar)"/>
+    <rect x="146" y="48" width="22" height="128" rx="11" fill="url(#bar)"/>
+    <rect x="176" y="66" width="22" height="92"  rx="11" fill="url(#bar)"/>
+    <rect x="206" y="52" width="22" height="120" rx="11" fill="url(#bar)"/>
+    <rect x="236" y="60" width="22" height="104" rx="11" fill="url(#bar)"/>
+    <rect x="266" y="48" width="22" height="128" rx="11" fill="url(#bar)"/>
+  </g>
+  <!-- laptop base -->
+  <path d="M40 198 h294 l-12 14 a8 8 0 0 1 -6 3 H58 a8 8 0 0 1 -6 -3 z" fill="url(#alu)"/>
+  <rect x="160" y="198" width="54" height="5" rx="2.5" fill="#b3b7c0"/>
   <!-- phone -->
-  <rect x="222" y="86" width="64" height="120" rx="12" fill="#e5e7eb"/>
-  <rect x="228" y="96" width="52" height="98" rx="6" fill="url(#phone)"/>
-  <circle cx="254" cy="200" r="3" fill="#9ca3af"/>
-  <rect x="236" y="108" width="36" height="6" rx="3" fill="#dbeafe"/>
-  <rect x="236" y="120" width="28" height="6" rx="3" fill="#bfdbfe"/>
-  <rect x="236" y="172" width="36" height="12" rx="6" fill="#ffffff"/>
-  <!-- chat bubble -->
-  <rect x="196" y="28" width="98" height="40" rx="12" fill="#ffffff"/>
-  <path d="M214 68 l-6 12 l16 -12 z" fill="#ffffff"/>
-  <circle cx="226" cy="48" r="5" fill="#ef4444"/>
-  <circle cx="245" cy="48" r="5" fill="#ef4444" opacity="0.7"/>
-  <circle cx="264" cy="48" r="5" fill="#ef4444" opacity="0.4"/>
+  <rect x="300" y="96" width="70" height="140" rx="14" fill="#1a1a1a"/>
+  <rect x="306" y="104" width="58" height="124" rx="9" fill="url(#phone)"/>
+  <rect x="325" y="108" width="20" height="5" rx="2.5" fill="#1a1a1a"/>
+  <circle cx="335" cy="200" r="10" fill="#ffffff" opacity="0.85"/>
+  <rect x="316" y="130" width="38" height="8" rx="4" fill="#ffffff" opacity="0.85"/>
+  <rect x="316" y="146" width="28" height="8" rx="4" fill="#ffffff" opacity="0.6"/>
 </svg>
