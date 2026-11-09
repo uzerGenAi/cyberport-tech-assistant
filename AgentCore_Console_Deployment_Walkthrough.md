@@ -1,6 +1,6 @@
 # AgentCore Runtime: Console Deployment Walkthrough
 
-**Project:** Cyberport Tech Assistant (SPBC project prefix), multi-agent electronics shopping and service assistant (reference demo, not affiliated with Cyberport)
+**Project:** Cyberport Tech Assistant (SPBC project prefix), multi-agent electronics shopping and service assistant (client project for Cyberport, running on sample data)
 **What you deploy:** the Strands agents in [6_deploy/agents](6_deploy/agents) to **Amazon Bedrock AgentCore Runtime**, plus their knowledge bases and an optional guardrail.
 **Region:** `eu-central-1` (Frankfurt), everywhere: console Region selector, CloudShell, every command.
 **Architecture and stack:** see [README.md](README.md#technology-stack) for the technology stack, the architecture diagram and the request flow. This guide builds the same system by hand in the console.

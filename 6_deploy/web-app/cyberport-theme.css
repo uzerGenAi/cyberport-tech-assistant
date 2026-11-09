@@ -1,8 +1,7 @@
 /* ==========================================================================
-   Cyberport-inspired theme for the Tech Assistant demo
-   Loaded after enhanced-styles.css and overrides it. Visual language only
-   (palette, typography, rounded panels, bold-bordered cards, pill badges):
-   no Cyberport logo, images or other brand assets are used.
+   Cyberport theme for the Tech Assistant
+   Loaded after enhanced-styles.css and overrides it. The wordmark is a placeholder:
+   swap in Cyberport's official logo and brand assets from their brand team.
    ========================================================================== */
 :root {
   --cp-navy: #1c1f2b;        /* utility bar */

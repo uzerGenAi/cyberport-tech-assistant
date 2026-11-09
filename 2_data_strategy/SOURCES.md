@@ -1,9 +1,9 @@
 # Data sources
 
-The demo data for the Cyberport Tech Assistant comes from three public Kaggle datasets plus
-illustrative content written for this project. **This is a reference demo. It is not affiliated
-with or endorsed by Cyberport SE**, and none of the stock, order, promotion or policy data below
-is Cyberport's.
+The Cyberport Tech Assistant is built for Cyberport (client project). Until it is connected to
+Cyberport's own systems, its data comes from three public Kaggle datasets plus sample content
+written for this project: **none of the stock, order, promotion, store or policy data below is
+Cyberport's live data.** Replace each source with the matching Cyberport system before go-live.
 
 Rebuild the catalog and orders with:
 

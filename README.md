@@ -4,9 +4,9 @@ Production AWS deployment pipeline for the **Cyberport Tech Assistant** — a mu
 shopping and service assistant for an electronics retailer, built on Amazon Bedrock AgentCore and
 deployed to `eu-central-1` (Frankfurt).
 
-> **Reference demo.** Not affiliated with or endorsed by Cyberport. The smartphone and
-> laptop catalog comes from public Kaggle datasets (PcComponentes prices in €, Apache 2.0); stores,
-> stock, orders, promotions and policies are illustrative. See
+> **Client project for Cyberport.** Until it is connected to Cyberport's systems it runs on sample
+> data: the smartphone and laptop catalog comes from public Kaggle datasets (PcComponentes prices in
+> €, Apache 2.0); stores, stock, orders, promotions and policies are sample content. See
 > [2_data_strategy/SOURCES.md](2_data_strategy/SOURCES.md).
 
 > **Deploy in one command:** `./deploy.sh`. Step-by-step runbook, troubleshooting and tear down: [DEPLOY.md](DEPLOY.md).
