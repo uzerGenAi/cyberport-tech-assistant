@@ -119,6 +119,12 @@ runs each 3 times, because answers vary between runs. It also checks the guardra
 questions and replies must pass, abuse must be blocked. Results: `.deploy-logs/eval-results.json`.
 Run it after every change to prompts, models or the guardrail.
 
+`make e2e` goes further: it signs in as a fresh Cognito customer with the web app's own
+credentials, runs a whole conversation (advice, stock, discount, financing, click & collect
+order, status, cancellation request, memory on a later visit, abuse), checks the order in
+DynamoDB, then has harness-manager cancel that order (declined, approved, re-cancel, shipped
+order, missing ID, prompt injection). Transcripts are in `.deploy-logs/`.
+
 ## 7. Redeploy after changing code
 
 ```bash

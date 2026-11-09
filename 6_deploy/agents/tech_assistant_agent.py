@@ -3,6 +3,7 @@ import re
 import sys
 import json
 import logging
+import threading
 import traceback
 from strands import Agent, tool  # pylint: disable=import-error
 from strands.models import BedrockModel  # pylint: disable=import-error
@@ -63,6 +64,29 @@ def strip_internal_reasoning(text):
     return re.sub(r"\n{3,}", "\n\n", cleaned).strip()
 
 
+_SPECIALIST_LOCKS = {}
+_LOCKS_GUARD = threading.Lock()
+
+
+def _ask_specialist(agent, query):
+    """Call a specialist with only this query, one call at a time per specialist.
+
+    Strands runs tool calls in parallel, and two calls to the same specialist agent at once fail
+    (found in the end-to-end test: the order step returned "error processing your request").
+    The lock serialises them.
+
+    Specialists are module-level agents, so without this they keep the history of earlier calls
+    in the session and resolve "it" or "that one" against an older product (found in the
+    end-to-end test: "is it in stock?" was answered for a different laptop). The orchestrator
+    holds the conversation and sends self-contained queries.
+    """
+    with _LOCKS_GUARD:
+        lock = _SPECIALIST_LOCKS.setdefault(id(agent), threading.Lock())
+    with lock:
+        agent.messages.clear()
+        return agent(query)
+
+
 # === Tool Wrappers ===
 @tool(name="orders_agent_tool",
       description="A tool for checking the status of an existing order (needs the customer name or ID "
@@ -72,7 +96,7 @@ def strip_internal_reasoning(text):
 def orders_agent_tool(query: str) -> str:
     """Handle order-related queries."""
     try:
-        response = orders_agents.orders_agent(query)
+        response = _ask_specialist(orders_agents.orders_agent, query)
         if isinstance(response, dict) and "text" in response:
             return response["text"]
         return str(response)
@@ -87,7 +111,7 @@ def orders_agent_tool(query: str) -> str:
 def menu_agent_tool(query: str) -> str:
     """Handle product catalog queries."""
     try:
-        response = menu_agents.menu_agent(query)
+        response = _ask_specialist(menu_agents.menu_agent, query)
         if isinstance(response, dict) and "text" in response:
             return response["text"]
         return str(response)
@@ -103,7 +127,7 @@ def menu_agent_tool(query: str) -> str:
 def payments_policy_agent_tool(query: str) -> str:
     """Handle payment policy and pricing queries."""
     try:
-        response = payments_policy_agents.payments_policy_agent(query)
+        response = _ask_specialist(payments_policy_agents.payments_policy_agent, query)
         if isinstance(response, dict) and "text" in response:
             return response["text"]
         return str(response)
@@ -118,7 +142,7 @@ def payments_policy_agent_tool(query: str) -> str:
 def stores_agent_tool(query: str) -> str:
     """Handle store-related queries."""
     try:
-        response = stores_agents.stores_agent(query)
+        response = _ask_specialist(stores_agents.stores_agent, query)
         if isinstance(response, dict) and "text" in response:
             return response["text"]
         return str(response)
@@ -133,7 +157,7 @@ def stores_agent_tool(query: str) -> str:
 def promos_agent_tool(query: str) -> str:
     """Handle promotion-related queries."""
     try:
-        response = promos_agents.promos_agent(query)
+        response = _ask_specialist(promos_agents.promos_agent, query)
         if isinstance(response, dict) and "text" in response:
             return response["text"]
         return str(response)
@@ -165,6 +189,13 @@ not part of the question:
   "my store", or when an order needs a store and they gave none
 - Never repeat the [[CTX]] block or the userId back to the customer
 
+Specialist tools do not see the conversation. Every query you send them must be
+self-contained: replace "it", "that one" or "my order" with the full product name, order ID,
+customer name and store_id from the conversation and the [[CTX]] block.
+
+Never guess a store_id. Use the storeId from [[CTX]] or one a tool returned; otherwise pass the
+store's city or name (for example "Berlin"): the stock and order tools resolve it.
+
 Route queries to the appropriate tool:
 - Product specs, comparisons and recommendations → menu_agent_tool
 - Product prices and order totals (always in €) → menu_agent_tool (it owns calculate_order_total)
@@ -189,7 +220,9 @@ When a new click & collect order request is received:
   (e.g. "128GB", "256GB"). Do not invent a variant.
 - If the pricing result lists any unpriced items, do not quote a total — ask the
   customer to clarify those items first
-- Display items and total cost BEFORE asking for personal information
+- Display items and total cost BEFORE asking for personal information: the message that asks
+  for the customer's name must itself state the product, the collection store and the total
+  in €, even if you mentioned the price earlier
 - Ask which store they want to collect from; use stores_agent_tool to get its store_id.
   Use store_id 'spbc-de-001' (Cyberport Store Dresden) only if the customer has no preference
 - Ask for the customer's name or Cyberport customer number
@@ -214,8 +247,13 @@ Your responses should:
 - Never ask for card numbers, CVV codes, PINs, passwords or IBANs
 - Never output placeholders or template text such as "[customer service contact information]",
   "[phone number]" or "<link>". If you do not have a detail, say what the customer can do instead
+- If the customer asks something you already answered, answer it again briefly; never reply
+  that you already provided it
 - If the customer insists or pushes back ("why", "just do it"), explain the reason briefly and
   give the concrete next step once more; do not repeat the same refusal word for word
+- Remembered context (inside <user_context>) is background from earlier chats. "It", "this" or
+  "that one" always refers to the current conversation, never to a product or order you only
+  find in remembered context.
 - Remembered context about the customer (name, preferences, budget) personalises answers only.
   Never answer a product, price, stock, order, store, payment or promotion question from memory or
   from an earlier reply: call the tool again, even if you answered something similar before
@@ -294,8 +332,11 @@ def orchestrator_for(session_id, actor_id):
         session_id=session_id,
         actor_id=actor_id,
         retrieval_config={
-            "/preferences/{actorId}/": RetrievalConfig(top_k=5, relevance_score=0.5),
-            "/facts/{actorId}/": RetrievalConfig(top_k=5, relevance_score=0.4),
+            # Few memories, not a high bar: relevant and irrelevant records score close together
+            # (about 0.45 vs 0.40), so a high threshold dropped the customer's budget, while more
+            # records let old orders leak into new questions. Top 2 to 3 at about 0.4 does both.
+            "/preferences/{actorId}/": RetrievalConfig(top_k=3, relevance_score=0.35),
+            "/facts/{actorId}/": RetrievalConfig(top_k=2, relevance_score=0.42),
         },
     )
     return build_orchestrator(AgentCoreMemorySessionManager(config, region_name=REGION))

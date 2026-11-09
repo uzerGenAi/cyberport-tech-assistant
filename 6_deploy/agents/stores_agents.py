@@ -195,6 +195,33 @@ def stores_kb_retrieve(query: str) -> str:
         return f"Failed to retrieve information: {str(e)}"
 
 
+_STORE_NAMES = None
+
+
+def store_names() -> dict:
+    """store_id -> store name from the stores database, cached per warm runtime ({} on failure)."""
+    global _STORE_NAMES
+    if _STORE_NAMES is None:
+        try:
+            _STORE_NAMES = {r["store_id"]: r["name"] for r in _rows("SELECT store_id, name FROM stores")}
+        except Exception:  # pylint: disable=broad-exception-caught
+            return {}                     # names are cosmetic: never fail a stock or order call
+    return _STORE_NAMES
+
+
+def resolve_store(text: str) -> str:
+    """store_id for an id, store name or city ("Berlin", "Munich", "Cyberport Store Köln"); "" if none."""
+    names = store_names()
+    key = (text or "").strip()
+    if not key or not names:
+        return ""
+    if key.lower() in names:
+        return key.lower()
+    city = _CITY_ALIASES.get(key.lower(), key).lower()
+    matches = [sid for sid, name in names.items() if city in name.lower()]
+    return matches[0] if len(matches) == 1 else ""
+
+
 @tool(name="list_stores", description="A tool to retrieve the list of all store locations with address, opening hours and pickup station")
 def list_stores(query: str = "") -> list:
     print("Running list_stores...")

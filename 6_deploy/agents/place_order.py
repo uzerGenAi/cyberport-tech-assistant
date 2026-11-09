@@ -39,7 +39,7 @@ TOOL_SPEC = {
                 },
                 "store_id": {
                     "type": "string",
-                    "description": "The collection store's ID, for example 'spbc-de-001'."
+                    "description": "The collection store's ID (for example 'spbc-de-001'), or its city or name (for example 'Berlin')."
                 },
                 "items": {
                     "type": "array",
@@ -60,6 +60,14 @@ TOOL_SPEC = {
         }
     }
 }
+
+
+def _resolves(text: str) -> bool:
+    try:
+        import stores_agents  # pylint: disable=import-outside-toplevel
+        return bool(stores_agents.resolve_store(text))
+    except Exception:  # pylint: disable=broad-exception-caught
+        return False
 
 
 def _error(tool_use_id: str, text: str) -> ToolResult:
@@ -86,9 +94,22 @@ def place_order(tool: ToolUse, **kwargs: Any) -> ToolResult:
 
     if not user_id:
         return _error(tool_use_id, "A customer name or customer ID is required.")
-    if not _STORE_ID.match(store_id):
+    if not _STORE_ID.match(store_id) and not _resolves(store_id):
         return _error(tool_use_id, f"Unknown store_id '{store_id}'. Look up the store's ID "
                                    "(for example 'spbc-de-001') before placing the order.")
+    try:
+        import stores_agents  # pylint: disable=import-outside-toplevel
+        known = stores_agents.store_names()
+    except Exception:  # pylint: disable=broad-exception-caught
+        known = {}
+    if known and store_id not in known:
+        resolved = stores_agents.resolve_store(tool["input"]["store_id"])
+        if resolved:
+            store_id = resolved
+    if known and store_id not in known:
+        # The pattern alone accepts stores that do not exist (the model once guessed "spbc-de-010")
+        listing = ", ".join(f"{v} ({k})" for k, v in sorted(known.items()))
+        return _error(tool_use_id, f"Unknown store_id '{store_id}'. Valid stores: {listing}.")
 
     # Never trust a total from the model: price every line from the catalog.
     pricing = menu_agents.price_items(items)
@@ -117,8 +138,13 @@ def place_order(tool: ToolUse, **kwargs: Any) -> ToolResult:
             "total_amount": Decimal(str(total_amount))
         })
 
+        try:
+            import stores_agents  # pylint: disable=import-outside-toplevel
+            store_label = stores_agents.store_names().get(store_id, store_id)
+        except Exception:  # pylint: disable=broad-exception-caught
+            store_label = store_id
         message = (f"Order placed successfully with ID: {order_id}. Total: €{total_amount:.2f}. "
-                   f"Collect it at store {store_id} when the status is READY_FOR_PICKUP.")
+                   f"Collect it at {store_label} ({store_id}) when the status is READY_FOR_PICKUP.")
         try:
             if quoted_total is not None and abs(float(quoted_total) - total_amount) > 0.005:
                 message += (f" Note: the quoted total €{float(quoted_total):.2f} differed from the "

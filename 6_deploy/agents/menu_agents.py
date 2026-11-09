@@ -353,12 +353,45 @@ def check_store_stock(item: str, store_id: str = "") -> dict:
         return {"item": item, "error": "Product not found in the catalog."}
     stock = (record.get("attributes_json") or {}).get("stock_by_store") or {}
     result = {"item": record.get("name"), "item_id": record.get("item_id")}
+    names = _store_names()
+    if store_id and names and store_id.strip().lower() not in names:
+        resolved = _resolve_store(store_id)
+        if resolved:
+            store_id = resolved
+    if store_id and names and store_id.strip().lower() not in names:
+        # Never report stock for a store that does not exist (the model once guessed "spbc-de-010")
+        return {"error": f"Unknown store_id '{store_id}'. Use one of these stores.",
+                "stores": [{"store_id": k, "store_name": v} for k, v in sorted(names.items())]}
     if store_id:
         units = int(stock.get(store_id.strip().lower(), 0))
         result.update({"store_id": store_id, "units_in_stock": units, "in_stock": units > 0})
+        if names.get(store_id.strip().lower()):
+            result["store_name"] = names[store_id.strip().lower()]
+        if units <= 0:
+            # Give the customer somewhere to go: the stores that do have it, most units first
+            result["other_stores_with_stock"] = [
+                {"store_id": s, "store_name": names.get(s, s), "units": n}
+                for s, n in sorted(((s, int(n)) for s, n in stock.items() if int(n) > 0), key=lambda kv: -kv[1])]
     else:
         result["stores_with_stock"] = stock
     return result
+
+def _resolve_store(text: str) -> str:
+    try:
+        import stores_agents  # pylint: disable=import-outside-toplevel
+        return stores_agents.resolve_store(text)
+    except Exception:  # pylint: disable=broad-exception-caught
+        return ""
+
+
+def _store_names() -> dict:
+    """Store names for customer-facing replies (the stores agent owns the database access)."""
+    try:
+        import stores_agents  # pylint: disable=import-outside-toplevel
+        return stores_agents.store_names()
+    except Exception:  # pylint: disable=broad-exception-caught
+        return {}
+
 
 # === Agent Definition ===
 
@@ -384,6 +417,8 @@ menu_agent = Agent(
           business, gaming, creative). Recommend its results in its order, with each price and
           the specs it returns; do not swap in cheaper products from get_menu. Without a budget,
           ask for one.
+        - When describing a single product, always include its price (per storage variant for
+          smartphones) along with its specs.
         - When comparing products, state only attributes the catalog returns (price per storage
           variant, segment, colours, RAM, CPU, storage, GPU, screen size when listed). If an
           attribute such as the chip, camera or battery is not in the catalog, say it is not
@@ -394,8 +429,11 @@ menu_agent = Agent(
           estimate a price yourself. All prices are in EUR (€). Quote every price exactly as the
           tool returns it, including both decimal places (for example €1009.00). If the tool
           reports unpriced items, ask the customer to clarify rather than guessing.
-        - For stock questions, use check_store_stock. Use the store_id you were given (for
-          example 'spbc-de-001'); if you only have a city or store name, ask for the store_id.
+        - For stock questions, use check_store_stock. If the product is not in stock at the
+          requested store, say so and list the other stores that have it (other_stores_with_stock)
+          with their units, so the customer can choose another store. Name stores by their
+          store_name (for example "Cyberport Store Berlin"), never by the store_id code alone. Use the store_id you were given (for
+          example 'spbc-de-001'); if you only have a city or store name, pass that as store_id: the tool resolves it.
         - For general buying advice that the catalog cannot answer (for example what RAM or
           storage someone needs), use menu_kb_retrieve.
         - If nothing relevant is found using any tool, ask clarifying questions or refer to customer service.

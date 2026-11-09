@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: deploy demo-user eval ci backend-setup post-deploy post-deploy-force amplify smoke help \
+.PHONY: deploy demo-user eval e2e ci backend-setup post-deploy post-deploy-force amplify smoke help \
         backends-plan backends seed-stores backends-check backends-env knowledge-bases memory
 
 help:
@@ -8,6 +8,7 @@ help:
 	@echo ""
 	@echo "  make deploy          Deploy everything with one resumable command (see DEPLOY.md)"
 	@echo "  make eval            Check answers against known facts (live runtime, 3 runs per question)"
+	@echo "  make e2e             Real customer journey + harness-manager cancellation (live, ~6 min)"
 	@echo "  make demo-user       Show the default web-app login (creates it if missing)"
 	@echo "  make backend-setup   Create the S3 bucket that holds the Terraform state  (run FIRST)"
 	@echo "  make ci              Run local validation checks (Python compile + Terraform validate/test)"
@@ -42,6 +43,11 @@ deploy:
 # Answer-quality evaluation against the live runtime (each case 3 times)
 eval:
 	python3 -u 6_deploy/eval/eval_answers.py --repeat 3
+
+# End-to-end: a real customer journey (sign-in, chat, order) then staff cancellation of that order
+e2e:
+	python3 -u 6_deploy/eval/e2e_user_journey.py
+	python3 -u 6_deploy/eval/e2e_harness_cancel.py
 
 # Show (and repair) the default web-app login
 demo-user:
