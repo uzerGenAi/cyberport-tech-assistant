@@ -217,7 +217,7 @@ def main():
         runs = []
         for _ in range(args.repeat):
             session = f"eval-{cid}-{uuid.uuid4()}"[:100]
-            # A fresh memory actor per run: long-term memory must not carry answers between runs
+            # A fresh customer per run, so runs never share a conversation
             # A realistic sign-in name (record-like ids such as "eval-x-1a2b" trip the privacy topic)
             user = f"demo{uuid.uuid4().hex[:6]}"
             answer = ""

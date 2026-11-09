@@ -203,7 +203,7 @@ The AWS resources and the names they are created with.
 | CI/CD | Pipeline (Source → Validate → Approve → Deploy) | AWS CodePipeline (V2) + CodeBuild | `6_deploy/infra/codepipeline` |
 | Compute | Container registry | Amazon ECR | `bedrock-agentcore-*` (runtime image) |
 | Data | Orders store | DynamoDB (PITR, deletion protection), `6_deploy/infra/agentcore-backends` | `spbc-orders-table` |
-| Memory | Conversation turns (short-term) and per-customer preferences, facts and session summaries (long-term) | Amazon Bedrock AgentCore Memory, `6_deploy/agents/create_memory.py` (`make memory`) | `spbc_tech_assistant_memory`; runtime env `MEMORY_ID`; customer id comes from the web app's `[[CTX]] userId`, so it separates demo users but is not an authenticated identity |
+| Memory | Conversation history only (short-term), so follow-ups like "is it in stock?" work; no long-term memory across chats, because recalling earlier chats made answers drift | Amazon Bedrock AgentCore Memory, `6_deploy/agents/create_memory.py` (`make memory`) | `spbc_tech_assistant_memory`; runtime env `MEMORY_ID`; customer id comes from the web app's `[[CTX]] userId`, so it separates demo users but is not an authenticated identity |
 | Data | Sessions store (proof-of-concept CLI only) | DynamoDB (PITR, deletion protection), `6_deploy/infra/agentcore-backends` | `spbc-sessions-table` |
 | Data | Store locations | Aurora MySQL Serverless v2, read through the RDS Data API (`6_deploy/infra/agentcore-backends`) | `spbc-aurora-cluster`, read-only secret `spbc-stores-db-reader` |
 | Data | Promotions API | API Gateway HTTP API (IAM auth) + Lambda (`6_deploy/infra/agentcore-backends`) | `spbcPromotionsAPI`, `GET /prod/promotions` |

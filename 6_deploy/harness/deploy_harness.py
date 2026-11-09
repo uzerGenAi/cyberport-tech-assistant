@@ -4,7 +4,7 @@ harness-manager is a config-defined agent: AgentCore runs the agent loop; there 
 and no container. Its only tools are get_order and cancel_order, served by the order-admin Lambda
 (Terraform: 6_deploy/infra/agentcore-backends/order_admin.tf) behind an AgentCore Gateway.
 
-    harness caller --InvokeHarness--> harness-manager (Nova Pro, guardrail, managed memory)
+    harness caller --InvokeHarness--> harness-manager (Nova 2 Lite, guardrail, short-term memory)
                                           |  agentcore_gateway tool, SigV4
                                           v
                                    AgentCore Gateway (AWS_IAM inbound)
@@ -42,6 +42,9 @@ GATEWAY_ROLE = "SPBC-OrderAdminGateway-Role"
 # reliably. Its own variable, because ~/environment/env.sh exports MODEL_ID for the runtime.
 MODEL_ID = os.environ.get("HARNESS_MODEL_ID", "eu.amazon.nova-2-lite-v1:0")
 LAMBDA_FUNCTION = "spbc-order-admin"
+# Conversation history only (no long-term strategies). Managed harness memory needs at least one
+# long-term strategy, so the harness uses its own memory instead.
+HARNESS_MEMORY_NAME = "spbc_harness_manager_memory"
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -160,6 +163,41 @@ def find_harness():
             return None
 
 
+# ── memory (short-term only) ─────────────────────────────────────────────────
+def find_memory(prefix):
+    token, found = None, []
+    while True:
+        resp = ctl.list_memories(**({"nextToken": token} if token else {}))
+        found += [m["id"] for m in resp.get("memories", []) if m["id"].startswith(prefix)]
+        token = resp.get("nextToken")
+        if not token:
+            return found
+
+
+def ensure_harness_memory():
+    ids = find_memory(f"{HARNESS_MEMORY_NAME}-")
+    mid = ids[0] if ids else ctl.create_memory(
+        name=HARNESS_MEMORY_NAME, eventExpiryDuration=30,
+        description="harness-manager conversation history (short-term only)")["memory"]["id"]
+    wait(lambda: (ctl.get_memory(memoryId=mid)["memory"]["status"], None), {"ACTIVE"}, {"FAILED"}, "Harness memory")
+    ok(f"Harness memory ready (short-term only): {mid}")
+    return f"arn:aws:bedrock-agentcore:{REGION}:{ACCOUNT}:memory/{mid}"
+
+
+def delete_old_managed_memory():
+    """The managed memory of earlier deploys held long-term summaries: delete it once detached."""
+    for mid in find_memory(f"{HARNESS_NAME}-"):
+        for _ in range(36):                       # detaching from the harness takes a minute or two
+            if ctl.get_memory(memoryId=mid)["memory"]["status"] not in ("UPDATING", "CREATING"):
+                break
+            time.sleep(5)
+        try:
+            ctl.delete_memory(memoryId=mid)
+            ok(f"Deleted old managed harness memory {mid} (long-term summaries)")
+        except ClientError as e:
+            log(f"Old managed memory {mid} not deleted yet: {e.response['Error']['Code']}")
+
+
 # ── IAM ──────────────────────────────────────────────────────────────────────
 def ensure_role(name, trust, policy_name, policy, description):
     try:
@@ -192,7 +230,7 @@ def ensure_gateway_role(fn_arn):
         "AgentCore Gateway service role for the harness-manager order-admin tools")
 
 
-def ensure_harness_role(gateway_arn, gr_id):
+def ensure_harness_role(gateway_arn, gr_id, memory_arn):
     profile = f"arn:aws:bedrock:{REGION}:{ACCOUNT}:inference-profile/{MODEL_ID}"
     base_model = MODEL_ID.split(".", 1)[1] if MODEL_ID.split(".", 1)[0] in {"eu", "us", "apac", "global"} else MODEL_ID
     statements = [
@@ -201,10 +239,10 @@ def ensure_harness_role(gateway_arn, gr_id):
          "Resource": [profile, f"arn:aws:bedrock:*::foundation-model/{base_model}"]},
         {"Sid": "InvokeOrderAdminGateway", "Effect": "Allow", "Action": "bedrock-agentcore:InvokeGateway",
          "Resource": gateway_arn},
-        {"Sid": "ManagedMemory", "Effect": "Allow",
+        {"Sid": "ConversationMemory", "Effect": "Allow",
          "Action": ["bedrock-agentcore:CreateEvent", "bedrock-agentcore:DeleteEvent", "bedrock-agentcore:GetEvent",
-                    "bedrock-agentcore:ListEvents", "bedrock-agentcore:RetrieveMemoryRecords"],
-         "Resource": f"arn:aws:bedrock-agentcore:{REGION}:{ACCOUNT}:memory/harness_*"},
+                    "bedrock-agentcore:ListEvents"],
+         "Resource": memory_arn},
         {"Sid": "WorkloadIdentity", "Effect": "Allow",
          "Action": ["bedrock-agentcore:GetWorkloadAccessToken", "bedrock-agentcore:GetWorkloadAccessTokenForJWT"],
          "Resource": [f"arn:aws:bedrock-agentcore:{REGION}:{ACCOUNT}:workload-identity-directory/default",
@@ -294,7 +332,7 @@ def ensure_target(gid, fn_arn):
 
 
 # ── harness ──────────────────────────────────────────────────────────────────
-def harness_config(role_arn, gateway_arn, gr_id, gr_ver):
+def harness_config(role_arn, gateway_arn, gr_id, gr_ver, memory_arn):
     model = {"bedrockModelConfig": {"modelId": MODEL_ID, "apiFormat": "converse_stream",
                                     "maxTokens": 1500, "temperature": 0.1}}
     if gr_id and gr_ver:
@@ -310,6 +348,7 @@ def harness_config(role_arn, gateway_arn, gr_id, gr_ver):
         # Only the order tools. Tested: "*" also enables the built-in shell (the model ran a command),
         # and a plain "cancel_order" hides the inline tool; "@cancel_order" exposes it without builtins.
         allowedTools=[f"@{TARGET_NAME}", "@cancel_order"],
+        memory={"agentCoreMemoryConfiguration": {"arn": memory_arn}},
         maxIterations=8,
         timeoutSeconds=120,
     )
@@ -319,14 +358,15 @@ def ensure_harness(cfg):
     hid = find_harness()
     if hid:
         log(f"Updating harness {HARNESS_NAME} ({hid})...")
-        ctl.update_harness(harnessId=hid, **cfg)
+        upd = dict(cfg)
+        upd["memory"] = {"optionalValue": cfg["memory"]}           # UpdateHarness wraps optional fields
+        ctl.update_harness(harnessId=hid, **upd)
     else:
-        log(f"Creating harness {HARNESS_NAME} with managed memory...")
+        log(f"Creating harness {HARNESS_NAME} (short-term memory)...")
         for attempt in range(6):
             try:
                 hid = ctl.create_harness(
                     harnessName=HARNESS_NAME,
-                    memory={"managedMemoryConfiguration": {"strategies": ["SUMMARIZATION"], "eventExpiryDuration": 30}},
                     tags={"project": "spbc-tech-assistant", "agent": DISPLAY_NAME},
                     **cfg)["harness"]["harnessId"]
                 break
@@ -362,8 +402,10 @@ def deploy():
     gw_role = ensure_gateway_role(fn_arn)
     gid, gw_arn = ensure_gateway(gw_role)
     ensure_target(gid, fn_arn)
-    h_role = ensure_harness_role(gw_arn, gr_id)
-    arn = ensure_harness(harness_config(h_role, gw_arn, gr_id, gr_ver))
+    memory_arn = ensure_harness_memory()
+    h_role = ensure_harness_role(gw_arn, gr_id, memory_arn)
+    arn = ensure_harness(harness_config(h_role, gw_arn, gr_id, gr_ver, memory_arn))
+    delete_old_managed_memory()
     record_env(arn)
     print(f"\nHARNESS_MANAGER_ARN={arn}\nTry it:  python3 6_deploy/harness/invoke_harness.py "
           "\"Cancel order ord_7977_021 for customer_7977\"")
@@ -388,7 +430,7 @@ def delete_role(name):
 def teardown():
     hid = find_harness()
     if hid:
-        log(f"Deleting harness {HARNESS_NAME} (and its managed memory)...")
+        log(f"Deleting harness {HARNESS_NAME}...")
         ctl.delete_harness(harnessId=hid, deleteManagedMemory=True)
         deadline = time.time() + 900
         while find_harness() and time.time() < deadline:
@@ -403,6 +445,9 @@ def teardown():
             time.sleep(5)
         ctl.delete_gateway(gatewayIdentifier=gid)
         ok(f"Gateway {GATEWAY_NAME} deleted")
+    for mid in find_memory(f"{HARNESS_MEMORY_NAME}-"):
+        ctl.delete_memory(memoryId=mid)
+        ok(f"Deleted harness memory {mid}")
     delete_role(HARNESS_ROLE)
     delete_role(GATEWAY_ROLE)
 

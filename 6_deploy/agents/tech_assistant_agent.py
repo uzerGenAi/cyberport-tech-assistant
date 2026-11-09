@@ -313,10 +313,8 @@ Your responses should:
   that you already provided it
 - If the customer insists or pushes back ("why", "just do it"), explain the reason briefly and
   give the concrete next step once more; do not repeat the same refusal word for word
-- Remembered context (inside <user_context>) is background from earlier chats. "It", "this" or
-  "that one" always refers to the current conversation, never to a product or order you only
-  find in remembered context.
-- Remembered context about the customer (name, preferences, budget) personalises answers only.
+- What the customer said earlier in this conversation (name, preferences, budget) personalises
+  answers only.
   Never answer a product, price, stock, order, store, payment or promotion question from memory or
   from an earlier reply: call the tool again, even if you answered something similar before
 """
@@ -357,10 +355,10 @@ def build_orchestrator(session_manager=None):
     )
 
 
-# AgentCore Memory (optional): set MEMORY_ID (make memory). Short-term events hold every turn;
-# long-term strategies keep customer preferences, facts and session summaries per actor. Only
-# preferences and facts are recalled into a conversation: summaries contain earlier answers, and
-# recalling them made a wrong answer repeat itself across sessions (found by 6_deploy/eval).
+# AgentCore Memory (optional): set MEMORY_ID (make memory). Short-term only: it stores the turns of
+# the current conversation so follow-ups ("is it in stock?") work across runtime restarts. There is
+# no long-term memory: recalling facts and preferences from earlier chats made answers drift (an old
+# "phones only" preference, an old order's price recalled as the budget), found by 6_deploy/eval.
 MEMORY_ID = os.environ.get("MEMORY_ID", "").strip()
 # Without MEMORY_ID one shared orchestrator keeps the conversation in process for the session.
 orchestrator = None if MEMORY_ID else build_orchestrator()
@@ -386,20 +384,13 @@ def orchestrator_for(session_id, actor_id):
         return orchestrator
     # Imported here so the runtime still starts if the memory integration is unavailable.
     from bedrock_agentcore.memory.integrations.strands.config import (  # pylint: disable=import-outside-toplevel
-        AgentCoreMemoryConfig, RetrievalConfig)
+        AgentCoreMemoryConfig)
     from bedrock_agentcore.memory.integrations.strands.session_manager import (  # pylint: disable=import-outside-toplevel
         AgentCoreMemorySessionManager)
     config = AgentCoreMemoryConfig(
         memory_id=MEMORY_ID,
         session_id=session_id,
         actor_id=actor_id,
-        retrieval_config={
-            # Few memories, not a high bar: relevant and irrelevant records score close together
-            # (about 0.45 vs 0.40), so a high threshold dropped the customer's budget, while more
-            # records let old orders leak into new questions. Top 2 to 3 at about 0.4 does both.
-            "/preferences/{actorId}/": RetrievalConfig(top_k=3, relevance_score=0.35),
-            "/facts/{actorId}/": RetrievalConfig(top_k=2, relevance_score=0.42),
-        },
     )
     return build_orchestrator(AgentCoreMemorySessionManager(config, region_name=REGION))
 

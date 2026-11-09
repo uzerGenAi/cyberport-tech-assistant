@@ -227,14 +227,13 @@ def backends_policy(env: dict, account_id: str):
              "Resource": f"arn:aws:execute-api:{api_region}:{account_id}:{api_id}/{stage}/GET/promotions"})
     memory_id = env.get("MEMORY_ID")
     if memory_id:
-        # Events (short-term turns) and long-term record retrieval for this one memory only
+        # Conversation events for this one memory only
         statements.append(
             {"Sid": "AgentCoreMemory", "Effect": "Allow",
+             # Short-term memory only: conversation events, no long-term records
              "Action": ["bedrock-agentcore:CreateEvent", "bedrock-agentcore:ListEvents",
                         "bedrock-agentcore:GetEvent", "bedrock-agentcore:DeleteEvent",
-                        "bedrock-agentcore:ListSessions",
-                        "bedrock-agentcore:ListActors", "bedrock-agentcore:RetrieveMemoryRecords",
-                        "bedrock-agentcore:ListMemoryRecords", "bedrock-agentcore:GetMemoryRecord"],
+                        "bedrock-agentcore:ListSessions"],
              "Resource": f"arn:aws:bedrock-agentcore:{env.get('REGION', 'eu-central-1')}:{account_id}:memory/{memory_id}"})
     return {"Version": "2012-10-17", "Statement": statements} if statements else None
 

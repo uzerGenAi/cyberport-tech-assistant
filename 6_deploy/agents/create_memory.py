@@ -1,10 +1,12 @@
 """Create the AgentCore Memory resource used by the Tech Assistant runtime (idempotent).
 
-Short-term memory (every conversation turn) is always on. Three long-term strategies extract
-what is worth keeping per customer (actor): shopping preferences, durable facts, and a summary
-of each session. The runtime reads the resulting MEMORY_ID from its environment.
+Short-term memory only: it keeps the turns of the current conversation. There are no long-term
+strategies (facts, preferences, summaries): recalling earlier chats made answers drift. Running
+this on an existing memory removes any long-term strategies it still has. The runtime reads the
+resulting MEMORY_ID from its environment.
 
 Run once, after `source setup_env.sh`:  make memory
+Delete long-term records left from earlier versions:  python3 create_memory.py --purge-long-term
 Prints and records MEMORY_ID in ~/environment/env.sh so configure_runtime.py passes it on.
 """
 import os
@@ -17,17 +19,7 @@ REGION = os.environ.get("REGION") or os.environ.get("AWS_REGION") or "eu-central
 MEMORY_NAME = "spbc_tech_assistant_memory"
 ENV_FILE = os.path.expanduser("~/environment/env.sh")
 
-STRATEGIES = [
-    {"userPreferenceMemoryStrategy": {
-        "name": "PreferenceLearner",
-        "namespaceTemplates": ["/preferences/{actorId}/"]}},
-    {"semanticMemoryStrategy": {
-        "name": "FactExtractor",
-        "namespaceTemplates": ["/facts/{actorId}/"]}},
-    {"summaryMemoryStrategy": {
-        "name": "SessionSummarizer",
-        "namespaceTemplates": ["/summaries/{actorId}/{sessionId}/"]}},
-]
+STRATEGIES = []          # short-term only: no long-term extraction (see tech_assistant_agent.py)
 
 
 def find_existing() -> str:
@@ -46,6 +38,54 @@ def find_existing() -> str:
             return ""
 
 
+def remove_long_term_strategies(memory_id: str) -> None:
+    """Delete any long-term strategies from an existing memory (idempotent)."""
+    ctl = boto3.client("bedrock-agentcore-control", region_name=REGION)
+    memory = ctl.get_memory(memoryId=memory_id)["memory"]
+    ids = [s.get("strategyId") or s.get("memoryStrategyId")
+           for s in memory.get("strategies", memory.get("memoryStrategies", []))]
+    if not ids:
+        return
+    ctl.update_memory(memoryId=memory_id,
+                      memoryStrategies={"deleteMemoryStrategies": [{"memoryStrategyId": i} for i in ids]})
+    print(f"Removed {len(ids)} long-term strategies: {', '.join(ids)}")
+
+
+def purge_long_term_records(memory_id: str) -> int:
+    """Delete every extracted long-term record (facts, preferences, session summaries), all actors."""
+    from concurrent.futures import ThreadPoolExecutor  # pylint: disable=import-outside-toplevel
+    dp = boto3.client("bedrock-agentcore", region_name=REGION)
+
+    def pages(call, key, **kw):
+        token = None
+        while True:
+            resp = call(**kw, **({"nextToken": token} if token else {}))
+            yield from resp.get(key, [])
+            token = resp.get("nextToken")
+            if not token:
+                return
+
+    def purge_actor(actor):
+        namespaces = [f"/facts/{actor}/", f"/preferences/{actor}/"]
+        namespaces += [f"/summaries/{actor}/{s['sessionId']}/"
+                       for s in pages(dp.list_sessions, "sessionSummaries", memoryId=memory_id, actorId=actor, maxResults=100)]
+        deleted = 0
+        for ns in namespaces:
+            ids = [r["memoryRecordId"] for r in pages(dp.list_memory_records, "memoryRecordSummaries",
+                                                      memoryId=memory_id, namespace=ns, maxResults=100)]
+            for i in range(0, len(ids), 100):
+                dp.batch_delete_memory_records(memoryId=memory_id,
+                                               records=[{"memoryRecordId": x} for x in ids[i:i + 100]])
+                deleted += len(ids[i:i + 100])
+        return deleted
+
+    actors = [a["actorId"] for a in pages(dp.list_actors, "actorSummaries", memoryId=memory_id, maxResults=100)]
+    with ThreadPoolExecutor(8) as pool:
+        total = sum(pool.map(purge_actor, actors))
+    print(f"Deleted {total} long-term records across {len(actors)} actors")
+    return total
+
+
 def record_in_env_file(memory_id: str) -> None:
     lines = []
     if os.path.exists(ENV_FILE):
@@ -61,17 +101,20 @@ def main() -> int:
     memory_id = find_existing()
     if memory_id:
         print(f"Memory already exists: {memory_id}")
+        remove_long_term_strategies(memory_id)
     else:
         print(f"Creating AgentCore Memory {MEMORY_NAME} in {REGION} (takes a few minutes)...")
         client = MemoryClient(region_name=REGION)
         memory = client.create_memory_and_wait(
             name=MEMORY_NAME,
-            description="Cyberport Tech Assistant: customer preferences, facts and session summaries",
+            description="Cyberport Tech Assistant: conversation history (short-term only)",
             strategies=STRATEGIES,
             event_expiry_days=90,
         )
         memory_id = memory["id"]
         print(f"Memory ACTIVE: {memory_id}")
+    if "--purge-long-term" in sys.argv:
+        purge_long_term_records(memory_id)
     record_in_env_file(memory_id)
     print(f"MEMORY_ID={memory_id}  (recorded in {ENV_FILE})")
     return 0

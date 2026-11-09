@@ -8,7 +8,7 @@
    used to read the login secret and to verify data in DynamoDB.
 2. Checks those customer credentials can call the runtime and nothing else.
 3. Runs a full customer journey in one chat (advice, follow-ups, stock, discount, financing,
-   click & collect order, status, cancellation request), then a second chat for memory, then
+   click & collect order, status, cancellation request), then a second chat that must start fresh, then
    single questions for deals, stores, returns and abuse.
 4. Verifies the placed order in DynamoDB (status and server-side total).
 
@@ -197,16 +197,12 @@ def run_journey(username, password):
             check("stored store spbc-de-002 (Berlin), click & collect", it["store_id"] == "spbc-de-002" and it.get("fulfilment") == "click_and_collect", it["store_id"])
             (LOGS / "e2e-order.json").write_text(json.dumps({"user_id": name, "order_id": order_id}))
 
-    # ── 3b. a new chat later: long-term memory ──
-    # Long-term records are extracted in the background after a chat (about a minute); a real
-    # customer comes back later, so wait before the next visit
-    import time
-    print("…waiting 120 s for long-term memory extraction (as if the customer came back later)")
-    time.sleep(120)
+    # ── 3b. a new chat later: it starts fresh (no long-term memory) ──
     chat2 = Chat(sess, user, "Next visit (new chat, same customer)")
     a = chat2.ask("Hi again, what was my budget for the laptop?")
-    no_noise("memory question", a)
-    check("remembers the €1,000 budget across chats", re.search(r"1[.,]?000", a), a[:160])
+    no_noise("new chat question", a)
+    check("new chat does not bring back the earlier chat (no budget or order recalled)",
+          not re.search(r"1[.,]?000|755[.,]48|ZenBook|ord_[0-9a-f]{12}", a), a[:160])
 
     # ── 3c. single questions ──
     singles = [

@@ -112,7 +112,7 @@ async def ask(page, question):
 
 async def main():
     url = sys.argv[1] if len(sys.argv) > 1 else amplify_url()
-    # A fresh customer: no long-term memory from earlier runs, no effect on the demo login
+    # A fresh customer: a clean conversation history, no effect on the demo login
     import pathlib, secrets as _s, string as _st, uuid as _u
     cfg = json.loads((pathlib.Path(__file__).resolve().parents[1] / "web-app" / "cognito-config.json").read_text())
     idp = boto3.client("cognito-idp", region_name=REGION)
