@@ -47,3 +47,9 @@
 
 16. **Can I change the delivery address after ordering?**
     You can change the address until the order is SHIPPED. Contact customer service with your order ID.
+
+17. **How do I contact customer service?**
+    You can reach customer service through the contact form on the Cyberport website (Contact link at the top of every page), or by visiting any Cyberport store, where staff at the service desk can look up your order. Have your order ID and the name or customer number used on the order ready. (Illustrative demo: no phone numbers or email addresses are published here.)
+
+18. **How do I cancel an order?**
+    Orders can be cancelled free of charge while they are PROCESSING. Ask the Tech Assistant to check the status first, then contact customer service (contact form or any store) with your order ID and the name or customer number used on the order; a staff member confirms and processes the cancellation. Once an order is READY_FOR_PICKUP or SHIPPED it can no longer be cancelled: collect or receive it and use the 14-day right of withdrawal or the return policy instead. The Tech Assistant itself cannot cancel orders.

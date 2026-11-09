@@ -95,7 +95,9 @@ s_docs() {
 s_kbs() {
     refresh_env
     if have_all_kbs; then
-        ok "All five knowledge bases already exist: skipping (OpenSearch Serverless bills ~\$350/month while it runs)"
+        # Already created: re-sync them, so edited documents (uploaded by the docs step) are re-indexed
+        ok "All five knowledge bases exist: re-syncing their documents"
+        ./deploy_agentcore.sh step5-knowledge-bases
         return 0
     fi
     warn "Creating the vector store and 5 knowledge bases takes 15-20 minutes. OpenSearch Serverless bills"
