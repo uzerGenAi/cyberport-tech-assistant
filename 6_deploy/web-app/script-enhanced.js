@@ -570,10 +570,38 @@ async function handleFormSubmit(event) {
         const selectedStoreData = sessionStorage.getItem('selectedStore');
         const selectedStore = selectedStoreData ? JSON.parse(selectedStoreData) : null;
         
-        // Send message to AgentCore using the fixed client
-        const response = await window.fixedAgentCoreClient.sendMessage(userInput);
+        // Stream the answer into the loading bubble: status lines while tools run, then the
+        // text as it is written. The final "done" text replaces it (it is the cleaned answer).
+        let streamedText = '';
+        const bubble = loadingMessage;
+        const showLoading = (statusText) => {
+            bubble.classList.add('loading-message');
+            bubble.classList.remove('streaming');
+            bubble.innerHTML = '<div class="loading-content"><div class="spinner"></div><span class="loading-text"></span></div>';
+            bubble.querySelector('.loading-text').textContent = statusText || 'Processing your request...';
+        };
+        const response = await window.fixedAgentCoreClient.sendMessage(userInput, {
+            onStatus: (statusText) => {
+                // Leading whitespace is not an answer yet: keep showing progress until real text arrives
+                if (!stripInternalReasoning(streamedText)) showLoading(statusText);
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            },
+            onDelta: (delta) => {
+                streamedText += delta;
+                const visible = stripInternalReasoning(streamedText);
+                if (!visible) return;
+                bubble.classList.remove('loading-message');
+                bubble.classList.add('streaming');
+                bubble.textContent = visible;
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            },
+            onReset: () => {
+                streamedText = '';
+                showLoading('Working on it...');
+            },
+        });
         
-        // Remove loading message
+        // The streamed bubble is replaced by the final answer below
         removeMessage(loadingMessage);
         
         // The runtime entrypoint returns a plain string, which the client wraps as

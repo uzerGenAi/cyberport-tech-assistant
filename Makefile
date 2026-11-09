@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: deploy demo-user eval e2e ci backend-setup post-deploy post-deploy-force amplify smoke help \
+.PHONY: deploy demo-user eval e2e browser-test ci backend-setup post-deploy post-deploy-force amplify smoke help \
         backends-plan backends seed-stores backends-check backends-env knowledge-bases memory
 
 help:
@@ -9,6 +9,7 @@ help:
 	@echo "  make deploy          Deploy everything with one resumable command (see DEPLOY.md)"
 	@echo "  make eval            Check answers against known facts (live runtime, 3 runs per question)"
 	@echo "  make e2e             Real customer journey + harness-manager cancellation (live, ~6 min)"
+	@echo "  make browser-test    Live website in headless Brave/Chrome: login, streaming, no leaks"
 	@echo "  make demo-user       Show the default web-app login (creates it if missing)"
 	@echo "  make backend-setup   Create the S3 bucket that holds the Terraform state  (run FIRST)"
 	@echo "  make ci              Run local validation checks (Python compile + Terraform validate/test)"
@@ -48,6 +49,10 @@ eval:
 e2e:
 	python3 -u 6_deploy/eval/e2e_user_journey.py
 	python3 -u 6_deploy/eval/e2e_harness_cancel.py
+
+# Real headless browser on the live site: sign in, chat, check streaming and status lines
+browser-test:
+	python3 -u 6_deploy/eval/browser_stream_test.py
 
 # Show (and repair) the default web-app login
 demo-user:

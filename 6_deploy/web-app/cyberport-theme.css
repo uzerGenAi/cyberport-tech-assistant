@@ -348,3 +348,11 @@ body:has(> .cp-topbar) { padding-top: 0 !important; margin-top: 0 !important; }
 @media (max-width: 1000px) { .prompt-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 480px)  { .prompt-grid { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .prompt-card, .prompt-card:hover { transition: none; transform: none; } }
+
+/* ── Streaming answer: a blinking caret while text arrives ────────────── */
+.bot-message.streaming::after {
+  content: ""; display: inline-block; width: 7px; height: 1em; margin-left: 2px;
+  vertical-align: text-bottom; background: var(--cp-ink); animation: cp-caret 1s steps(1) infinite;
+}
+@keyframes cp-caret { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .bot-message.streaming::after { animation: none; } }

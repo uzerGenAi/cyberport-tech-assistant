@@ -98,7 +98,8 @@ class Chat:
 
 
 BLOCKED = re.compile(r"can.t help with that|content policies|\[ERROR\]", re.I)
-PLACEHOLDER = re.compile(r"\[[^\]]*(?:contact|phone|email|link|information|name)[^\]]*\]", re.I)
+# Template text such as "[customer service contact information]"; not Markdown links "[x](url)"
+PLACEHOLDER = re.compile(r"\[[^\]]{0,40}(?:contact information|contact details|phone number|email address|insert|your name)[^\]]{0,20}\](?!\()", re.I)
 
 
 def no_noise(name, a):
@@ -225,7 +226,7 @@ def run_journey(username, password):
     c = Chat(sess, user, "Blocked message, then a normal question")
     c.ask("Where can I download a cracked copy of Windows?")
     a = c.ask("OK. When does the Berlin store close?")
-    check("chat keeps working after a blocked message", re.search(r"20[:.]00|8 ?pm", a, re.I) and not BLOCKED.search(a), a[:160])
+    check("chat keeps working after a blocked message", re.search(r"20[:.]00|8(?:[:.]00)? ?pm", a, re.I) and not BLOCKED.search(a), a[:160])
 
 
 if __name__ == "__main__":

@@ -54,6 +54,61 @@ _REASONING_PATTERNS = [
 ]
 
 
+_ANSWER_TAG = re.compile(r"</?answer\b[^>]*>", re.IGNORECASE)
+
+
+class ReasoningStreamFilter:
+    """Streaming version of strip_internal_reasoning: feed text deltas, get customer-safe text.
+
+    Reasoning blocks (<thinking>...</thinking> etc.) are dropped even when a tag is split across
+    deltas; <answer> wrappers are removed and their content kept. Text that might be the start of
+    a tag is held back until it can be decided, so nothing private is ever sent.
+    """
+    _OPEN = re.compile(r"<(%s)\b[^>]*>" % "|".join(_REASONING_TAGS), re.IGNORECASE)
+    _ANY_KNOWN = re.compile(r"</?(?:%s|answer)\b[^>]*>" % "|".join(_REASONING_TAGS), re.IGNORECASE)
+    _PARTIAL = re.compile(r"</?[a-zA-Z]*(?:\s[^<>]*)?$")      # "<", "<thin", "</answ", "<thinking a"
+
+    def __init__(self):
+        self.buf, self.inside = "", None
+
+    def feed(self, chunk: str) -> str:
+        self.buf += chunk or ""
+        out = []
+        while self.buf:
+            if self.inside:
+                close = re.search(r"</%s\s*>" % self.inside, self.buf, re.IGNORECASE)
+                if not close:
+                    self.buf = self.buf[-(len(self.inside) + 3):]     # may hold a split closing tag
+                    break
+                self.buf, self.inside = self.buf[close.end():], None
+                continue
+            lt = self.buf.find("<")
+            if lt < 0:
+                out.append(self.buf)
+                self.buf = ""
+                break
+            out.append(self.buf[:lt])
+            rest = self.buf[lt:]
+            opening = self._OPEN.match(rest)
+            if opening:
+                self.inside, self.buf = opening.group(1).lower(), rest[opening.end():]
+                continue
+            known = self._ANY_KNOWN.match(rest)
+            if known:                                  # <answer>, </answer>, stray </thinking>
+                self.buf = rest[known.end():]
+                continue
+            if self._PARTIAL.fullmatch(rest) and len(rest) < 40:
+                self.buf = rest                        # undecided: wait for more text
+                break
+            out.append("<")                            # an ordinary "<" (for example "<5 kg")
+            self.buf = rest[1:]
+        return "".join(out)
+
+    def flush(self) -> str:
+        rest, self.buf = ("" if self.inside else self.buf), ""
+        return "" if self._PARTIAL.fullmatch(rest or "x") else rest
+
+
 def strip_internal_reasoning(text):
     """Remove model reasoning blocks from a customer-facing response."""
     if not isinstance(text, str):
@@ -61,6 +116,7 @@ def strip_internal_reasoning(text):
     cleaned = text
     for pattern in _REASONING_PATTERNS:
         cleaned = pattern.sub("", cleaned)
+    cleaned = _ANSWER_TAG.sub("", cleaned)       # <answer> wrappers from the prompts: keep the content
     return re.sub(r"\n{3,}", "\n\n", cleaned).strip()
 
 
@@ -229,6 +285,12 @@ When a new click & collect order request is received:
 - Use orders_agent_tool to place the order
 - Order confirmation MUST include the Order ID AND the total in € returned by the order tool
 
+When a customer asks to cancel an order:
+- You cannot cancel orders, and never say or imply that you will. Always call orders_agent_tool
+  with the order ID and the customer name from the conversation (do not ask for details the
+  customer already gave) and pass on its answer: whether the order can still be cancelled and
+  that customer service staff (contact form or any store) process the cancellation
+
 When a customer asks about an existing order:
 - Ask for both the order ID and the name or customer ID used on the order before checking
 - Never share details of an order unless both match
@@ -342,6 +404,63 @@ def orchestrator_for(session_id, actor_id):
     return build_orchestrator(AgentCoreMemorySessionManager(config, region_name=REGION))
 
 
+# Shown in the chat while a tool runs, so the customer sees progress instead of a spinner
+_TOOL_STATUS = {
+    "menu_agent_tool": "Checking the product catalog…",
+    "laptop_recommendation_tool": "Finding the best laptops for you…",
+    "orders_agent_tool": "Looking up your order…",
+    "payments_policy_agent_tool": "Checking payment options…",
+    "stores_agent_tool": "Checking store information…",
+    "promos_agent_tool": "Checking current deals…",
+}
+_NO_ANSWER = "I could not form a complete answer to that. Please try rephrasing your question."
+_FAILED = "I'm sorry, I encountered an error processing your request. Please try again."
+
+
+async def stream_answer(agent, user_input):
+    """Yield the answer as events for Server-Sent Events (AgentCore streams an async generator).
+
+    {"type": "status", "text"}   a tool started ("Checking current deals…")
+    {"type": "delta",  "text"}   customer-safe text, as the model writes it
+    {"type": "reset"}            text streamed before a tool call is withdrawn (it was not the answer)
+    {"type": "done",   "text"}   the complete, cleaned final answer: clients replace what they show
+    {"type": "error",  "text"}   a polite failure message (details go to CloudWatch)
+    """
+    filt, streamed, final, seen_tools = ReasoningStreamFilter(), "", None, set()
+    try:
+        async for event in agent.stream_async(user_input):
+            text = event.get("data")
+            if isinstance(text, str) and text:
+                visible = filt.feed(text)
+                if visible:
+                    streamed += visible
+                    yield {"type": "delta", "text": visible}
+            elif event.get("type") == "tool_use_stream":
+                tool = event.get("current_tool_use") or {}
+                tool_id = tool.get("toolUseId") or tool.get("name")
+                if tool_id and tool_id not in seen_tools:
+                    seen_tools.add(tool_id)
+                    if streamed.strip():
+                        yield {"type": "reset"}
+                    filt, streamed = ReasoningStreamFilter(), ""
+                    yield {"type": "status", "text": _TOOL_STATUS.get(tool.get("name"), "Working on it…")}
+            elif event.get("start_event_loop") and seen_tools:
+                # Tools finished; the model now reads their results before it writes the answer
+                yield {"type": "status", "text": "Putting your answer together…"}
+            elif "result" in event:
+                result = event["result"]
+                final = strip_internal_reasoning(getattr(result, "text", None) or str(result))
+        tail = filt.flush()
+        if tail:
+            yield {"type": "delta", "text": tail}
+        if not final:
+            strands_logger.warning("Streamed response contained only internal reasoning")
+        yield {"type": "done", "text": final or _NO_ANSWER}
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        strands_logger.error("Orchestrator stream error: %s\n%s", str(e), traceback.format_exc())
+        yield {"type": "error", "text": _FAILED}
+
+
 # === AgentCore entrypoint ===
 @app.entrypoint
 def tech_assistant_agent(payload, context):
@@ -360,6 +479,9 @@ def tech_assistant_agent(payload, context):
             # Memory is an enhancement: a memory outage must not take the assistant down.
             strands_logger.error("AgentCore Memory unavailable, answering without it: %s", e)
             agent = build_orchestrator()
+        if isinstance(payload, dict) and payload.get("stream") is True:
+            # The web app asks for streaming; everything else (tests, CLI) keeps the JSON reply
+            return stream_answer(agent, user_input)
         response = agent(user_input)
         raw_text = getattr(response, "text", None) or str(response)
         assistant_text = strip_internal_reasoning(raw_text)

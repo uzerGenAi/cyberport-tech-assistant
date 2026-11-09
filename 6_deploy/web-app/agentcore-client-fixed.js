@@ -155,8 +155,42 @@ class FixedAgentCoreClient {
     }
   }
 
+  // === Streaming (Server-Sent Events) ===
+  // Reads the runtime's event stream and calls the handlers as events arrive.
+  // Returns { message } with the final answer (the "done" event), like the JSON path.
+  async #readStream(resp, handlers) {
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let finalText = null;
+    let errorText = null;
+    let streamed = '';
+    const dispatch = (evt) => {
+      if (!evt || typeof evt !== 'object') return;
+      if (evt.type === 'status') handlers.onStatus && handlers.onStatus(evt.text || '');
+      else if (evt.type === 'delta') { streamed += evt.text || ''; handlers.onDelta && handlers.onDelta(evt.text || ''); }
+      else if (evt.type === 'reset') { streamed = ''; handlers.onReset && handlers.onReset(); }
+      else if (evt.type === 'done') finalText = evt.text || '';
+      else if (evt.type === 'error') errorText = evt.text || 'Something went wrong.';
+    };
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (value) buffer += decoder.decode(value, { stream: true });
+      if (done) buffer += decoder.decode();
+      const parsed = agentcoreParseSSE(buffer, done);
+      buffer = parsed.rest;
+      parsed.events.forEach(dispatch);
+      if (done) break;
+    }
+    if (finalText !== null) return { message: finalText };
+    if (errorText !== null) return { message: errorText };
+    return { message: streamed };
+  }
+
   // === Messaging ===
-  async sendMessage(message) {
+  // handlers (optional): { onStatus(text), onDelta(text), onReset() } switches on streaming.
+  async sendMessage(message, handlers = null) {
+    const streaming = !!(handlers && (handlers.onDelta || handlers.onStatus));
     if (!this.isInitialized) await this.initialize();
 
     // --- build lightweight context from storage ---
@@ -168,7 +202,7 @@ class FixedAgentCoreClient {
     const prompt = ctxBlock + message;
     // ------------------------------------------------
 
-    const payload = JSON.stringify({ prompt });
+    const payload = JSON.stringify(streaming ? { prompt, stream: true } : { prompt });
     const baseUrl = 'https://bedrock-agentcore.eu-central-1.amazonaws.com';
     const runtimeArnEnc = encodeURIComponent(this.agentRuntimeArn);
     const session = encodeURIComponent(this.sessionId);
@@ -180,7 +214,7 @@ class FixedAgentCoreClient {
     awsReq.headers = {
       'host': host,
       'content-type': 'application/json',
-      'accept': 'application/json',
+      'accept': streaming ? 'text/event-stream' : 'application/json',
       'X-Amzn-Bedrock-AgentCore-Runtime-Session-Id': this.sessionId,
     };
     awsReq.body = payload;
@@ -257,6 +291,11 @@ class FixedAgentCoreClient {
         this.#emitStatus('connected', 'Connected');
         this.lastFailure = null;
 
+        const contentType = resp.headers.get('content-type') || '';
+        if (streaming && contentType.includes('text/event-stream') && resp.body) {
+          return await this.#readStream(resp, handlers);
+        }
+
         const text = await resp.text();
         try {
           const parsed = JSON.parse(text);
@@ -299,6 +338,24 @@ class FixedAgentCoreClient {
   isReady() { return this.isInitialized && !!this.credentials; }
   getLastFailure() { return this.lastFailure; }
 }
+
+// Split a Server-Sent Events buffer into parsed "data:" payloads.
+// Returns { events, rest }: rest is the incomplete tail to keep for the next chunk.
+function agentcoreParseSSE(buffer, final = false) {
+  const events = [];
+  const blocks = buffer.split(/\r?\n\r?\n/);
+  const rest = final ? '' : blocks.pop();
+  for (const block of blocks) {
+    const data = block.split(/\r?\n/)
+      .filter(line => line.startsWith('data:'))
+      .map(line => line.slice(5).replace(/^ /, ''))
+      .join('\n');
+    if (!data) continue;
+    try { events.push(JSON.parse(data)); } catch { events.push({ type: 'delta', text: data }); }
+  }
+  return { events, rest };
+}
+if (typeof window !== 'undefined') window.agentcoreParseSSE = agentcoreParseSSE;
 
 // Create a global singleton so the same session is reused across your app
 window.fixedAgentCoreClient = new FixedAgentCoreClient();

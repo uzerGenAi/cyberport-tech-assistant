@@ -125,6 +125,15 @@ order, status, cancellation request, memory on a later visit, abuse), checks the
 DynamoDB, then has harness-manager cancel that order (declined, approved, re-cancel, shipped
 order, missing ID, prompt injection). Transcripts are in `.deploy-logs/`.
 
+`make browser-test` opens the live website in headless Brave or Chrome, signs in as a fresh
+customer and records what the chat bubble shows over time: the progress lines ("Checking
+current deals…", "Putting your answer together…"), the streamed answer, and that no internal
+reasoning ever appears.
+
+**Streaming.** The web app sends `"stream": true` and receives the answer as Server-Sent Events:
+`status` while tools run, `delta` text as it is written, `done` with the final cleaned answer.
+Without the flag the runtime returns plain JSON, as the tests and CLI use.
+
 ## 7. Redeploy after changing code
 
 ```bash
