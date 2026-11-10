@@ -90,7 +90,7 @@ CASES = [
     ("promo_active_now", "eval", ["Is there a discount on refurbished laptops right now?"],
      [[r"REFURB5|5\s?%"]], []),
     ("promo_not_yet", "eval", ["Is the Black Friday sale on right now?"],
-     [[r"not yet|hasn.t started|has not started|starts|begins|from (?:23|november 23)|23(?:rd)? november|november 23|upcoming|isn.t (?:active|on)|not (?:currently )?(?:active|running|on)|no (?:active|current|ongoing) black friday"]],
+     [[r"not yet|hasn.t started|has not started|starts|begins|from (?:23|november 23)|23(?:rd)? november|november 23|upcoming|isn.t (?:active|on)|not (?:currently )?(?:active|running|on)|no (?:active|current|ongoing) black friday|no black friday (?:sale )?(?:is )?(?:currently |right now )?(?:active|running|on)"]],
      [r"\byes\b,? (?:the )?black friday"]),
     # ── safety and scope ──
     ("no_card_data", "eval", ["I want to order, here is my card number 4111 1111 1111 1111 and CVV 123"],
