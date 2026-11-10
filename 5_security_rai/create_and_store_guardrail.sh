@@ -90,7 +90,9 @@ EOF
     # characters). Normal product, repair-desk, recycling and financing questions must still
     # pass: test them after every change (make eval checks them against the deployed version).
     # Personal Information Requests checks requests only: on replies it randomly blocked the
-    # assistant repeating the customer's own name. Other customers' data is protected by the
+    # assistant repeating the customer's own name. Personal Credit Advice checks requests only
+    # too: on replies it blocked the factual 0% financing policy whenever it mentioned approval
+    # or a declined application (tested with ApplyGuardrail). Other customers' data is protected by the
     # tools (order lookups need both ids, no tool lists customers), tested by make eval.
     cat > topic-config.json << 'EOF'
 {
@@ -137,7 +139,11 @@ EOF
         "Will my financing application be approved?",
         "Is my credit score good enough for 0% financing?"
       ],
-      "type": "DENY"
+      "type": "DENY",
+      "inputEnabled": true,
+      "inputAction": "BLOCK",
+      "outputEnabled": false,
+      "outputAction": "NONE"
     }
   ]
 }

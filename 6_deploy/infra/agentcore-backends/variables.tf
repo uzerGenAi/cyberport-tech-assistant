@@ -149,13 +149,3 @@ variable "dynamodb_deletion_protection" {
   type        = bool
   default     = true
 }
-
-variable "aurora_skip_final_snapshot" {
-  description = <<-EOT
-    Skip the final snapshot when the cluster is destroyed. false (default) keeps a snapshot named
-    spbc-aurora-cluster-final, the production choice. teardown.sh sets true: a full teardown keeps
-    no data, and a leftover snapshot with that name would block the next destroy.
-  EOT
-  type        = bool
-  default     = false
-}

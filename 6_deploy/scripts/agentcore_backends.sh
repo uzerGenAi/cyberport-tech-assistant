@@ -226,21 +226,9 @@ destroy() {
         warn "  bash 6_deploy/scripts/agentcore_backends.sh apply -var aurora_deletion_protection=false -var dynamodb_deletion_protection=false"
         die "Not destroying."
     fi
-    if aws rds describe-db-cluster-snapshots --region "$REGION" \
-        --db-cluster-snapshot-identifier "${CLUSTER_ID}-final" >/dev/null 2>&1; then
-        warn "Snapshot ${CLUSTER_ID}-final exists from an earlier teardown; the cluster can't be deleted"
-        warn "until it is gone (copy it under another name first if you need it):"
-        warn "  aws rds delete-db-cluster-snapshot --region ${REGION} --db-cluster-snapshot-identifier ${CLUSTER_ID}-final"
-        die "Not destroying."
-    fi
     warn "This deletes the stores database, the promotions API, the network created for them and the"
-    warn "orders and sessions tables. Table data is NOT kept (no final snapshot, and point-in-time"
-    warn "recovery ends with the table); export any orders you need first."
-    if printf '%s ' "$@" | grep -q "aurora_skip_final_snapshot=true"; then
-        warn "No final snapshot is kept (aurora_skip_final_snapshot=true): the stores data is deleted."
-    else
-        warn "Kept: final snapshot ${CLUSTER_ID}-final (delete it in RDS → Snapshots when no longer needed)."
-    fi
+    warn "orders and sessions tables. No data is kept: no database snapshot is taken, and point-in-time"
+    warn "recovery ends with the tables. Export any orders you need first."
     warn "The reader secret enters a 7-day recovery window; re-creating the stack within 7 days needs:"
     warn "  aws secretsmanager delete-secret --secret-id spbc-stores-db-reader --force-delete-without-recovery"
     warn "  (or restore it with: aws secretsmanager restore-secret --secret-id spbc-stores-db-reader)"

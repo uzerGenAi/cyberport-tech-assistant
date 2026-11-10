@@ -150,7 +150,7 @@ Confirmed the defaults are already production-safe; flipping would be a no-op or
 break the passing tftest assertion, so nothing was changed:
 - `agentcore-backends/variables.tf`: `aurora_deletion_protection` default **`true`**.
 - `agentcore-backends/database.tf`: `deletion_protection = var.aurora_deletion_protection`,
-  `skip_final_snapshot = false`.
+  `skip_final_snapshot = true` (changed later: no final snapshot is kept; the stores data is seed data).
 - `agentcore-backends/orders.tf`: `deletion_protection_enabled = true` (hardcoded).
 - `backends.tftest.hcl` asserts the cluster's `deletion_protection` is truthy — i.e. the
   create-run relies on the `true` default (no override to false). Test runs that need

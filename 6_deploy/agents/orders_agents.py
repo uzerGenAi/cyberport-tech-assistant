@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import boto3
 import place_order
@@ -138,6 +139,158 @@ def check_cancellation(user_id: str, order_id: str) -> dict:
                        f"have it, you can return it instead. {_RETURN_POLICIES['online']}")}
 
 
+# Finding an order without its ID, the way a shop does it: the name on the order plus what was
+# bought (and, when that is vague, the store or the date). A name alone never lists orders.
+_GENERIC_WORDS = {
+    "a", "an", "the", "my", "me", "i", "it", "one", "of", "for", "and", "with", "from", "that", "this",
+    "order", "ordered", "orders", "bought", "purchase", "purchased", "new", "item", "product", "device",
+    "laptop", "laptops", "notebook", "notebooks", "phone", "phones", "smartphone", "smartphones",
+    "mobile", "computer", "pc", "gb", "tb",
+}
+_MAX_LISTED = 3
+
+
+def _words(text) -> list:
+    return re.findall(r"[a-z0-9]+", str(text).lower())
+
+
+def _catalog_categories() -> dict:
+    """item_id -> category ("gaming_laptops"), so "gaming laptop" matches; {} if unavailable."""
+    try:
+        import menu_agents  # pylint: disable=import-outside-toplevel
+        return {r.get("item_id"): r.get("category", "") for r in menu_agents._load_priced_menu()}  # pylint: disable=protected-access
+    except Exception:  # pylint: disable=broad-exception-caught
+        return {}
+
+
+def _order_text(order: dict, categories: dict) -> str:
+    try:
+        items = json.loads(order.get("items", "[]"))
+    except (TypeError, ValueError):
+        items = []
+    parts = []
+    for it in items:
+        parts += [it.get("item", ""), it.get("name", ""), it.get("item_id", ""),
+                  categories.get(it.get("item_id"), "").replace("_", " ")]
+    return " ".join(parts).lower()
+
+
+def _product_matches(hint_words: list, text: str) -> bool:
+    """At least half of the specific words (brand, model, type like 'gaming') appear in the order."""
+    specific = [w for w in hint_words if w not in _GENERIC_WORDS]
+    if not specific:
+        return False
+    squashed = re.sub(r"[^a-z0-9]", "", text)
+    text_words = set(_words(text))
+    hits = sum(1 for w in specific if w in text_words or (len(w) >= 4 and w in squashed))
+    return hits >= 1 and hits * 2 >= len(specific)
+
+
+def _resolve_store(text: str) -> str:
+    try:
+        import stores_agents  # pylint: disable=import-outside-toplevel
+        return stores_agents.resolve_store(text) or ""
+    except Exception:  # pylint: disable=broad-exception-caught
+        return ""
+
+
+def _store_label(store_id: str) -> str:
+    try:
+        import stores_agents  # pylint: disable=import-outside-toplevel
+        return stores_agents.store_names().get(store_id, store_id)
+    except Exception:  # pylint: disable=broad-exception-caught
+        return store_id
+
+
+def search_orders(name_on_order: str, product: str, store: str = "", order_date: str = "") -> dict:
+    """Plain-function order search; see find_orders."""
+    name, product = str(name_on_order or "").strip(), str(product or "").strip()
+    store, order_date = str(store or "").strip(), str(order_date or "").strip()
+    not_found = {"message": (
+        "No order matches that name and description. Please check the name used on the order and "
+        "what was ordered. The order ID (it starts with ord_) is in the order confirmation; if you "
+        f"cannot find it, {_CONTACT} can look the order up after checking your identity.")}
+    if not name:
+        return {"message": "Ask for the name or customer number used on the order."}
+    hint_words = _words(product)
+    if not hint_words:
+        return {"message": "Ask what was ordered (for example the brand or model)."}
+    vague = not [w for w in hint_words if w not in _GENERIC_WORDS]
+    store_id = _resolve_store(store) if store else ""
+    if vague and not (store_id or order_date):
+        return {"message": ("If an order ID for this customer was placed or mentioned earlier in this "
+                            "conversation, do not ask the customer anything: check that order ID instead. "
+                            "Otherwise the description is too general to identify the order safely: ask for "
+                            "the brand or model, or for the collection store or the order date.")}
+    try:
+        query = {"KeyConditionExpression": Key("user_id").eq(name)}
+        orders = []
+        while True:
+            resp = table.query(**query)
+            orders += resp.get("Items", [])
+            if "LastEvaluatedKey" not in resp:
+                break
+            query["ExclusiveStartKey"] = resp["LastEvaluatedKey"]
+    except (KeyError, ValueError) as e:
+        return {"error": str(e)}
+    categories = _catalog_categories()
+    matches = []
+    for o in orders:
+        text = _order_text(o, categories)
+        if vague:
+            # "a laptop" / "my phone": match the product type; store or date (checked below) narrow it
+            ok = any(w in text for w in hint_words if w in _GENERIC_WORDS and len(w) >= 5)
+        else:
+            ok = _product_matches(hint_words, text)
+        if ok and store_id and o.get("store_id") != store_id:
+            ok = False
+        if ok and order_date and not str(o.get("order_timestamp", "")).startswith(order_date[:10]):
+            ok = False
+        if ok:
+            matches.append(o)
+    if not matches:
+        return not_found                  # same answer for an unknown name and a wrong description
+    matches.sort(key=lambda o: o.get("order_timestamp", ""), reverse=True)
+    if len(matches) > _MAX_LISTED:
+        return {"message": (f"Several orders match. Ask for the collection store or the order date "
+                            "to narrow it down.")}
+    found = []
+    for o in matches:
+        try:
+            items = json.loads(o.get("items", "[]"))
+        except (TypeError, ValueError):
+            items = []
+        found.append({
+            "order_id": o.get("order_id", ""),
+            "order_date": str(o.get("order_timestamp", ""))[:10],
+            "status": o.get("status", ""),
+            "store": _store_label(o.get("store_id", "")),
+            "items": [it.get("item") or it.get("name") or it.get("item_id") for it in items],
+            "total_amount": float(o.get("total_amount", 0)) if o.get("total_amount") is not None else None,
+        })
+    return {"orders": found,
+            "note": "Give the customer the order ID so they can use it next time."}
+
+
+@tool(name="find_orders",
+      description=("Find a customer's order when they do not know the order ID and it is NOT already in this "
+                   "conversation (if an order ID was placed or mentioned in this chat, use that instead). "
+                   "Needs the name or customer "
+                   "number used on the order AND what was ordered (brand, model or type, e.g. 'ASUS gaming "
+                   "laptop'). If the description is general ('a laptop'), also pass the collection store or "
+                   "the order date (YYYY-MM-DD)."))
+def find_orders(name_on_order: str, product: str, store: str = "", order_date: str = "") -> dict:
+    """Look up orders by name plus product (and store or date), never by name alone.
+
+    Args:
+        name_on_order: The customer name or Cyberport customer number the order was placed with.
+        product: What was ordered, in the customer's words (brand, model or type).
+        store: Optional collection store name, city or store_id.
+        order_date: Optional order date, YYYY-MM-DD.
+    """
+    return search_orders(name_on_order, product, store, order_date)
+
+
 orders_agent = Agent(
     model=BedrockModel(model_id=os.environ["MODEL_ID"], region_name=REGION),
     system_prompt="""
@@ -148,12 +301,12 @@ orders_agent = Agent(
         - If errors occur, acknowledge it politely.
         - When you receive a query, determine if the question is about an order, delivery, returns or warranty.
         - For queries not related to orders, respond with 'Sorry, I cannot answer this question'.
-        - For existing orders, use get_order_status. It needs BOTH the customer's name or customer ID and the order ID; if either is missing, ask for it. Never guess or reuse another customer's details.
+        - For existing orders, use get_order_status. It needs BOTH the customer's name or customer ID and the order ID. If the customer does not know the order ID, use find_orders with the name and what was ordered (and the store or date when the description is general). Never guess or reuse another customer's details.
         - For new orders, use the place_order tool with the customer name or ID, the store_id and the items (product, quantity, and storage variant for smartphones). The tool calculates the total; report the order ID and the total it returns.
         - For cancellation requests: you cannot cancel orders yourself, and never claim you did. With both the order ID and the customer name or ID, call check_cancellation and give its answer as returned (it already says whether the order can still be cancelled and what to do next). If either is missing, ask for it.
         - For every returns question, call return_policy and give its policy text without adding conditions. purchase_channel: 'online' when the customer ordered online, through the Tech Assistant, had it delivered or mentions an order or order ID; 'store' only when they bought it in person in a store; otherwise 'unknown'. Never apply the store rule (unopened, receipt) to an online order.
         - For other policy questions (delivery times, warranty, damaged deliveries, address changes, contacting customer service), search the knowledge base using orders_kb_retrieve.
         - If nothing relevant is found, ask clarifying questions or refer to customer service.
     """,
-    tools=[orders_kb_retrieve, get_order_status, check_cancellation, return_policy, place_order],
+    tools=[orders_kb_retrieve, get_order_status, check_cancellation, find_orders, return_policy, place_order],
 )

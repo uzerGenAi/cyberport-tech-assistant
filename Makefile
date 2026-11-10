@@ -45,9 +45,11 @@ eval:
 	python3 -u 6_deploy/eval/eval_answers.py --repeat 3
 
 # End-to-end: a real customer journey (sign-in, chat, order) then staff cancellation of that order
+# Both always run (the staff test uses the order the journey placed); fails if either fails.
 e2e:
-	python3 -u 6_deploy/eval/e2e_user_journey.py
-	python3 -u 6_deploy/eval/e2e_harness_cancel.py
+	@python3 -u 6_deploy/eval/e2e_user_journey.py; j=$$?; \
+	python3 -u 6_deploy/eval/e2e_harness_cancel.py; h=$$?; \
+	[ $$j -eq 0 ] && [ $$h -eq 0 ]
 
 # Real headless browser on the live site: sign in, chat, check streaming and status lines
 browser-test:

@@ -150,8 +150,8 @@ d_loggroup() { local g; for g in $1; do aws logs delete-log-group --log-group-na
 d_backends() {
     export AUTO_APPROVE=1
     say "Turning off deletion protection..."
-    # A full teardown keeps no data: switch protection off and skip the final snapshot first
-    local tf_vars=(-var aurora_deletion_protection=false -var dynamodb_deletion_protection=false -var aurora_skip_final_snapshot=true)
+    # A full teardown keeps no data (the database never takes a final snapshot): switch protection off first
+    local tf_vars=(-var aurora_deletion_protection=false -var dynamodb_deletion_protection=false)
     bash 6_deploy/scripts/agentcore_backends.sh apply "${tf_vars[@]}"
     say "terraform destroy (Aurora takes about 10 minutes)..."
     bash 6_deploy/scripts/agentcore_backends.sh destroy "${tf_vars[@]}"

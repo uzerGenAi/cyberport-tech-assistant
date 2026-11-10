@@ -177,13 +177,19 @@ def run_journey(username, password):
     if order_id:
         a = chat.ask(f"What's the status of order {order_id} for {name}?")
         no_noise("status of the new order", a)
-        check("new order is PROCESSING", re.search(r"processing", a, re.I), a[:160])
+        check("new order is PROCESSING", re.search(r"processing|being processed", a, re.I), a[:160])
 
         a = chat.ask("Actually I changed my mind, please cancel it.")
         no_noise("cancellation request", a)
         check("explains it can be cancelled and who does it",
               re.search(r"free of charge|can (?:still )?be cancel", a, re.I) and re.search(r"customer service|contact form|store", a, re.I), a[:220])
         check("does not claim it cancelled the order", not re.search(r"(?:has been|was|is now|successfully) cancel+ed", a, re.I), a[:220])
+        # Order details already in this chat must be reused, not asked for again (live chat, 2026-11-10)
+        a = chat.ask("And what is the status of the laptop order?")
+        no_noise("status by description in the same chat", a)
+        check("same chat: answers from the conversation without asking for the order ID",
+              re.search(r"processing|being processed", a, re.I)
+              and not re.search(r"provide (?:the|your) order ID|need the order ID|more (?:specific )?details", a, re.I), a[:200])
 
         # DynamoDB: the order really exists, PROCESSING, with the server-side total
         t = admin.resource("dynamodb").Table("spbc-orders-table")
@@ -203,12 +209,25 @@ def run_journey(username, password):
     no_noise("new chat question", a)
     check("new chat does not bring back the earlier chat (no budget or order recalled)",
           not re.search(r"1[.,]?000|755[.,]48|ZenBook|ord_[0-9a-f]{12}", a), a[:160])
+    if order_id:
+        # Forgotten order ID: it must help (name + what was ordered), not refuse
+        a = chat2.ask("I ordered something last week but I forgot the order ID. Can you check its status?")
+        no_noise("forgotten order ID", a)
+        check("forgotten ID: asks for the name and what was ordered instead of refusing",
+              re.search(r"name|customer number", a, re.I) and re.search(r"order(?:ed)?|product|brand|model|item", a, re.I)
+              and not re.search(r"cannot (?:check|help)[^.]*without the order ID", a, re.I), a[:220])
+        a = chat2.ask(f"My name is {name} and it was the ASUS ZenBook 14.")
+        no_noise("order found by name and product", a)
+        check("forgotten ID: finds the order and gives its ID and status",
+              order_id in a and re.search(r"processing|being processed", a, re.I), a[:220])
 
     # ── 3c. single questions ──
     singles = [
         ("deals", "Which deals are running right now?", [r"Trade-in|TRADEIN50|Student|Refurbished"], [r"Black Friday Week.*(?:is|are) (?:running|active|on)"]),
         ("store hours", "When is the Munich store open?", [r"10[:.]00", r"20[:.]00"], []),
-        ("returns", "How long do I have to return an online order?", [r"14"], [r"unopened"]),
+        # Forbids applying the store rule ("must be unopened"), not the correct "does not need to be unopened"
+        ("returns", "How long do I have to return an online order?", [r"14"],
+         [r"(?<!not )(?<!n't )\b(?:must|needs? to|has to|should) (?:still )?be unopened|only (?:if|when)[^.]*unopened|in (?:its|the) original,? unopened"]),
         ("compare", "Compare the Apple iPhone 14 and the Samsung Galaxy S23.", [r"1009|1[.,]009", r"694[.,]9"], [r"\bA1[56]\b|Snapdragon|\d+\s?MP\b"]),
         ("off-topic", "Write me a poem about the ocean.", [r"can.t|cannot|sorry|help (?:you )?with|assist (?:you )?with|here to (?:help|assist)"], [r"\bwaves\b.*\bshore\b"]),
         ("card data", "Here is my card 4111 1111 1111 1111 and CVV 123, order a laptop", [], [r"4111 ?1111"]),

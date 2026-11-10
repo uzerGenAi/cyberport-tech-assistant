@@ -128,7 +128,7 @@ The stores database and the promotions API come from one Terraform stack, [6_dep
 
 | Resource | What the stack creates (eu-central-1) |
 |---|---|
-| Stores database | Aurora MySQL Serverless v2 cluster `spbc-aurora-cluster`: 2 instances in different AZs, encrypted, TLS required, 7-day backups, deletion protection, a final snapshot on delete, RDS Data API on |
+| Stores database | Aurora MySQL Serverless v2 cluster `spbc-aurora-cluster`: 2 instances in different AZs, encrypted, TLS required, 7-day backups, deletion protection, no snapshot on delete, RDS Data API on |
 | Credentials | Master password generated and rotated by RDS, used only by the loader. Read-only user `stores_reader` (SELECT on `StoresDB.stores`); the agents use its secret `spbc-stores-db-reader` |
 | Network | A VPC with private subnets only (no internet gateway, no NAT) and flow logs. The database has no inbound rule: everything goes through the Data API |
 | Promotions API | HTTP API `spbcPromotionsAPI`, route `GET /promotions` with **IAM** authorization, stage `prod`, throttled and access-logged. A Lambda function returns the promotions in [promos_records.json](2_data_strategy/promos/promos_records.json) that are valid today |
@@ -545,8 +545,8 @@ Delete in this order:
    bash 6_deploy/scripts/agentcore_backends.sh apply -var aurora_deletion_protection=false -var dynamodb_deletion_protection=false
    bash 6_deploy/scripts/agentcore_backends.sh destroy
    ```
-   - `destroy` refuses while protection is on (database or orders table) or while a snapshot named `spbc-aurora-cluster-final` already exists.
-   - The final snapshot `spbc-aurora-cluster-final` is kept: delete it under RDS → Snapshots when you no longer need it.
+   - `destroy` refuses while deletion protection is on (database or orders table).
+   - No snapshot of the database is kept: the stores data is deleted (it is seed data, reloaded on the next deploy).
    - The secret `spbc-stores-db-reader` waits 7 days before deletion; to re-create the stack sooner, restore it or force-delete it (the script prints both commands).
    - The orders and sessions tables are deleted with their data (no snapshot is kept). Export any orders you need first.
 9. Optionally, the runtime log groups and the state bucket `spbc-tfstate-<account-id>` (only if no other stack uses it).

@@ -261,7 +261,8 @@ Route queries to the appropriate tool:
 - Order status, placing orders, delivery, cancellation, returns, return periods, the 14-day
   right of withdrawal, warranty → orders_agent_tool
 - Payment methods, 0% financing, how long a refund takes to arrive, invoices, gift cards
-  → payments_policy_agent_tool
+  → payments_policy_agent_tool. Send it the payment question with the price when known
+  ("Is 0% financing available for a €755.48 purchase?"), not product specs
 - Store locations, opening hours, pickup stations, repairs, recycling → stores_agent_tool
 - Promotions, trade-in, student and business discounts → promos_agent_tool
 
@@ -279,21 +280,40 @@ When a new click & collect order request is received:
 - Display items and total cost BEFORE asking for personal information: the message that asks
   for the customer's name must itself state the product, the collection store and the total
   in €, even if you mentioned the price earlier
-- Ask which store they want to collect from; use stores_agent_tool to get its store_id.
-  Use store_id 'spbc-de-001' (Cyberport Store Dresden) only if the customer has no preference
+- Ask which store they want to collect from; use stores_agent_tool to get its store_id. If the
+  customer has not chosen one, propose their preferred store from [[CTX]], or else Cyberport
+  Store Dresden (spbc-de-001), by name in that message, and let them confirm or change it
 - Ask for the customer's name or Cyberport customer number
+- Place the order only after the customer has confirmed (or given) the store and given a name.
+  A name alone does not confirm a store you did not state; never pick a store silently
 - Use orders_agent_tool to place the order
 - Order confirmation MUST include the Order ID AND the total in € returned by the order tool
+- Never apply a discount, promo code or student/trade-in reduction to an order total yourself,
+  and never ask for a discount rate. Quote and place the order at the catalog total from the
+  tools; if a promotion was discussed, add that its code (e.g. STUDENT10) is applied at checkout
+  or at collection, where staff check eligibility
 
 When a customer asks to cancel an order:
-- You cannot cancel orders, and never say or imply that you will. Always call orders_agent_tool
-  with the order ID and the customer name from the conversation (do not ask for details the
-  customer already gave) and pass on its answer: whether the order can still be cancelled and
-  that customer service staff (contact form or any store) process the cancellation
+- You cannot cancel orders, and never say or imply that you will. Always call check_cancellation
+  with the order ID and name_on_order: the customer name or number the order was placed or
+  checked with in this conversation (never the [[CTX]] userId). Do not ask for details the
+  customer already gave; ask only for what is missing. Never answer a cancellation request
+  without calling it. Give its "answer" text as returned: it says whether the order can still
+  be cancelled and that customer service staff (contact form or any store) process it
 
 When a customer asks about an existing order:
-- Ask for both the order ID and the name or customer ID used on the order before checking
-- Never share details of an order unless both match
+- Use the order ID and the name on the order from this conversation when they are there (for
+  example an order placed or checked earlier in this chat, or "the gaming laptop order"); do not
+  ask for them again and do not call find_orders: check that order ID with orders_agent_tool
+- When the customer gives no details ("Where is my order?"), ask for the order ID and the name
+  on the order, and add that if they do not have the order ID, the name and what they ordered
+  also work
+- When the order ID is unknown or forgotten, do not refuse: ask for the name on the order and
+  what was ordered (brand, model or type), then call find_orders. If it says the description is
+  too general, ask for the collection store or the order date and call it again. Give the
+  customer the order ID it returns
+- Never share details of an order unless the name and the order ID match, or find_orders
+  returned it for that name
 
 Your responses should:
 - Be direct and to the point, 1-3 sentences where possible
@@ -335,8 +355,30 @@ if gr_id and gr_ver:
     if gr_trc:
         opt["guardrail_trace"] = gr_trc
 
+@tool(name="check_cancellation",
+      description="Check whether an existing order can still be cancelled and what the customer should do "
+                  "next. Call it for every cancellation request. Needs the order ID and name_on_order.")
+def check_cancellation_tool(order_id: str, name_on_order: str) -> dict:
+    """Apply the cancellation policy to the order's real status.
+
+    Args:
+        order_id: The order ID, e.g. ord_1a2b3c4d5e6f.
+        name_on_order: The customer name or Cyberport customer number the order was placed or
+            checked with in this conversation (e.g. "Lena Fischer" or "customer_7977"). Never the
+            [[CTX]] userId: orders are stored under the name given when ordering.
+    """
+    # Separate parameter name from the orders agent's user_id: with "user_id" the model passed
+    # the [[CTX]] userId instead of the name on the order, and the lookup found nothing (live e2e)
+    return orders_agents.check_cancellation(name_on_order, order_id)
+
+
 _ORCHESTRATOR_TOOLS = [
     orders_agent_tool,
+    # Deterministic "I forgot my order ID" lookup: name + what was ordered (+ store or date)
+    orders_agents.find_orders,
+    # Direct, deterministic policy check: routed through orders_agent_tool the orchestrator
+    # sometimes answered a cancellation request itself without checking the order (live e2e)
+    check_cancellation_tool,
     menu_agent_tool,
     payments_policy_agent_tool,
     stores_agent_tool,
@@ -400,6 +442,8 @@ _TOOL_STATUS = {
     "menu_agent_tool": "Checking the product catalog…",
     "laptop_recommendation_tool": "Finding the best laptops for you…",
     "orders_agent_tool": "Looking up your order…",
+    "check_cancellation": "Checking whether your order can be cancelled…",
+    "find_orders": "Looking for your order…",
     "payments_policy_agent_tool": "Checking payment options…",
     "stores_agent_tool": "Checking store information…",
     "promos_agent_tool": "Checking current deals…",

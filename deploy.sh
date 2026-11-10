@@ -70,6 +70,15 @@ s_preflight() {
     acct=$(account_id)
     say "AWS identity : $arn"
     say "Account      : $acct   Region: $REGION"
+    if [ -n "${TF_STATE_BUCKET:-}" ]; then
+        say "State bucket : $TF_STATE_BUCKET (from TF_STATE_BUCKET)"
+        # A name carrying another account's ID is usually a leftover export from an earlier account
+        case "$TF_STATE_BUCKET" in
+            *"$acct"*) ;;
+            *[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*)
+                say "⚠️  TF_STATE_BUCKET contains a different account ID than $acct. If you switched accounts, 'unset TF_STATE_BUCKET' (and remove it from your shell profile) before the first deploy." ;;
+        esac
+    fi
     if [ "${YES:-0}" != "1" ] && [ -t 0 ]; then
         read -r -p "Deploy to THIS account? [y/N] " a
         case "$a" in y|Y|yes) ;; *) die "Aborted. Switch credentials (aws configure / AWS_PROFILE) and re-run." ;; esac

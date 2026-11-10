@@ -9,7 +9,6 @@ aurora_max_acu               = 4
 # aurora_seconds_until_auto_pause = 300 # only used with aurora_min_acu = 0
 aurora_backup_retention_days = 7
 aurora_deletion_protection   = true # set false and apply before terraform destroy
-aurora_skip_final_snapshot   = false # true: no snapshot on destroy (teardown.sh sets this)
 
 # Orders and sessions tables
 dynamodb_deletion_protection = true # set false and apply before terraform destroy
