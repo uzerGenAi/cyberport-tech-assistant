@@ -227,8 +227,8 @@ destroy() {
         die "Not destroying."
     fi
     warn "This deletes the stores database, the promotions API, the network created for them and the"
-    warn "orders and sessions tables. No data is kept: no database snapshot is taken, and point-in-time"
-    warn "recovery ends with the tables. Export any orders you need first."
+    warn "orders table. No data is kept: no database snapshot is taken, and point-in-time recovery"
+    warn "ends with the table. Export any orders you need first."
     warn "The reader secret enters a 7-day recovery window; re-creating the stack within 7 days needs:"
     warn "  aws secretsmanager delete-secret --secret-id spbc-stores-db-reader --force-delete-without-recovery"
     warn "  (or restore it with: aws secretsmanager restore-secret --secret-id spbc-stores-db-reader)"

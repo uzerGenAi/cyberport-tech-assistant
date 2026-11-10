@@ -53,7 +53,7 @@ model, and order lookups require both the customer ID and the order ID.
 | Memory | **AgentCore Memory**, short-term only | The current conversation, so follow-ups such as "is it in stock?" work. No long-term memory across chats: recalled old chats made answers drift |
 | Staff agent | **AgentCore harness** `harness_manager` + **AgentCore Gateway** (MCP) + Lambda | Config-defined agent (no code, no container). Reads orders through the gateway; cancellation is an inline tool that a person must approve |
 | Retrieval | **Bedrock Knowledge Bases** (5) on **OpenSearch Serverless** | Titan Text Embeddings V2 (1024 dimensions), HNSW/faiss index, hybrid search returning 7 results; source documents in S3 |
-| Data | **DynamoDB** (orders, sessions), **Aurora MySQL Serverless v2** (stores), **S3** (catalog JSON, KB documents) | Aurora is read through the **RDS Data API** with a SELECT-only user (no VPC path from the runtime) |
+| Data | **DynamoDB** (orders), **Aurora MySQL Serverless v2** (stores), **S3** (catalog JSON, KB documents) | Aurora is read through the **RDS Data API** with a SELECT-only user (no VPC path from the runtime) |
 | Business API | **API Gateway HTTP API** (IAM auth) + **Lambda** (Python 3.12, arm64) | Serves today's promotions; the promotions agent calls it with SigV4 |
 | Safety | **Bedrock Guardrails**, IAM least privilege, **Secrets Manager**, **SSM Parameter Store** | Content filters including prompt-attack detection, denied topics, PII masking and blocking; the guardrail ID and version live in SSM |
 | Infrastructure as code | **Terraform** `>= 1.10`, AWS provider `~> 5.100` | Two stacks (`agentcore-backends`, `codepipeline`), remote state in S3 with a lock file |
@@ -99,7 +99,6 @@ graph TB
     subgraph Data["Systems of record"]
         S3Cat[("S3\nproduct catalog JSON")]
         DDBOrders[("DynamoDB\nspbc-orders-table")]
-        DDBSessions[("DynamoDB\nspbc-sessions-table\nproof-of-concept CLI only")]
         Aurora[("Aurora MySQL Serverless v2\nspbc-aurora-cluster")]
         Secret["Secrets Manager\nread-only DB user"]
         PromosAPI["API Gateway HTTP API (IAM)\nGET /prod/promotions"]
@@ -228,7 +227,6 @@ The AWS resources and the names they are created with.
 | Compute | Container registry | Amazon ECR | `bedrock-agentcore-*` (runtime image) |
 | Data | Orders store | DynamoDB (PITR, deletion protection), `6_deploy/infra/agentcore-backends` | `spbc-orders-table` |
 | Memory | Conversation history only (short-term), so follow-ups like "is it in stock?" work; no long-term memory across chats, because recalling earlier chats made answers drift | Amazon Bedrock AgentCore Memory, `6_deploy/agents/create_memory.py` (`make memory`) | `spbc_tech_assistant_memory`; runtime env `MEMORY_ID`; customer id comes from the web app's `[[CTX]] userId`, so it separates demo users but is not an authenticated identity |
-| Data | Sessions store (proof-of-concept CLI only) | DynamoDB (PITR, deletion protection), `6_deploy/infra/agentcore-backends` | `spbc-sessions-table` |
 | Data | Store locations | Aurora MySQL Serverless v2, read through the RDS Data API (`6_deploy/infra/agentcore-backends`) | `spbc-aurora-cluster`, read-only secret `spbc-stores-db-reader` |
 | Data | Promotions API | API Gateway HTTP API (IAM auth) + Lambda (`6_deploy/infra/agentcore-backends`) | `spbcPromotionsAPI`, `GET /prod/promotions` |
 | Data | KB documents and product catalog | S3 + OpenSearch Serverless | `spbc-kb-docs-<account>` |
@@ -334,17 +332,14 @@ CodeCommit + CodePipeline V2 + CodeBuild, with no stored AWS keys. A push to `ma
 ├── DEPLOY.md                   Runbook: developer → GitHub, deployer → own AWS account
 ├── Makefile                    All targets (make help)
 ├── setup_env.sh                Discovers + exports AWS resource IDs into ~/environment/env.sh
-├── check_env.sh                Validates the environment before deploy
 ├── deploy_agentcore.sh         Lower-level steps used by deploy.sh (docs bucket, runtime role, tests)
-├── amplify.yml                 Amplify build spec
 ├── 1_business_modeling/        Business value model (EUR, Streamlit)
 ├── 2_data_strategy/            Seed data: product catalog (Kaggle), stores, orders, promotions, KB documents
 │   ├── build_from_kaggle.py     Rebuilds the catalog and orders from the Kaggle datasets
 │   ├── SOURCES.md               Data sources, licences, and which data is illustrative
 │   └── stores/load_stores_data_api.py   Stores loader through the RDS Data API
-├── 3_proof_of_concept/         Proof-of-concept agents + knowledge-base setup scripts
+├── 3_proof_of_concept/
 │   └── knowledge_bases/         Vector store bootstrap and the five KBs (idempotent, each sync verified)
-├── 4_monitor_and_evaluate/     CloudWatch observability scripts
 ├── 5_security_rai/             Bedrock Guardrail creation + SSM storage
 └── 6_deploy/
     ├── agents/                 Production agent code (Strands + AgentCore runtime)
@@ -389,7 +384,7 @@ CodeCommit + CodePipeline V2 + CodeBuild, with no stored AWS keys. A push to `ma
 - **Secrets:** `terraform.tfvars`, `cognito-config.json`, `agentcore-config.json` are gitignored — never commit them
 - **Stores DB access:** the agents use the RDS Data API with a SELECT-only user, so the AgentCore runtime needs no VPC path to Aurora; the master secret is only used by the loader
 - **Promotions API:** IAM-authorized (SigV4); unsigned requests get 403. Edit `2_data_strategy/promos/promos_records.json` and `make backends` to change promotions
-- **Backends teardown:** `bash 6_deploy/scripts/agentcore_backends.sh apply -var aurora_deletion_protection=false -var dynamodb_deletion_protection=false`, then `... destroy` (guarded). No snapshot is taken: **the stores database, orders and sessions tables are deleted with their data**
+- **Backends teardown:** `bash 6_deploy/scripts/agentcore_backends.sh apply -var aurora_deletion_protection=false -var dynamodb_deletion_protection=false`, then `... destroy` (guarded). No snapshot is taken: **the stores database and the orders table are deleted with their data**
 - **CI/CD is all AWS-native:** CodeCommit + CodePipeline + CodeBuild. GitHub Actions and the GitHub OIDC deploy role have been **retired** — there is no `.github/` workflow directory and no `6_deploy/infra/github-oidc` stack. See [6_deploy/infra/codepipeline/README.md](6_deploy/infra/codepipeline/README.md) to stand the pipeline up and push the repo to CodeCommit.
 - **Terraform:** two independent stacks (`agentcore-backends`, `codepipeline`), each with its own state key in `spbc-tfstate-<account-id>` (derived from your account because bucket names are global; `TF_STATE_BUCKET` overrides it). `make backend-setup` must create that bucket before any `terraform init`. Tested with Terraform 1.17.1 (constraints are `>= 1.10`).
 - **Known Terraform test quirk:** some Terraform 1.16.x builds panic in `terraform test` with `value has marks, so it cannot be serialized as JSON`. `ci_checks.sh` recognises only that exact panic and prints a visible skip; `fmt` and `validate` still run, and any real test failure still fails CI.

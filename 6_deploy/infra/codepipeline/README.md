@@ -82,7 +82,7 @@ come from the matching `toggle_*` Terraform variables) and passed into the Deplo
 
 | Pipeline variable | Default | Effect |
 |---|---|---|
-| `TOGGLE_PROVISION_BACKENDS` | `false` | Apply the backends stack (stores DB, promotions API, orders and sessions tables), seed, and check. |
+| `TOGGLE_PROVISION_BACKENDS` | `false` | Apply the backends stack (stores DB, promotions API, orders table, order-admin Lambda), seed, and check. |
 | `TOGGLE_SETUP_KNOWLEDGE_BASES` | `false` | Bootstrap the vector store and create/sync the knowledge bases. |
 | `TOGGLE_DEPLOY_AGENT` | `true` | Deploy Cognito, the AgentCore runtime, the frontend, then verify the agent. |
 | `TOGGLE_SMOKE` | `false` | Run the frontend smoke test. |

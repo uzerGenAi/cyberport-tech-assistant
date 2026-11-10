@@ -83,19 +83,9 @@ check_prerequisites_and_backup() {
         exit 1
     fi
     
-    # Backup existing files
-    local backup_dir="$WEB_APP_DIR/backup_$(date +%Y%m%d_%H%M%S)"
-    mkdir -p "$backup_dir"
-    
-    local files_to_backup=("cognito-config.json")
-    for file in "${files_to_backup[@]}"; do
-        if [ -f "$WEB_APP_DIR/$file" ]; then
-            cp "$WEB_APP_DIR/$file" "$backup_dir/"
-            print_status "Backed up $file to $backup_dir"
-        fi
-    done
-    
-    print_success "Prerequisites check and backup completed"
+    # No backup copy: cognito-config.json is regenerated from the live user pool on every run
+    # (the old per-run backup_<date>/ folders only piled up in the web-app directory)
+    print_success "Prerequisites check completed"
 }
 
 # Function to create Cognito User Pool

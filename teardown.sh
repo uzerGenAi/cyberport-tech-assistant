@@ -13,7 +13,7 @@
 # SPBC-*). Anything else in the account, and account-wide settings such as the CloudWatch
 # Transaction Search / X-Ray configuration and the shared aws/spans log group, is left alone.
 # Each item is skipped when it is already gone, so after a partial failure just re-run it.
-# DATA IS NOT KEPT: the stores database, the orders and sessions tables, the knowledge-base
+# DATA IS NOT KEPT: the stores database, the orders table, the knowledge-base
 # vectors and the AgentCore Memory are deleted with no snapshot.
 set -eo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -206,7 +206,7 @@ run_all() {
     item "IAM role (knowledge bases)" "aws iam get-role --role-name AmazonBedrockExecutionRoleForKnowledgeBase_${REGION} --query Role.RoleName --output text" d_role
     item "Documents bucket" "aws s3api head-bucket --bucket $DOCS_BUCKET >/dev/null 2>&1 && echo $DOCS_BUCKET" d_docs_bucket
 
-    hdr "Data backends (Terraform): Aurora, orders and sessions tables, promotions API"
+    hdr "Data backends (Terraform): Aurora, orders table, promotions API, order-admin Lambda"
     item "Terraform backends stack" "echo \$(aws rds describe-db-clusters --db-cluster-identifier spbc-aurora-cluster --region $REGION --query 'DBClusters[0].Status' --output text 2>/dev/null)\$(aws dynamodb describe-table --table-name spbc-orders-table --region $REGION --query 'Table.TableStatus' --output text 2>/dev/null)" d_backends
     item "Secret spbc-stores-db-reader" "aws secretsmanager describe-secret --secret-id spbc-stores-db-reader --region $REGION --query 'ARN' --output text" d_secret
 

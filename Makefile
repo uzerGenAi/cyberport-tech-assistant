@@ -14,7 +14,7 @@ help:
 	@echo "  make backend-setup   Create the S3 bucket that holds the Terraform state  (run FIRST)"
 	@echo "  make ci              Run local validation checks (Python compile + Terraform validate/test)"
 	@echo ""
-	@echo "  Data backends (stores database, promotions API, orders and sessions tables):"
+	@echo "  Data backends (stores database, promotions API, orders table):"
 	@echo "  make backends-plan   Show what Terraform would change"
 	@echo "  make backends        Plan, confirm, and apply exactly that plan"
 	@echo "  make seed-stores     Create the stores table, load the data, create the read-only user"

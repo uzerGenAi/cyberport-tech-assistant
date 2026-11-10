@@ -10,7 +10,7 @@ aurora_max_acu               = 4
 aurora_backup_retention_days = 7
 aurora_deletion_protection   = true # set false and apply before terraform destroy
 
-# Orders and sessions tables
+# Orders table
 dynamodb_deletion_protection = true # set false and apply before terraform destroy
 
 # Reuse an existing VPC instead of the isolated one this stack creates (optional)

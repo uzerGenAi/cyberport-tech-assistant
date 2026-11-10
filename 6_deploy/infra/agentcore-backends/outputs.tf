@@ -35,10 +35,6 @@ output "orders_table_name" {
   value = aws_dynamodb_table.orders.name
 }
 
-output "sessions_table_name" {
-  value = aws_dynamodb_table.sessions.name
-}
-
 output "agentcore_runtime_env" {
   description = "Environment variables to add to the AgentCore runtime."
   value = {

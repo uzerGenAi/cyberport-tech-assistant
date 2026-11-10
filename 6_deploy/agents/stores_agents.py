@@ -31,8 +31,7 @@ USE_DATA_API = bool(DB_CLUSTER_ARN and DB_SECRET_ARN)
 DB_CLUSTER_PREFIX = "spbc-aurora-cluster"
 DB_SECRET_ID = "spbc-aurora-db-credentials"
 
-# Must match the table created by 2_data_strategy/stores/ (load_stores_data_api.py or
-# stores_load_helper_script.py).
+# Must match the table created by 2_data_strategy/stores/load_stores_data_api.py.
 _STORE_COLUMNS = (
     "store_id, name, address, city, state, zip_code, "
     "latitude, longitude, has_drive_thru, hours_start, hours_end"

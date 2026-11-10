@@ -121,14 +121,6 @@ else
     echo "❌ Orders table not found (expected: spbc-orders-table; created by make backends)"
 fi
 
-SESSIONS_TABLE=$(aws dynamodb list-tables --query 'TableNames[?starts_with(@, `spbc-sessions-table`)]' --output text 2>/dev/null | head -1 || true)
-if [ -n "$SESSIONS_TABLE" ]; then
-    echo "export SESSIONS_TABLE=$SESSIONS_TABLE" >> $ENV_FILE
-    echo "✅ Found Sessions Table: $SESSIONS_TABLE"
-else
-    echo "❌ Sessions table not found (expected: spbc-sessions-table; created by make backends)"
-fi
-
 # Discover OpenSearch collection
 echo "Looking for OpenSearch collection..."
 OPENSEARCH_COLLECTION=$(aws opensearchserverless list-collections --query 'collectionSummaries[?starts_with(name, `spbc-`) || contains(name, `electronics`)].name' --output text 2>/dev/null | head -1 || true)

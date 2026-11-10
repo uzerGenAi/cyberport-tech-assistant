@@ -92,7 +92,7 @@ enable these three:
 ### B4. Terraform: the data backends
 
 Terraform creates the stores database (Aurora MySQL Serverless v2 with its own VPC), the orders
-and sessions tables (DynamoDB), the promotions API (API Gateway + Lambda) and the order-admin
+table (DynamoDB), the promotions API (API Gateway + Lambda) and the order-admin
 Lambda for harness-manager. Its state is stored in an S3 bucket in your account.
 
 **1. Create the state bucket** (named `spbc-tfstate-<your-account-id>`):

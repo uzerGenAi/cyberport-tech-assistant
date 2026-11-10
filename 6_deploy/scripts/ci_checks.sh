@@ -29,7 +29,7 @@ echo "Running CI validations"
 PYCACHE_DIR="$(mktemp -d)"
 trap 'rm -rf "$PYCACHE_DIR"' EXIT
 PYTHONPYCACHEPREFIX="$PYCACHE_DIR" python3 -m compileall -q \
-    3_proof_of_concept 4_monitor_and_evaluate 2_data_strategy 6_deploy
+    1_business_modeling 2_data_strategy 6_deploy
 
 echo "Validating and testing Terraform files (AgentCore backends; mocked providers)"
 fmt_check_tracked 6_deploy/infra/agentcore-backends

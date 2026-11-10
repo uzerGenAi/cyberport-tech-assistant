@@ -145,7 +145,7 @@ variable "promotions_api_burst_limit" {
 # ── DynamoDB tables ───────────────────────────────────────────────────────────
 
 variable "dynamodb_deletion_protection" {
-  description = "Deletion protection on the orders and sessions tables. Keep true for anything real; set false (apply first, then destroy) to tear the stack down."
+  description = "Deletion protection on the orders table. Keep true for anything real; set false (apply first, then destroy) to tear the stack down."
   type        = bool
   default     = true
 }

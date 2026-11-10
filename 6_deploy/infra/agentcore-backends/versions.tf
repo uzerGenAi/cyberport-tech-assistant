@@ -1,5 +1,5 @@
 # Backends for the AgentCore Tech Assistant runtime: the stores database (Aurora MySQL,
-# queried through the RDS Data API), the promotions API and the orders and sessions tables.
+# queried through the RDS Data API), the promotions API, the orders table and the order-admin Lambda.
 # Has its own state, independent of the pipeline stack in ../codepipeline.
 
 terraform {

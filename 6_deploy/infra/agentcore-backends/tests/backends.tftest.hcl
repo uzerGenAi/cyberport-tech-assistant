@@ -130,13 +130,13 @@ run "defaults_create_isolated_vpc_and_data_api_cluster" {
   }
 
   assert {
-    condition     = aws_dynamodb_table.orders.name == "spbc-orders-table" && aws_dynamodb_table.sessions.name == "spbc-sessions-table"
-    error_message = "The orders and sessions tables must always be created, with the names the agents use."
+    condition     = aws_dynamodb_table.orders.name == "spbc-orders-table"
+    error_message = "The orders table must always be created, with the name the agents use."
   }
 
   assert {
-    condition     = aws_dynamodb_table.orders.deletion_protection_enabled && aws_dynamodb_table.sessions.deletion_protection_enabled
-    error_message = "Both tables must have deletion protection by default."
+    condition     = aws_dynamodb_table.orders.deletion_protection_enabled
+    error_message = "The orders table must have deletion protection by default."
   }
 
   assert {
@@ -192,10 +192,6 @@ run "tables_match_what_the_agents_use" {
     error_message = "Orders table key schema must match what the agents query."
   }
 
-  assert {
-    condition     = aws_dynamodb_table.sessions.hash_key == "session_id"
-    error_message = "Sessions table key must be session_id."
-  }
 
   assert {
     condition     = aws_dynamodb_table.orders.point_in_time_recovery[0].enabled && aws_dynamodb_table.orders.server_side_encryption[0].enabled
@@ -211,8 +207,8 @@ run "tables_can_be_unprotected_for_teardown" {
   }
 
   assert {
-    condition     = !aws_dynamodb_table.orders.deletion_protection_enabled && !aws_dynamodb_table.sessions.deletion_protection_enabled
-    error_message = "dynamodb_deletion_protection = false must lift protection on both tables."
+    condition     = !aws_dynamodb_table.orders.deletion_protection_enabled
+    error_message = "dynamodb_deletion_protection = false must lift protection on the orders table."
   }
 }
 

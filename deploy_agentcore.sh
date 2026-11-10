@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ###############################################################################
-# deploy_agentcore.sh — AWS CLI equivalent of AgentCore_Console_Deployment_Walkthrough.md
+# deploy_agentcore.sh — lower-level AgentCore steps that ./deploy.sh calls (docs bucket, runtime role, tests)
 #
 # Project : SPBC Tech Assistant (Amazon Bedrock AgentCore Runtime)
 # Region  : eu-central-1
