@@ -6,8 +6,9 @@ Two tools, dispatched by the Gateway tool name ("<target>___<tool>"):
 
 Safety lives here, not in the prompt:
   * an order is only found when user_id AND order_id both match (no scans, no guessing)
-  * only PROCESSING orders can be cancelled (orders policy: free cancellation until the order
-    is SHIPPED or READY_FOR_PICKUP; see 2_data_strategy/orders/orders_policies_kb_faqs.txt)
+  * only PROCESSING orders (just placed, not yet prepared further) can be cancelled; every other
+    order has to be escalated to the team, and the tool results say so
+    (see 2_data_strategy/orders/orders_policies_kb_faqs.txt)
   * the update is conditional on the status read, so a concurrent change is never overwritten
   * orders are never deleted: the status changes and an audit trail is written on the item
 """
@@ -26,6 +27,9 @@ logger.setLevel(logging.INFO)
 
 TABLE = boto3.resource("dynamodb").Table(os.environ["ORDERS_TABLE"])
 CANCELLABLE = {"PROCESSING"}
+# An already cancelled order needs nothing; any other status has moved on and goes to the team
+ESCALATE_MESSAGE = ("It has already moved past processing, so it cannot be cancelled here. "
+                    "Escalate it to the team (fulfilment and customer service).")
 MAX_KEY_LEN = 64
 MAX_REASON_LEN = 200
 
@@ -79,6 +83,12 @@ def get_order(args):
         return {"found": False, "message": "No order matches that user_id and order_id."}
     order = _summary(item)
     order["cancellable"] = order["status"] in CANCELLABLE
+    if order["cancellable"]:
+        order["next_step"] = "cancel_order"
+    elif order["status"] == "CANCELLED":
+        order["next_step"] = "none: the order is already cancelled"
+    else:
+        order["next_step"] = "escalate_to_team"
     return {"found": True, "order": order}
 
 
@@ -92,8 +102,10 @@ def cancel_order(args, request_id):
         return {"cancelled": False, "message": "No order matches that user_id and order_id."}
     status = item.get("status")
     if status not in CANCELLABLE:
-        return {"cancelled": False, "status": status,
-                "message": f"Order is {status}; only {sorted(CANCELLABLE)} orders can be cancelled."}
+        message = (f"Order is {status}; it is already cancelled." if status == "CANCELLED"
+                   else f"Order is {status}; only {sorted(CANCELLABLE)} orders can be cancelled. {ESCALATE_MESSAGE}")
+        return {"cancelled": False, "status": status, "escalate_to_team": status != "CANCELLED",
+                "message": message}
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     try:
         TABLE.update_item(

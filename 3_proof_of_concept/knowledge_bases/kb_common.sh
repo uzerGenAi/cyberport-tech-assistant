@@ -19,7 +19,7 @@ INDEX_PROPAGATION_SECONDS="${INDEX_PROPAGATION_SECONDS:-60}"
 INGESTION_TIMEOUT_SECONDS="${INGESTION_TIMEOUT_SECONDS:-900}"
 
 # shellcheck disable=SC2034  # read by setup_knowledge_bases.sh, which sources this file
-KB_DOMAINS_ALL="menu orders payments stores promos"
+KB_DOMAINS_ALL="menu orders payments stores"
 
 # All progress output goes to stderr: ensure_kb and ensure_data_source return their IDs on
 # stdout, so anything logged there would be captured as part of the ID.

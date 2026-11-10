@@ -58,7 +58,8 @@ ENV_FILE = pathlib.Path.home() / "environment" / "env.sh"
 TOOL_SCHEMA = [
     {
         "name": "get_order",
-        "description": "Look up one order. Requires BOTH the customer's user_id and the order_id.",
+        "description": ("Look up one order. Requires BOTH the customer's user_id and the order_id. The result "
+                        "includes its status and next_step (cancel_order, escalate_to_team or none)."),
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -74,9 +75,10 @@ CANCEL_TOOL = {
     "type": "inline_function",
     "name": "cancel_order",
     "config": {"inlineFunction": {
-        "description": ("Request cancellation of one order. A staff member must approve it before anything "
-                        "changes; the result says whether it was approved and cancelled. Requires user_id, "
-                        "order_id and a short reason."),
+        "description": ("Request cancellation of one order. Only for orders in status PROCESSING: any other "
+                        "order must be escalated to the team instead. A staff member must approve it before "
+                        "anything changes; the result says whether it was approved and cancelled. Requires "
+                        "user_id, order_id and a short reason."),
         "inputSchema": {
             "type": "object",
             "properties": {

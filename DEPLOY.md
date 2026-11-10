@@ -87,7 +87,8 @@ If it reports missing model access: open the AWS console in **Europe (Frankfurt)
 ## 5. Terraform: the data backends
 
 Terraform creates the stores database (Aurora MySQL Serverless v2 in its own private VPC), the
-orders table (DynamoDB), the promotions API (API Gateway + Lambda) and the order-admin Lambda.
+orders table (DynamoDB), the promotions API (API Gateway + Lambda), the S3 bucket that holds the
+promotions file (`spbc-promotions-<your-account-id>`) and the order-admin Lambda.
 Its state is kept in an S3 bucket in your account, named `spbc-tfstate-<your-account-id>`.
 
 Create the state bucket:
@@ -110,8 +111,19 @@ Plan and apply:
 make backends
 ```
 
-It prints the plan (about 30 resources), then asks you to type `apply`. The apply takes about
+It prints the plan (a few dozen resources), then asks you to type `apply`. The apply takes about
 10 minutes, most of it the database.
+
+Terraform also uploads `2_data_strategy/promos/promos_records.json` to the promotions bucket once,
+as the starting promotions. From then on, change promotions without Terraform or a redeploy:
+upload a new file (a JSON list; `[]` means no promotions) and it is live within about a minute.
+
+```bash
+aws s3 cp promos_records.json "s3://spbc-promotions-$(aws sts get-caller-identity --query Account --output text)/promotions/promos_records.json"
+```
+
+Versioning is on, so a bad upload can be rolled back. If the file is missing or not valid JSON,
+the agent says it cannot check promotions right now; it never reports "no promotions" for an error.
 
 ---
 
@@ -130,7 +142,7 @@ Type `y` when it asks to confirm the account. It then runs these steps, each log
 | `state` / `ci` | State bucket (exists after step 5); offline validation | 1 min |
 | `backends` | Terraform (reports no changes after step 5) | 1 min |
 | `seed` / `orders` | Loads the 9 stores and the sample orders | 1 min |
-| `docs` / `kbs` | Documents bucket, vector store, the 5 knowledge bases | 10–15 min |
+| `docs` / `kbs` | Documents bucket, vector store, the 4 knowledge bases | 10–15 min |
 | `role` / `guardrail` | Runtime role, Bedrock guardrail | 1 min |
 | `app` | Sign-in (Cognito), AgentCore Memory and runtime, the website (Amplify) | 5 min |
 | `user` | The default login | seconds |
@@ -162,7 +174,7 @@ make demo-user
 The password is generated on the first deploy and kept in AWS Secrets Manager (`spbc-demo-user`),
 never in the code.
 
-Staff console (harness-manager: looks orders up and cancels only after you approve):
+Staff console (harness-manager: looks orders up and cancels only after you approve. It cancels only orders that are still PROCESSING; for any order that has moved further it gives a handoff note for the team instead):
 
 ```bash
 python3 6_deploy/harness/invoke_harness.py "Cancel order ord_7977_021 for customer_7977"

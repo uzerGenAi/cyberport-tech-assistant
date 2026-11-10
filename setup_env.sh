@@ -107,7 +107,7 @@ if [ -n "$_promos_endpoint" ] && [ "$_promos_endpoint" != "None" ]; then
     echo "✅ Found promotions API: ${_promos_endpoint}/prod/promotions"
 else
     unset PROMOS_API_URL
-    echo "⚠️  Promotions API spbcPromotionsAPI not found: promotions come from the promos knowledge base only"
+    echo "⚠️  Promotions API spbcPromotionsAPI not found: the promos agent cannot list promotions"
 fi
 unset _promos_endpoint
 
@@ -163,7 +163,7 @@ fi
 # Discover knowledge base IDs by name. This file is truncated on every run, so IDs appended
 # by the KB setup scripts would otherwise be lost when setup_env.sh is re-sourced.
 echo "Looking for knowledge bases..."
-for domain in menu orders payments stores promos; do
+for domain in menu orders payments stores; do
     var_name="$(echo "$domain" | tr '[:lower:]' '[:upper:]')_KNOWLEDGE_BASE_ID"
     kb_id=$(aws bedrock-agent list-knowledge-bases --region "$REGION" \
         --query "knowledgeBaseSummaries[?name=='spbc-${domain}-knowledge-base'].knowledgeBaseId | [0]" \
@@ -171,8 +171,6 @@ for domain in menu orders payments stores promos; do
     if [ -n "$kb_id" ] && [ "$kb_id" != "None" ]; then
         echo "export ${var_name}=${kb_id}" >> $ENV_FILE
         echo "✅ Found ${var_name}: ${kb_id}"
-    elif [ "$domain" = "promos" ]; then
-        echo "⚠️  spbc-promos-knowledge-base not found (optional: promos then relies on the promotions API only)"
     else
         echo "❌ spbc-${domain}-knowledge-base not found (required by the agent runtime)"
     fi

@@ -49,7 +49,7 @@ German prices.
 |---|---|
 | `menu/menu_records.json` → `stock_by_store` | Synthetic per-store stock, generated deterministically from each product ID |
 | `stores/stores_records.json` | 9 stores in cities where Cyberport lists stores (Burda reported 9 stores in Germany and Austria in February 2025). The Berlin, Hamburg, Leipzig, Dortmund and Bochum addresses match a public store listing (weekli.de, November 2026); the Dresden, Munich, Cologne and Vienna addresses are illustrative. Opening hours, coordinates and pickup stations are illustrative too. Check cyberport.de for the real store list. `has_drive_thru` means "has a 24/7 pickup station". |
-| `promos/promos_records.json` | Demo promotions (trade-in bonus, student discount, financing and others) |
+| `promos/promos_records.json` | Demo promotions (trade-in bonus, student discount, financing and others). Uploaded to the promotions S3 bucket once by Terraform as the starting file; later changes are made by uploading a new file to that bucket |
 | `*/..._kb_faqs.txt` | Knowledge-base documents. The policies are modelled on typical German electronics retail. Statements about EU and German law (14-day withdrawal right, 2-year legal guarantee, USB-C rule, EU energy label, ElektroG take-back) describe the law, not a company policy. |
 
 ## Demo lookups

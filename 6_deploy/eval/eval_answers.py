@@ -84,7 +84,7 @@ CASES = [
      [[r"299"], [r"0\s?%"]], []),
     ("refund_time", "eval", ["How long does a PayPal refund take?"],
      [[r"5 (?:to|-|–) ?10"]], []),
-    # ── promotions (promotions API, date-aware, + promos KB) ──
+    # ── promotions (promotions API, date-aware; no promos KB) ──
     ("promo_student", "eval", ["Is there a student discount on laptops?"],
      [[r"STUDENT10"], [r"10\s?%"], [r"150"]], []),
     ("promo_active_now", "eval", ["Is there a discount on refurbished laptops right now?"],

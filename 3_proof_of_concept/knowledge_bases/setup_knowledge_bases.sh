@@ -2,7 +2,7 @@
 # setup_knowledge_bases.sh — create, sync and verify every SPBC knowledge base.
 #
 # Usage:
-#   bash 3_proof_of_concept/knowledge_bases/setup_knowledge_bases.sh            # all five domains
+#   bash 3_proof_of_concept/knowledge_bases/setup_knowledge_bases.sh            # all four domains
 #   bash 3_proof_of_concept/knowledge_bases/setup_knowledge_bases.sh orders     # one domain
 #
 # Prerequisites:
@@ -11,7 +11,7 @@
 #
 # Idempotent: existing indexes, knowledge bases and data sources are reused, and each sync
 # is verified (a job that scans zero documents or fails any document stops the run). This
-# is the unattended entry point; the four single-domain *_knowledge_base_setup.sh scripts
+# is the unattended entry point; the single-domain *_knowledge_base_setup.sh scripts
 # remain for following the lab by hand.
 #
 # Requires: aws CLI, jq, awscurl  (pip install awscurl — the venv setup in DEPLOY.md installs it)

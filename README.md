@@ -22,7 +22,7 @@ reading its own system of record:
 | Orders | Click & collect orders, order status (needs customer ID **and** order ID), delivery, returns, warranty | DynamoDB `spbc-orders-table` + orders KB |
 | Payments | Payment methods, 0% financing, refunds, invoices, gift cards | Payments KB |
 | Stores | Locations, opening hours, pickup stations, repair desk, recycling | Aurora `StoresDB.stores` (read-only) + stores KB |
-| Promotions | Trade-in bonus, student and business discounts, Black Friday | Promotions API (IAM) + promotions KB |
+| Promotions | Trade-in bonus, student and business discounts, Black Friday | Promotions API (IAM); the Lambda behind it reads the promotions file in S3 (no knowledge base) |
 
 Example questions:
 
@@ -108,7 +108,7 @@ graph TB
     subgraph AI["Amazon Bedrock (eu-central-1)"]
         Model["Nova Pro\nEU inference profile"]
         Guardrail{{"Guardrail"}}
-        subgraph KBs["5 Knowledge Bases: policy and buying-guide text"]
+        subgraph KBs["4 Knowledge Bases: policy and buying-guide text"]
             KBDocs[("S3\nspbc-kb-docs")]
             KBVec[("OpenSearch Serverless\nvectors, Titan Embeddings V2")]
         end
@@ -204,10 +204,10 @@ sequenceDiagram
 - **Facts come from data, language comes from the model.** Prices, stock, orders, hours and promotions are read from their systems of record by tools. Knowledge bases hold only policy and buying-guide text, so the model cannot invent a price.
 - **Totals are computed in code.** `place_order` recomputes the total from the catalog and ignores any number the model supplies. Order lookups need both the customer and the order ID.
 - **Aurora through the RDS Data API.** The runtime reaches the stores database over HTTPS with IAM, so it needs no VPC attachment, connection pool or database password, and it uses a SELECT-only user.
-- **The promotions API is a real business API.** It sits behind IAM authorization and a Lambda function, which shows how an agent calls an existing service rather than a database.
+- **The promotions API is a real business API.** It sits behind IAM authorization and a Lambda function that reads the promotions file from S3, which shows how an agent calls an existing service rather than a database.
 - **Terraform for stable infrastructure, scripts for the rest.** The database, API, tables and pipeline are Terraform; knowledge bases, the guardrail and the runtime are created by idempotent scripts that can be re-run safely.
 - **Policy decisions in code.** Whether an order can be cancelled (`check_cancellation`: only PROCESSING orders) and which return rule applies (`return_policy`: online or in-store purchase) are decided by tools, not by prompt wording.
-- **A person approves every cancellation.** harness-manager can read orders through the gateway, but `cancel_order` is an inline tool: the harness hands the call back to the staff console, which cancels only after a "y". The approver's AWS identity is written to the order.
+- **A person approves every cancellation.** harness-manager can read orders through the gateway, but `cancel_order` is an inline tool: the harness hands the call back to the staff console, which cancels only after a "y". The approver's AWS identity is written to the order. Only orders that are still PROCESSING can be cancelled; once an order has moved further (ready for pickup, shipped, delivered, collected) harness-manager does not cancel it and hands it over to the team with a short handoff note, and the order-admin Lambda refuses the cancellation as well.
 - **Human approval before production.** The pipeline pauses at a manual approval before it deploys.
 
 ---
@@ -228,13 +228,13 @@ The AWS resources and the names they are created with.
 | Data | Orders store | DynamoDB (PITR, deletion protection), `6_deploy/infra/agentcore-backends` | `spbc-orders-table` |
 | Memory | Conversation history only (short-term), so follow-ups like "is it in stock?" work; no long-term memory across chats, because recalling earlier chats made answers drift | Amazon Bedrock AgentCore Memory, `6_deploy/agents/create_memory.py` (`make memory`) | `spbc_tech_assistant_memory`; runtime env `MEMORY_ID`; customer id comes from the web app's `[[CTX]] userId`, so it separates demo users but is not an authenticated identity |
 | Data | Store locations | Aurora MySQL Serverless v2, read through the RDS Data API (`6_deploy/infra/agentcore-backends`) | `spbc-aurora-cluster`, read-only secret `spbc-stores-db-reader` |
-| Data | Promotions API | API Gateway HTTP API (IAM auth) + Lambda (`6_deploy/infra/agentcore-backends`) | `spbcPromotionsAPI`, `GET /prod/promotions` |
+| Data | Promotions API | API Gateway HTTP API (IAM auth) + Lambda (`6_deploy/infra/agentcore-backends`) | `spbcPromotionsAPI`, `GET /prod/promotions`; promotions file in S3 bucket `spbc-promotions-<account>` |
 | Data | KB documents and product catalog | S3 + OpenSearch Serverless | `spbc-kb-docs-<account>` |
 | AI | Foundation model | Amazon Bedrock | Nova Pro via EU inference profile `eu.amazon.nova-pro-v1:0` (no in-Region on-demand in eu-central-1) |
 | Security | Content guardrail | Bedrock Guardrail | `/SPBC/guardrail/*` (SSM) |
 | Security | Database credentials | Secrets Manager | `spbc-stores-db-reader` (read-only user used by the agents); the RDS-managed master secret is used only by the loader |
 | Observability | Runtime metrics (invocations, latency, errors, sessions) and logs | CloudWatch generative AI observability + Logs | namespace `AWS/Bedrock-AgentCore`, log groups `/aws/bedrock-agentcore/runtimes/<runtime-id>-DEFAULT` |
-| Staff agent | harness-manager (order lookup + approved cancellation) | AgentCore harness, AgentCore Gateway (MCP), Lambda, AgentCore Memory (short-term) | `harness_manager`, `spbc-order-admin-gateway`, `spbc-order-admin`, `spbc_harness_manager_memory` |
+| Staff agent | harness-manager (order lookup + approved cancellation of PROCESSING orders; other orders are handed to the team) | AgentCore harness, AgentCore Gateway (MCP), Lambda, AgentCore Memory (short-term) | `harness_manager`, `spbc-order-admin-gateway`, `spbc-order-admin`, `spbc_harness_manager_memory` |
 | Auth | Default web-app login | Cognito user + Secrets Manager | `demo`, password in `spbc-demo-user` (`make demo-user`) |
 | IaC state | Remote state for both Terraform stacks (`agentcore-backends`, `codepipeline`), locked with an S3 lock file | S3 bucket | `spbc-tfstate-<account-id>` |
 
@@ -268,7 +268,7 @@ flowchart LR
 | `preflight` | Tools and versions, AWS credentials, access to Nova Pro, Nova 2 Lite and Titan Embeddings V2 |
 | `state` / `ci` | Terraform state bucket; offline validation (`make ci`) |
 | `backends` / `seed` / `orders` | Terraform apply, the 9 stores in Aurora, the sample orders |
-| `docs` / `kbs` | Documents bucket, OpenSearch Serverless vector store and the 5 knowledge bases (about 15 min) |
+| `docs` / `kbs` | Documents bucket, OpenSearch Serverless vector store and the 4 knowledge bases (about 15 min) |
 | `role` / `guardrail` | Runtime execution role, Bedrock guardrail |
 | `app` | Cognito, AgentCore Memory, the runtime container (built in CodeBuild), the website on Amplify |
 | `user` | Default login `demo`; the generated password is kept in Secrets Manager (`spbc-demo-user`) |
@@ -310,7 +310,8 @@ CodeCommit + CodePipeline V2 + CodeBuild, with no stored AWS keys. A push to `ma
 | `FORCE=1 ./deploy.sh` | Ship changed agent code (`FORCE=1 ./deploy.sh only app` for the runtime alone) |
 | `make amplify` | Ship website changes |
 | `./deploy.sh only harness` | Re-apply the harness-manager configuration or its system prompt |
-| `make backends-plan` / `make backends` | Review and apply Terraform changes (for example after editing `promos_records.json`) |
+| `make backends-plan` / `make backends` | Review and apply Terraform changes to the data backends |
+| `aws s3 cp promos_records.json s3://spbc-promotions-<account>/promotions/promos_records.json` | Publish new promotions (a JSON list, `[]` for none); live within about a minute, no Terraform or redeploy |
 | `bash 3_proof_of_concept/knowledge_bases/setup_knowledge_bases.sh <domain>` | Re-sync one knowledge base after editing its source document |
 | `make demo-user` | Show (and repair) the default login |
 | `make eval` | 42 questions with known answers, each asked 3 times |
@@ -339,7 +340,7 @@ CodeCommit + CodePipeline V2 + CodeBuild, with no stored AWS keys. A push to `ma
 │   ├── SOURCES.md               Data sources, licences, and which data is illustrative
 │   └── stores/load_stores_data_api.py   Stores loader through the RDS Data API
 ├── 3_proof_of_concept/
-│   └── knowledge_bases/         Vector store bootstrap and the five KBs (idempotent, each sync verified)
+│   └── knowledge_bases/         Vector store bootstrap and the four KBs (idempotent, each sync verified)
 ├── 5_security_rai/             Bedrock Guardrail creation + SSM storage
 └── 6_deploy/
     ├── agents/                 Production agent code (Strands + AgentCore runtime)
@@ -383,7 +384,7 @@ CodeCommit + CodePipeline V2 + CodeBuild, with no stored AWS keys. A push to `ma
 - **Currency:** all prices in Euros (€)
 - **Secrets:** `terraform.tfvars`, `cognito-config.json`, `agentcore-config.json` are gitignored — never commit them
 - **Stores DB access:** the agents use the RDS Data API with a SELECT-only user, so the AgentCore runtime needs no VPC path to Aurora; the master secret is only used by the loader
-- **Promotions API:** IAM-authorized (SigV4); unsigned requests get 403. Edit `2_data_strategy/promos/promos_records.json` and `make backends` to change promotions
+- **Promotions API:** IAM-authorized (SigV4); unsigned requests get 403. The Lambda reads the promotions from `s3://spbc-promotions-<account>/promotions/promos_records.json`; upload a new file to change them (Terraform only seeds it once from `2_data_strategy/promos/promos_records.json` and never overwrites it). An unreadable file returns 503, which the agent reports as "cannot check right now", not as "no promotions"
 - **Backends teardown:** `bash 6_deploy/scripts/agentcore_backends.sh apply -var aurora_deletion_protection=false -var dynamodb_deletion_protection=false`, then `... destroy` (guarded). No snapshot is taken: **the stores database and the orders table are deleted with their data**
 - **CI/CD is all AWS-native:** CodeCommit + CodePipeline + CodeBuild. GitHub Actions and the GitHub OIDC deploy role have been **retired** — there is no `.github/` workflow directory and no `6_deploy/infra/github-oidc` stack. See [6_deploy/infra/codepipeline/README.md](6_deploy/infra/codepipeline/README.md) to stand the pipeline up and push the repo to CodeCommit.
 - **Terraform:** two independent stacks (`agentcore-backends`, `codepipeline`), each with its own state key in `spbc-tfstate-<account-id>` (derived from your account because bucket names are global; `TF_STATE_BUCKET` overrides it). `make backend-setup` must create that bucket before any `terraform init`. Tested with Terraform 1.17.1 (constraints are `>= 1.10`).

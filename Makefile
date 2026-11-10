@@ -21,7 +21,7 @@ help:
 	@echo "  make backends-check  Live smoke test: reader query, unsigned 403, signed GET /promotions"
 	@echo "  make backends-env    Print export lines for the runtime env vars"
 	@echo ""
-	@echo "  make knowledge-bases Bootstrap the vector store, then create/sync all five KBs"
+	@echo "  make knowledge-bases Bootstrap the vector store, then create/sync all four KBs"
 	@echo "  make memory          Create the AgentCore Memory (then source setup_env.sh and make post-deploy-force)"
 	@echo "  make post-deploy     Configure Cognito + AgentCore, then deploy the Amplify frontend"
 	@echo "  make post-deploy-force  post-deploy that always redeploys the agent code"

@@ -42,7 +42,7 @@ refresh_env() {
 }
 have_all_kbs() {
     local d
-    for d in MENU ORDERS PAYMENTS STORES PROMOS; do
+    for d in MENU ORDERS PAYMENTS STORES; do
         [ -n "$(eval "echo \${${d}_KNOWLEDGE_BASE_ID:-}")" ] || return 1
     done
 }
@@ -133,11 +133,11 @@ s_kbs() {
     refresh_env
     if have_all_kbs; then
         # Already created: re-sync them, so edited documents (uploaded by the docs step) are re-indexed
-        ok "All five knowledge bases exist: re-syncing their documents"
+        ok "All four knowledge bases exist: re-syncing their documents"
         ./deploy_agentcore.sh step5-knowledge-bases
         return 0
     fi
-    warn "Creating the vector store and 5 knowledge bases takes 15-20 minutes. OpenSearch Serverless bills"
+    warn "Creating the vector store and 4 knowledge bases takes 15-20 minutes. OpenSearch Serverless bills"
     warn "about \$350/month while it exists: delete it when you are done (see DEPLOY.md, Tear down)."
     make knowledge-bases
     refresh_env
@@ -200,6 +200,7 @@ cmd_status() {
     chk "Aurora cluster"      "aws rds describe-db-clusters --db-cluster-identifier spbc-aurora-cluster --region $REGION --query 'DBClusters[0].Status' --output text"
     chk "orders table"        "aws dynamodb describe-table --table-name spbc-orders-table --region $REGION --query 'Table.TableStatus' --output text"
     chk "promotions API"      "aws apigatewayv2 get-apis --region $REGION --query \"Items[?Name=='spbcPromotionsAPI'].ApiEndpoint|[0]\" --output text"
+    chk "promotions bucket"   "aws s3api head-bucket --bucket spbc-promotions-$acct >/dev/null 2>&1 && echo spbc-promotions-$acct"
     chk "docs bucket"         "aws s3api head-bucket --bucket spbc-kb-docs-$acct >/dev/null 2>&1 && echo spbc-kb-docs-$acct"
     chk "knowledge bases"     "aws bedrock-agent list-knowledge-bases --region $REGION --query \"length(knowledgeBaseSummaries[?starts_with(name,'spbc-')])\" --output text | grep -v '^0\$'"
     chk "OpenSearch collection" "aws opensearchserverless list-collections --region $REGION --query \"collectionSummaries[?name=='spbc-electronics-vectors'].status|[0]\" --output text"

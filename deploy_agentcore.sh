@@ -87,9 +87,12 @@ LLM_MODEL_ID="eu.amazon.nova-pro-v1:0"
 LLM_MODEL_ARN="arn:aws:bedrock:${REGION}:${ACCOUNT_ID}:inference-profile/${LLM_MODEL_ID}"
 EMBED_MODEL_ID="amazon.titan-embed-text-v2:0"
 
-# Knowledge base domains (promos is optional: the promos agent falls back to its live API)
-KB_DOMAINS=("menu" "orders" "payments" "stores" "promos")
+# Knowledge base domains. Promotions have no knowledge base: the promos agent reads them from the
+# promotions API (a Lambda that reads the promotions file in S3).
+KB_DOMAINS=("menu" "orders" "payments" "stores")
 REQUIRED_KB_DOMAINS="menu orders payments stores"
+# Removed domains: teardown still deletes their knowledge base if an earlier deployment created one
+LEGACY_KB_DOMAINS=("promos")
 
 # The agent modules the runtime imports (all are required)
 AGENT_MODULES=("tech_assistant_agent.py" "menu_agents.py" "orders_agents.py" "place_order.py"
@@ -647,7 +650,6 @@ step3_s3_bucket() {
         "orders/orders_policies_kb_faqs.txt|electronics_orders/orders_policies_kb_faqs.txt"
         "payments/payments_policies_kb_faqs.txt|electronics_payments/payments_policies_kb_faqs.txt"
         "stores/store_kb_faqs.txt|electronics_stores/store_kb_faqs.txt"
-        "promos/promos_kb_faqs.txt|electronics_promos/promos_kb_faqs.txt"
     )
     local pair src key
     for pair in "${uploads[@]}"; do
@@ -682,7 +684,7 @@ step5_knowledge_bases() {
 
     info "This step syncs and verifies knowledge bases that already exist. To create them:"
     info "  bash 3_proof_of_concept/knowledge_bases/bootstrap_vector_store.sh   (collection + role)"
-    info "  bash 3_proof_of_concept/knowledge_bases/setup_knowledge_bases.sh    (all five domains)"
+    info "  bash 3_proof_of_concept/knowledge_bases/setup_knowledge_bases.sh    (all four domains)"
     info "Or in the console (walkthrough Step 4B): quick-create an Amazon OpenSearch Serverless vector"
     info "store, Titan Text Embeddings V2 (1024), S3 URI s3://${BUCKET_NAME}/electronics_<domain>/."
     echo ""
@@ -694,12 +696,8 @@ step5_knowledge_bases() {
         kb_id=$(kb_id_by_domain "$domain")
 
         if [ -z "$kb_id" ]; then
-            if [ "$domain" = "promos" ]; then
-                warn "${kb_name} not found (optional — promos then relies on the spbcPromotionsAPI only)"
-            else
-                err "${kb_name} not found"
-                problems="${problems} ${kb_name}"
-            fi
+            err "${kb_name} not found"
+            problems="${problems} ${kb_name}"
             continue
         fi
         export "${env_var}=${kb_id}"
@@ -742,9 +740,7 @@ step5_knowledge_bases() {
         if [ "$status" != "COMPLETE" ] || [ "$scanned" -eq 0 ] || [ "$failed" -gt 0 ]; then
             err "${kb_name}: sync ${status} (scanned ${scanned}, indexed ${indexed}, failed ${failed})"
             err "  Check the data source S3 URI is s3://${BUCKET_NAME}/electronics_${domain}/ and the file is there."
-            if [ "$domain" != "promos" ]; then
-                problems="${problems} ${kb_name}"
-            fi
+            problems="${problems} ${kb_name}"
         else
             log "${kb_name}: sync COMPLETE (scanned ${scanned}, indexed ${indexed}, failed 0)"
         fi
@@ -1149,7 +1145,6 @@ step8_create_runtime() {
         --arg ORDERS "${ORDERS_KNOWLEDGE_BASE_ID:-}" \
         --arg PAYMENTS "${PAYMENTS_KNOWLEDGE_BASE_ID:-}" \
         --arg STORES "${STORES_KNOWLEDGE_BASE_ID:-}" \
-        --arg PROMOS "${PROMOS_KNOWLEDGE_BASE_ID:-}" \
         --arg BUCKET "$BUCKET_NAME" \
         --arg GID "${GUARDRAIL_ID:-}" \
         --arg GVER "${GUARDRAIL_VERSION:-}" \
@@ -1161,7 +1156,7 @@ step8_create_runtime() {
         '{REGION: $REGION, MODEL_ID: $MODEL_ID, MODEL_ARN: $MODEL_ARN,
           MENU_KNOWLEDGE_BASE_ID: $MENU, ORDERS_KNOWLEDGE_BASE_ID: $ORDERS,
           PAYMENTS_KNOWLEDGE_BASE_ID: $PAYMENTS, STORES_KNOWLEDGE_BASE_ID: $STORES,
-          PROMOS_KNOWLEDGE_BASE_ID: $PROMOS, S3_BUCKET_NAME: $BUCKET,
+          S3_BUCKET_NAME: $BUCKET,
           GUARDRAIL_ID: $GID, GUARDRAIL_VERSION: $GVER, GUARDRAIL_TRACE: "enabled",
           STORES_DB_CLUSTER_ARN: $DB_CLUSTER, STORES_DB_SECRET_ARN: $DB_SECRET,
           STORES_DB_NAME: $DB_NAME, PROMOS_API_URL: $PROMOS_URL,
@@ -1226,8 +1221,6 @@ step9_test_runtime() {
     header "Step 9 — Test AgentCore Runtime"
 
     local runtime_id status session_id out_file err_file payload prompt failures=0
-    # So the promos check knows whether a knowledge base can answer it
-    discover_kb_ids
     runtime_id=$(runtime_id_by_name)
     if [ -z "$runtime_id" ]; then
         err "Runtime not found. Run step8 first."
@@ -1273,9 +1266,9 @@ step9_test_runtime() {
             promos)
                 prompt="Is there a student discount on laptops?"
                 expect="student|10 ?%|STUDENT10|discount"
-                # Answerable from the API or the KB; optional when neither is configured
+                # Answered from the promotions API; optional when the API is not configured
                 requirement="optional"
-                if [ -n "$PROMOS_API_URL" ] || [ -n "${PROMOS_KNOWLEDGE_BASE_ID:-}" ]; then
+                if [ -n "$PROMOS_API_URL" ]; then
                     requirement="required"
                 fi ;;
             stores)
@@ -1443,7 +1436,7 @@ teardown() {
         aws bedrock delete-guardrail --region "$REGION" --guardrail-identifier "$gr_id" && log "Guardrail deleted"
     fi
 
-    for domain in "${KB_DOMAINS[@]}"; do
+    for domain in "${KB_DOMAINS[@]}" "${LEGACY_KB_DOMAINS[@]}"; do
         kb_name="${PROJECT_PREFIX}-${domain}-knowledge-base"
         kb_id=$(kb_id_by_domain "$domain")
         if [ -n "$kb_id" ]; then

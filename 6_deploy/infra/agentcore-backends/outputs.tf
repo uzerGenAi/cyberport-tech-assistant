@@ -31,6 +31,16 @@ output "promotions_api_invoke_arn" {
   value       = "${aws_apigatewayv2_api.promotions.execution_arn}/${local.promotions_stage}/GET/promotions"
 }
 
+output "promotions_bucket_name" {
+  description = "Bucket holding the promotions file the promotions Lambda reads."
+  value       = aws_s3_bucket.promotions.id
+}
+
+output "promotions_upload_command" {
+  description = "Publish a new promotions file (a JSON list; [] means no promotions). Live within about a minute."
+  value       = "aws s3 cp promos_records.json s3://${aws_s3_bucket.promotions.id}/${local.promotions_s3_key}"
+}
+
 output "orders_table_name" {
   value = aws_dynamodb_table.orders.name
 }

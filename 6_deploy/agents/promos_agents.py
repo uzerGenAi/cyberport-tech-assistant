@@ -8,17 +8,14 @@ from strands import Agent, tool
 from strands.models import BedrockModel
 
 REGION = os.environ.get("REGION", "eu-central-1")
-MODEL_ARN = os.environ.get("MODEL_ARN", "")
 # Promotions API (Terraform stack 6_deploy/infra/agentcore-backends): IAM-authorized GET /promotions.
 # Without PROMOS_API_URL the API is looked up by name (legacy lab setup).
 PROMOS_API_URL = os.environ.get("PROMOS_API_URL", "").strip()
 PROMOS_API_NAME = "spbcPromotionsAPI"
 PROMOS_API_PATH = "/prod/promotions"
-# Optional. When set, the agent can answer from the promotions knowledge base, which keeps
-# promotions working when the API is missing or unreachable.
-PROMOS_KNOWLEDGE_BASE_ID = os.environ.get("PROMOS_KNOWLEDGE_BASE_ID", "").strip()
+# Promotions come only from this API. The Lambda behind it reads the promotions file that an admin
+# uploads to S3, so there is no promotions knowledge base that could go stale.
 
-bedrock_runtime = boto3.client('bedrock-agent-runtime', region_name=REGION)
 _session = boto3.Session(region_name=REGION)
 
 
@@ -68,34 +65,6 @@ def list_promotions() -> list:
         return {"error": f"Error in API request: {str(e)}"}
 
 
-@tool(name="promos_kb_retrieve", description="A tool to retrieve data from the promotions knowledge base")
-def promos_kb_retrieve(query: str) -> str:
-    """Search the promotions knowledge base using retrieve_and_generate."""
-    params = {
-        "input": {"text": query},
-        "retrieveAndGenerateConfiguration": {
-          "type": "KNOWLEDGE_BASE",
-          "knowledgeBaseConfiguration": {
-              "knowledgeBaseId": PROMOS_KNOWLEDGE_BASE_ID,
-              "modelArn": MODEL_ARN,
-              "retrievalConfiguration": {
-                  "vectorSearchConfiguration": {
-                      "numberOfResults": 7,
-                      "overrideSearchType": "HYBRID"
-                  }
-              }
-          }
-      }
-    }
-    try:
-        response = bedrock_runtime.retrieve_and_generate(**params)
-        return response.get("output", {}).get("text", "No relevant information found in the knowledge base.")
-    except Exception as e:
-        return f"Failed to retrieve information: {str(e)}"
-
-
-_promos_tools = [list_promotions] + ([promos_kb_retrieve] if PROMOS_KNOWLEDGE_BASE_ID else [])
-
 # === Agent ===
 
 promos_agent = Agent(
@@ -123,10 +92,12 @@ promos_agent = Agent(
         - For queries not related to promotions, respond with 'Sorry, I cannot answer this question'.
         - For queries related to promotions, use list_promotions to fetch the current promotional offers.
         - list_promotions returns only the promotions that are active TODAY. A promotion is running right now only if list_promotions returns it. Never work out from dates yourself whether a promotion is active.
-        - If the customer asks about a promotion that list_promotions does not return, say clearly that it is not active right now; you may use promos_kb_retrieve to say when it runs.
-        - If list_promotions returns an error or lacks the detail you need, use promos_kb_retrieve (when it is available) to search the promotions knowledge base.
+        - If list_promotions returns an empty list, there are no active promotions today. Say so in a friendly way, for example: "There are no active promotions right now, but new offers do come up, so please check back soon. I'm happy to help with products, orders or stores in the meantime." Do not invent or suggest promotions.
+        - If the customer asks about a promotion that list_promotions does not return, say clearly and politely that it is not active right now. Do not give its code or dates.
+        - If list_promotions returns an error, say you cannot check the current promotions right now and ask the customer to try again in a moment. Never say or imply that there are no promotions because of an error.
+        - Promo codes, dates, conditions and eligibility must come only from list_promotions. If the customer asks for a detail that is not in what it returned, say you do not have that detail and suggest asking a store team member or contacting support.
         - If nothing relevant is found, ask clarifying questions or refer to contact support.
         - Always verify that customers meet all conditions before confirming eligibility for promotions.
     """,
-    tools=_promos_tools,
+    tools=[list_promotions],
 )

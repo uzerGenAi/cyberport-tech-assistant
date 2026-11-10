@@ -170,7 +170,8 @@ def main():
     text, _ = c.say("Cancel order ord_2055_023 for customer customer_2055.")
     check("shipped order: refused, no cancellation request", not c.requests, c.requests)
     check("shipped order: still SHIPPED in DynamoDB", order("customer_2055", "ord_2055_023")["status"] == shipped["status"] == "SHIPPED")
-    check("shipped order: explains returns instead", re.search(r"return|withdraw", text, re.I), text[:200])
+    check("shipped order: handed over to the team, not cancelled", re.search(r"escalat|hand(?:ed)? ?over|\bteam\b", text, re.I), text[:200])
+    check("shipped order: no promise that it will be cancelled", not re.search(r'"cancelled":\s*true|has been cancel+ed', text, re.I), text[:200])
 
     c = StaffChat("Missing order ID", decide=lambda a: True)
     text, tools = c.say("Please cancel the order for customer_7977.")

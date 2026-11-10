@@ -68,6 +68,12 @@ mock_provider "aws" {
     }
   }
 
+  mock_resource "aws_s3_bucket" {
+    defaults = {
+      arn = "arn:aws:s3:::spbc-promotions-111111111111"
+    }
+  }
+
   mock_resource "aws_lambda_function" {
     defaults = {
       arn        = "arn:aws:lambda:eu-central-1:111111111111:function:spbc-promotions-api"
