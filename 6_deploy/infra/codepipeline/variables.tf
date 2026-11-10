@@ -128,16 +128,10 @@ variable "toggle_smoke" {
   default     = false
 }
 
-variable "cognito_admin_username" {
-  description = "Passed through to post_deploy.sh; empty (with the secret id) selects --skip-user."
+variable "demo_username" {
+  description = "Default web-app sign-in user that deploy.sh's user step creates. Its password is generated and kept in Secrets Manager (spbc-demo-user), never in the build log."
   type        = string
-  default     = ""
-}
-
-variable "cognito_admin_password_secret_id" {
-  description = "Secrets Manager id holding the admin password; empty (with the username) selects --skip-user."
-  type        = string
-  default     = ""
+  default     = "demo"
 }
 
 variable "smoke_test_url" {

@@ -6,10 +6,9 @@ environment = "production"
 # The CodeCommit repository name and the pipeline source.
 repository_name = "spbc-tech-assistant"
 
-# Optional sign-in user for the agent deploy. Leave both empty to pass --skip-user to
-# post_deploy.sh. cognito_admin_password_secret_id is a Secrets Manager id, not the password.
-# cognito_admin_username           = "admin@example.com"
-# cognito_admin_password_secret_id = "spbc/admin-password"
+# Default web-app sign-in user (created by deploy.sh's user step). The password is generated
+# and stored in Secrets Manager as spbc-demo-user; read it with `make demo-user`.
+# demo_username = "demo"
 
 # Optional frontend smoke test. Only runs when toggle_smoke is true AND this is set.
 # smoke_test_url = "https://app.example.com"

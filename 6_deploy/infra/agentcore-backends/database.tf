@@ -67,7 +67,7 @@ resource "aws_rds_cluster" "stores" {
   preferred_maintenance_window    = "sun:03:30-sun:04:30"
   copy_tags_to_snapshot           = true
   deletion_protection             = var.aurora_deletion_protection
-  skip_final_snapshot             = false
+  skip_final_snapshot             = var.aurora_skip_final_snapshot
   final_snapshot_identifier       = "${local.cluster_identifier}-final"
   enabled_cloudwatch_logs_exports = ["error", "slowquery"]
   apply_immediately               = false

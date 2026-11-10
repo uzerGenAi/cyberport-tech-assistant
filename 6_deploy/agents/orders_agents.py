@@ -48,6 +48,11 @@ def get_order_status(user_id: str, order_id: str) -> dict:
     Requiring both values (like order tracking with an order number plus surname) stops
     anyone from reading another customer's latest order just by typing their name.
     """
+    return lookup_order(user_id, order_id)
+
+
+def lookup_order(user_id: str, order_id: str) -> dict:
+    """Plain-function order lookup shared by get_order_status and check_cancellation."""
     user_id, order_id = str(user_id).strip(), str(order_id).strip()
     if not user_id or not order_id:
         return {"message": "Both the customer name or ID and the order ID are required."}
@@ -78,6 +83,61 @@ def get_order_status(user_id: str, order_id: str) -> dict:
     except (KeyError, ValueError) as e:
         return {"error": str(e)}
 
+# Policies decided in code, not summarised by a model: the knowledge base holds both return
+# policies with the same words ("return", "14 days", "receipt"), and a generated summary mixed
+# them up (online orders were told they must be unopened). Same text as orders_policies_kb_faqs.txt.
+_CONTACT = ("customer service via the contact form on the Cyberport website (Contact link at the top "
+            "of every page) or at the service desk in any Cyberport store")
+_RETURN_POLICIES = {
+    "online": ("Online orders: you have 14 days from receiving the goods to withdraw from the purchase "
+               "(EU right of withdrawal), without giving a reason. The product does not need to be "
+               "unopened: you may unpack and test it. If it was used beyond testing, its value may be "
+               "reduced. Return it in any Cyberport store or with a free return label from your account; "
+               "the refund goes to the original payment method once the return is checked."),
+    "store": ("Store purchases: EU law gives no withdrawal right for purchases made in a store. As a "
+              "goodwill policy, unopened products in their original packaging can be returned within 14 "
+              "days of purchase with the receipt. Opened products are exchanged or refunded only if "
+              "they are faulty."),
+}
+_CANCELLABLE = {"PROCESSING"}
+
+
+@tool(name="return_policy",
+      description="The exact return policy. purchase_channel is 'online' (ordered online or through the "
+                  "Tech Assistant) or 'store' (bought in person in a Cyberport store). Use it for every "
+                  "returns question; when the channel is unknown, pass 'unknown' to get both.")
+def return_policy(purchase_channel: str = "unknown") -> dict:
+    """Return the policy text for one channel, or both clearly labelled."""
+    channel = (purchase_channel or "").strip().lower()
+    if channel in _RETURN_POLICIES:
+        return {"channel": channel, "policy": _RETURN_POLICIES[channel]}
+    return {"channel": "unknown", "online": _RETURN_POLICIES["online"], "store": _RETURN_POLICIES["store"],
+            "note": "Ask where it was bought if it matters, and never apply the store rule to an online order."}
+
+
+@tool(name="check_cancellation",
+      description="Check whether one existing order can still be cancelled, and what the customer should "
+                  "do next. Requires both the customer's name or customer ID (user_id) and the order ID.")
+def check_cancellation(user_id: str, order_id: str) -> dict:
+    """Apply the cancellation policy to the order's real status (no model judgement involved)."""
+    order = lookup_order(user_id, order_id)
+    status = order.get("status") if isinstance(order, dict) else None
+    if not status:
+        return order                      # missing ids or no matching order: pass the message on
+    if status in _CANCELLABLE:
+        return {"order_id": order["order_id"], "status": status, "can_cancel": True,
+                "answer": (f"Order {order['order_id']} is {status}, so it can still be cancelled free of "
+                           f"charge. The Tech Assistant cannot cancel orders itself: contact {_CONTACT} with "
+                           "the order ID and the name or customer number on the order, and a staff member "
+                           "will confirm and process the cancellation.")}
+    if status == "CANCELLED":
+        return {"order_id": order["order_id"], "status": status, "can_cancel": False,
+                "answer": f"Order {order['order_id']} is already cancelled; nothing else needs to be done."}
+    return {"order_id": order["order_id"], "status": status, "can_cancel": False,
+            "answer": (f"Order {order['order_id']} is {status}, so it can no longer be cancelled. Once you "
+                       f"have it, you can return it instead. {_RETURN_POLICIES['online']}")}
+
+
 orders_agent = Agent(
     model=BedrockModel(model_id=os.environ["MODEL_ID"], region_name=REGION),
     system_prompt="""
@@ -90,14 +150,10 @@ orders_agent = Agent(
         - For queries not related to orders, respond with 'Sorry, I cannot answer this question'.
         - For existing orders, use get_order_status. It needs BOTH the customer's name or customer ID and the order ID; if either is missing, ask for it. Never guess or reuse another customer's details.
         - For new orders, use the place_order tool with the customer name or ID, the store_id and the items (product, quantity, and storage variant for smartphones). The tool calculates the total; report the order ID and the total it returns.
-        - For cancellation requests: you cannot cancel orders yourself, and never claim you did. If both the order ID and the customer name or ID are given, check the order with get_order_status first. PROCESSING: say it can still be cancelled free of charge and that customer service staff (contact form on the website or any store) confirm and process it. READY_FOR_PICKUP, SHIPPED, DELIVERED or COLLECTED: say it can no longer be cancelled and explain the 14-day right of withdrawal or the return policy. Use orders_kb_retrieve for the contact options.
-        - Returns: keep the two policies apart. ONLINE orders: 14-day right of withdrawal from
-          receiving the goods, no reason needed, and the customer may test the product; never say
-          an online order must be unopened. STORE purchases: goodwill returns of unopened products
-          in original packaging within 14 days with the receipt. If the customer does not say
-          where they bought it, give the online rule when they mention an online order.
-        - For policy questions (cancellation, delivery times, returns, the 14-day withdrawal right, warranty, damaged deliveries), search the knowledge base using orders_kb_retrieve.
+        - For cancellation requests: you cannot cancel orders yourself, and never claim you did. With both the order ID and the customer name or ID, call check_cancellation and give its answer as returned (it already says whether the order can still be cancelled and what to do next). If either is missing, ask for it.
+        - For every returns question, call return_policy and give its policy text without adding conditions. purchase_channel: 'online' when the customer ordered online, through the Tech Assistant, had it delivered or mentions an order or order ID; 'store' only when they bought it in person in a store; otherwise 'unknown'. Never apply the store rule (unopened, receipt) to an online order.
+        - For other policy questions (delivery times, warranty, damaged deliveries, address changes, contacting customer service), search the knowledge base using orders_kb_retrieve.
         - If nothing relevant is found, ask clarifying questions or refer to customer service.
     """,
-    tools=[orders_kb_retrieve, get_order_status, place_order],
+    tools=[orders_kb_retrieve, get_order_status, check_cancellation, return_policy, place_order],
 )

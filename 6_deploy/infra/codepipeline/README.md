@@ -90,9 +90,11 @@ come from the matching `toggle_*` Terraform variables) and passed into the Deplo
 Only `TOGGLE_DEPLOY_AGENT` is on by default. Override per run by editing the pipeline variable
 values when you start the execution.
 
-`COGNITO_ADMIN_USERNAME` and `COGNITO_ADMIN_PASSWORD_SECRET_ID` are plumbed through to
-`post_deploy.sh`: if either is empty the deploy passes `--skip-user` (infrastructure only). The
-smoke step runs only when `TOGGLE_SMOKE` is true **and** `SMOKE_TEST_URL` is set.
+The deploy stage runs `./deploy.sh` (the same command used by hand) and maps the toggles to
+`SKIP_STEPS`. `DEMO_USERNAME` (Terraform variable `demo_username`, default `demo`) names the
+default sign-in user; its password lives only in Secrets Manager (`spbc-demo-user`) and is never
+printed in the build log. Read it afterwards with `make demo-user`. The smoke step runs only
+when `TOGGLE_SMOKE` is true **and** `SMOKE_TEST_URL` is set.
 
 ## 5. Security note
 

@@ -28,12 +28,11 @@ help:
 	@echo "  make amplify         Deploy (or re-deploy) the web frontend to AWS Amplify only"
 	@echo "  make smoke           Run the smoke test against SMOKE_TEST_URL"
 	@echo ""
-	@echo "  Typical first-time flow:"
-	@echo "    make backend-setup  →  make ci  →  make backends  →  make seed-stores  →  make backends-check"
-	@echo "    →  ./deploy_agentcore.sh step3-s3-bucket  →  make knowledge-bases"
-	@echo "    →  ./deploy_agentcore.sh step2-iam-role  →  make post-deploy"
+	@echo "  First-time flow (DEPLOY.md):"
+	@echo "    make backend-setup  →  make backends-plan  →  make backends  →  ./deploy.sh"
+	@echo "  The targets above are the building blocks ./deploy.sh runs; use them for single steps."
 
-# Optional: AgentCore Memory (preferences, facts, session summaries) for the runtime
+# AgentCore Memory for the runtime: short-term only (the current conversation). deploy.sh's app step runs it.
 memory:
 	cd 6_deploy/agents && python3 create_memory.py
 

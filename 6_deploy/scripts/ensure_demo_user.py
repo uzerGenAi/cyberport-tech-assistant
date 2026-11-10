@@ -96,7 +96,9 @@ def main():
     print("  Sign in to the Cyberport Tech Assistant")
     print(f"  URL      : {web_url()}")
     print(f"  Username : {username}")
-    print(f"  Password : {password}")
+    # CI logs are shared and kept: never print the password there (it stays in Secrets Manager)
+    in_ci = bool(os.environ.get("CODEBUILD_BUILD_ID") or os.environ.get("CI"))
+    print(f"  Password : {'(hidden in CI logs: make demo-user shows it)' if in_ci else password}")
     print(f"  (stored in Secrets Manager: {SECRET_ID}; show again: make demo-user)")
     print("══════════════════════════════════════════════════════")
 

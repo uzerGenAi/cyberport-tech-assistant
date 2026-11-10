@@ -11,6 +11,7 @@
 #   FORCE=1      also rebuild and ship the agent code (use after changing code)
 #   YES=1        do not ask to confirm the AWS account
 #   SKIP_CI=1    skip the local validation step
+#   SKIP_STEPS="docs kbs"   skip the named steps (used by the CI pipeline's toggles)
 #
 # Every step logs to .deploy-logs/<step>.log. On failure the script stops, names the step and
 # the log, and a re-run continues from there: each step is idempotent.
@@ -241,6 +242,9 @@ main() {
             # preflight always runs: it checks credentials, tools and model access
             from) [ "$s" = preflight ] || [ "$started" = 1 ] || continue ;;
             only) [ "$s" = preflight ] || [ "$s" = "$arg" ] || continue ;;
+        esac
+        case " ${SKIP_STEPS:-} " in
+            *" $s "*) [ "$s" = preflight ] || { say "SKIP_STEPS: skipping $s"; continue; } ;;
         esac
         run_step "$s"
     done

@@ -52,7 +52,6 @@ resource "aws_codebuild_project" "deploy" {
       type  = "PLAINTEXT"
     }
 
-
     environment_variable {
       name  = "TOGGLE_SMOKE"
       value = var.toggle_smoke ? "true" : "false"
@@ -60,14 +59,8 @@ resource "aws_codebuild_project" "deploy" {
     }
 
     environment_variable {
-      name  = "COGNITO_ADMIN_USERNAME"
-      value = var.cognito_admin_username
-      type  = "PLAINTEXT"
-    }
-
-    environment_variable {
-      name  = "COGNITO_ADMIN_PASSWORD_SECRET_ID"
-      value = var.cognito_admin_password_secret_id
+      name  = "DEMO_USERNAME"
+      value = var.demo_username
       type  = "PLAINTEXT"
     }
 

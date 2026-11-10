@@ -150,9 +150,11 @@ d_loggroup() { local g; for g in $1; do aws logs delete-log-group --log-group-na
 d_backends() {
     export AUTO_APPROVE=1
     say "Turning off deletion protection..."
-    bash 6_deploy/scripts/agentcore_backends.sh apply -var aurora_deletion_protection=false -var dynamodb_deletion_protection=false
+    # A full teardown keeps no data: switch protection off and skip the final snapshot first
+    local tf_vars=(-var aurora_deletion_protection=false -var dynamodb_deletion_protection=false -var aurora_skip_final_snapshot=true)
+    bash 6_deploy/scripts/agentcore_backends.sh apply "${tf_vars[@]}"
     say "terraform destroy (Aurora takes about 10 minutes)..."
-    bash 6_deploy/scripts/agentcore_backends.sh destroy -var aurora_deletion_protection=false -var dynamodb_deletion_protection=false
+    bash 6_deploy/scripts/agentcore_backends.sh destroy "${tf_vars[@]}"
 }
 d_secret() { aws secretsmanager delete-secret --secret-id spbc-stores-db-reader --force-delete-without-recovery --region "$REGION" >/dev/null; }
 d_state_bucket() {

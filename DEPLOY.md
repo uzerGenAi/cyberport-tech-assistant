@@ -211,6 +211,8 @@ See what exists in the account at any time: `./deploy.sh status`.
 | Run one step | `./deploy.sh only <step>` (`./deploy.sh list` shows the names) |
 | Reset the sample orders | `(cd 2_data_strategy/orders && python3 orders_load_helper_script.py)` |
 | Skip the account prompt | `YES=1 ./deploy.sh` |
+| Run unattended (CI) | `YES=1 AUTO_APPROVE=1 ./deploy.sh` |
+| Skip some steps | `SKIP_STEPS="kbs harness" ./deploy.sh` |
 
 ### harness-manager (staff order cancellation)
 

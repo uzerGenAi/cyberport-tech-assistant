@@ -1,15 +1,13 @@
 version: 0.2
 
-# Deploy stage: maps the nine steps of the retired .github/workflows/deploy.yml onto the
-# existing scripts, gated by the four toggle env vars the pipeline passes in
-# (TOGGLE_PROVISION_BACKENDS / TOGGLE_SETUP_KNOWLEDGE_BASES / TOGGLE_DEPLOY_AGENT /
-# TOGGLE_SMOKE). All deploy steps run in ONE build phase command (a single shell) so the env
-# that setup_env.sh / env.sh sources persists across them — CodeBuild, like GitHub steps, does
-# not share shell state across separate command entries.
-#
-# Differences from deploy.yml, carried from the design review:
-#   - The agent deploy has NO `|| event=='push'` override (no v* tag trigger).
-#   - The smoke step is gated on TOGGLE_SMOKE AND a non-empty SMOKE_TEST_URL.
+# Deploy stage: runs ./deploy.sh, the same resumable deploy people run by hand, so there is one
+# deploy path to maintain. The pipeline's toggle variables choose which groups of steps run:
+#   TOGGLE_PROVISION_BACKENDS     backends seed orders   (Aurora, DynamoDB, promotions API, data)
+#   TOGGLE_SETUP_KNOWLEDGE_BASES  docs kbs               (documents bucket, vector store, 5 KBs)
+#   TOGGLE_DEPLOY_AGENT           role guardrail app user harness test
+#   TOGGLE_SMOKE                  frontend smoke test (also needs SMOKE_TEST_URL)
+# The Validate stage already ran `make ci`, so the ci step is skipped here. The agent code is
+# always shipped (FORCE=1); the demo password is never printed in CI logs (Secrets Manager only).
 
 env:
   variables:
@@ -20,67 +18,30 @@ phases:
     runtime-versions:
       python: 3.11
     commands:
-      - python -m pip install --upgrade pip
-      # requirements.txt already brings awscurl, needed for the knowledge base indexes
-      - pip install -r requirements.txt
-      # Starter toolkit used by configure_runtime.py
-      - pip install -r 6_deploy/agents/requirements-deploy.txt
       - |
         set -euo pipefail
         curl -fsSL -o /tmp/terraform.zip \
           "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip"
         unzip -o /tmp/terraform.zip -d /usr/local/bin
         terraform version
-      - pip install uv
+      # deploy.sh runs from this virtual environment, exactly as on a laptop
+      - python -m venv .venv
+      - .venv/bin/pip install --upgrade pip
+      - .venv/bin/pip install -r 6_deploy/agents/requirements-deploy.txt awscurl
   build:
     commands:
       - |
         set -euo pipefail
-
-        # (1) Confirm the assumed identity.
         aws sts get-caller-identity
 
-        # (2) Provision data backends (stores DB, promotions API, orders and sessions tables).
-        if [ "${TOGGLE_PROVISION_BACKENDS}" = "true" ]; then
-          AUTO_APPROVE=1 bash 6_deploy/scripts/agentcore_backends.sh apply
-          bash 6_deploy/scripts/agentcore_backends.sh seed
-          bash 6_deploy/scripts/agentcore_backends.sh check
-        fi
+        skip="ci"
+        [ "${TOGGLE_PROVISION_BACKENDS}" = "true" ]    || skip="$skip backends seed orders"
+        [ "${TOGGLE_SETUP_KNOWLEDGE_BASES}" = "true" ] || skip="$skip docs kbs"
+        [ "${TOGGLE_DEPLOY_AGENT}" = "true" ]          || skip="$skip role guardrail app user harness test"
+        echo "Skipping steps: $skip"
 
-        # (3) Discover AWS resources. Writes ~/environment/env.sh for the later steps.
-        # shellcheck source=/dev/null
-        source setup_env.sh
+        YES=1 AUTO_APPROVE=1 FORCE=1 SKIP_STEPS="$skip" ./deploy.sh
 
-        # (4) Create knowledge bases.
-        if [ "${TOGGLE_SETUP_KNOWLEDGE_BASES}" = "true" ]; then
-          # shellcheck source=/dev/null
-          source ~/environment/env.sh
-          bash 3_proof_of_concept/knowledge_bases/bootstrap_vector_store.sh
-          bash 3_proof_of_concept/knowledge_bases/setup_knowledge_bases.sh
-          # shellcheck source=/dev/null
-          source setup_env.sh   # pick up the new knowledge base IDs
-        fi
-
-        # (5) Deploy Cognito, the AgentCore runtime and the frontend.
-        if [ "${TOGGLE_DEPLOY_AGENT}" = "true" ]; then
-          # shellcheck source=/dev/null
-          source ~/environment/env.sh
-          args=(--force --non-interactive)
-          if [ -z "${COGNITO_ADMIN_USERNAME}" ] || [ -z "${COGNITO_ADMIN_PASSWORD_SECRET_ID}" ]; then
-            echo "No sign-in user configured; deploying infrastructure only (--skip-user)."
-            args+=(--skip-user)
-          fi
-          bash 6_deploy/scripts/post_deploy.sh "${args[@]}"
-        fi
-
-        # (6) Verify the agent answers.
-        if [ "${TOGGLE_DEPLOY_AGENT}" = "true" ]; then
-          # shellcheck source=/dev/null
-          source ~/environment/env.sh
-          ./deploy_agentcore.sh step9-test-runtime
-        fi
-
-        # (7) Smoke test the frontend.
         if [ "${TOGGLE_SMOKE}" = "true" ] && [ -n "${SMOKE_TEST_URL}" ]; then
           SMOKE_TEST_URL="${SMOKE_TEST_URL}" bash 6_deploy/scripts/smoke_test.sh
         fi
