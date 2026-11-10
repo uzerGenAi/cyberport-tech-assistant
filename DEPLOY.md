@@ -1,7 +1,7 @@
 # Deploy the Cyberport Tech Assistant
 
-Copy each block into a terminal, in order. The only line you edit is the repository URL in
-step 3. Everything is created in **eu-central-1 (Frankfurt)**, in the AWS account you log in to.
+Copy each block into a terminal, in order; nothing needs editing. Everything is created in
+**eu-central-1 (Frankfurt)**, in the AWS account you log in to.
 
 | | |
 |---|---|
@@ -50,10 +50,8 @@ aws sts get-caller-identity
 
 ## 3. Get the code
 
-Edit the URL, then paste:
-
 ```bash
-git clone https://github.com/<owner>/cyberport-tech-assistant.git
+git clone https://github.com/uzerGenAi/cyberport-tech-assistant.git
 cd cyberport-tech-assistant
 ```
 

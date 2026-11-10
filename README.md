@@ -246,7 +246,7 @@ The full runbook is [DEPLOY.md](DEPLOY.md). In short, on a machine with the AWS 
 Terraform 1.10+ and Python 3.10+:
 
 ```bash
-git clone <repo-url> && cd <repo>
+git clone https://github.com/uzerGenAi/cyberport-tech-assistant.git && cd cyberport-tech-assistant
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r 6_deploy/agents/requirements-deploy.txt awscurl
 
