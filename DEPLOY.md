@@ -1,165 +1,232 @@
 # Deploy the Cyberport Tech Assistant
 
-One command deploys everything to AWS `eu-central-1`. It is safe to re-run: finished work is
-skipped or harmlessly repeated, and a failure stops with the step name, its log and the exact
-command to resume.
+Two roles, two parts:
 
-## 1. Before you start (once per machine)
+- **Part A, the developer:** writes the code and pushes it to GitHub.
+- **Part B, the deployer:** clones it and deploys it into **their own AWS account**: Terraform first, then `./deploy.sh`.
 
-| Need | Check |
-|---|---|
-| AWS credentials for the account you want to deploy to | `aws sts get-caller-identity` shows the right account |
-| Bedrock model access: Amazon Nova Pro and Titan Text Embeddings V2 | Bedrock console, Model access (`deploy.sh` also tests this) |
-| `aws` (v2), `terraform` (1.10 or later), `jq`, `python3`, `make` | `aws --version`, `terraform version` |
-| Python environment | see below |
+Nothing in the repository is tied to one AWS account: names that must be unique (the Terraform
+state bucket, the documents bucket) are derived from the deployer's account ID at deploy time.
+
+---
+
+## Part A: Developer → GitHub
+
+### A1. Check that nothing private is about to be pushed
 
 ```bash
+git status                     # review what changed
+git ls-files | grep -i -E "\.env$|secret|credential|tfstate|tfvars$|cognito-config|agentcore-config"
+```
+
+The last command must print nothing. `.gitignore` already keeps these out of git: Terraform state
+and `terraform.tfvars`, the generated web-app configs (`cognito-config.json`,
+`agentcore-config.json`), `.bedrock_agentcore.yaml`, `.venv/`, `.deploy-logs/` and `~/environment/env.sh`.
+No AWS account ID, password or key is stored in the code.
+
+### A2. Commit and push
+
+```bash
+git add <the files you changed>
+git commit -m "Describe the change"
+git push origin main
+```
+
+First push of a new repository:
+
+```bash
+git remote add origin https://github.com/<you>/<repo>.git
+git push -u origin main
+```
+
+---
+
+## Part B: Deployer → own AWS account
+
+About 45 minutes the first time, most of it waiting for AWS (Aurora about 10 min, knowledge bases
+about 15 min, runtime build about 5 min).
+
+### B1. Prerequisites (once per machine and account)
+
+| Need | How to check | Install |
+|---|---|---|
+| AWS CLI v2 | `aws --version` | [AWS CLI install guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) |
+| Terraform 1.10 or later | `terraform version` | `brew install hashicorp/tap/terraform` |
+| Python 3.10 or later | `python3 --version` | `brew install python` |
+| `jq`, `make`, `git` | `jq --version` | `brew install jq` |
+| An AWS account with admin rights | `aws sts get-caller-identity` | see B3 |
+
+Docker is **not** needed: the agent container is built in AWS CodeBuild.
+
+### B2. Get the code and the Python environment
+
+```bash
+git clone https://github.com/<owner>/<repo>.git
+cd <repo>
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate                     # repeat in every new terminal
 pip install -r 6_deploy/agents/requirements-deploy.txt awscurl
 ```
 
-Use the virtual environment, not a global `pip`: it keeps the AWS CLI v2 you already have from being replaced.
+Always use the virtual environment: a global `pip install` can replace AWS CLI v2 with v1.
 
-## 2. Deploy
+### B3. Log in to your AWS account and enable the models
+
+```bash
+aws configure                 # access key, secret key, region: eu-central-1, output: json
+aws sts get-caller-identity   # must show YOUR account
+export AWS_REGION=eu-central-1
+```
+
+In the AWS console, region **Europe (Frankfurt) eu-central-1**: **Amazon Bedrock → Model access**,
+enable these three:
+
+| Model | Used by |
+|---|---|
+| Amazon Nova Pro | the Tech Assistant |
+| Amazon Nova 2 Lite | harness-manager (staff agent) |
+| Amazon Titan Text Embeddings V2 | the knowledge bases |
+
+`./deploy.sh` checks all three in its first step and stops with a clear message if one is missing.
+
+### B4. Terraform: the data backends
+
+Terraform creates the stores database (Aurora MySQL Serverless v2 with its own VPC), the orders
+and sessions tables (DynamoDB), the promotions API (API Gateway + Lambda) and the order-admin
+Lambda for harness-manager. Its state is stored in an S3 bucket in your account.
+
+**1. Create the state bucket** (named `spbc-tfstate-<your-account-id>`):
+
+```bash
+make backend-setup
+```
+
+**2. Optional, for a cheaper demo:** one Aurora instance instead of two:
+
+```bash
+cp 6_deploy/infra/agentcore-backends/terraform.tfvars.example 6_deploy/infra/agentcore-backends/terraform.tfvars
+# edit terraform.tfvars:  aurora_instance_count = 1
+```
+
+**3. Plan and apply:**
+
+```bash
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+cd 6_deploy/infra/agentcore-backends
+terraform init -backend-config="bucket=spbc-tfstate-${ACCOUNT_ID}"
+terraform plan                 # review: about 33 resources to add
+terraform apply                # type "yes"; about 10 minutes (Aurora)
+cd ../../..
+```
+
+The same with the repository's wrapper (adds retries and a deletion-protection guard):
+`make backends-plan`, then `make backends`.
+
+### B5. Deploy everything else
 
 ```bash
 ./deploy.sh
 ```
 
-It asks you to confirm the AWS account, then runs these steps in order (about 30 to 45 minutes
-the first time, about 4 minutes when everything already exists):
+It asks you to confirm the account, then runs these steps. Every step is idempotent, so the
+Terraform step simply reports "No changes" after B4.
 
-| Step | What it does | Time (first run) |
-|---|---|---|
-| `preflight` | Checks tools, credentials and Bedrock model access | seconds |
-| `state` | Creates the Terraform state bucket `spbc-tfstate-<account-id>` | seconds |
-| `ci` | Validates Python and Terraform locally | 10 s |
-| `backends` | Aurora (stores), DynamoDB (orders, sessions), promotions API. Shows the plan and asks you to type `apply` | 10 min |
-| `seed` | Loads 9 stores, then checks the database and the API | 1 min |
-| `orders` | Loads 24 demo orders | seconds |
-| `docs` | Creates the knowledge-base documents bucket and uploads the files | seconds |
-| `kbs` | OpenSearch Serverless vector store and 5 knowledge bases | 15 to 20 min |
-| `role` | Creates the AgentCore execution role | seconds |
-| `guardrail` | Creates the Bedrock guardrail and stores it in Parameter Store | seconds |
-| `app` | Cognito, AgentCore Memory, the runtime (container built in CodeBuild) and the Amplify web app | 8 to 10 min |
-| `user` | Creates the default web-app login (see section 4) | seconds |
-| `harness` | harness-manager: an AgentCore **harness** agent (order lookup and cancellation) with its gateway and IAM roles | 2 to 3 min |
-| `test` | Sends one question per domain to the live runtime and prints the web app URL | 1 min |
-
-The final line prints the web app URL.
-
-## 3. If something fails
-
-The script stops and prints the step, the log (`.deploy-logs/<step>.log`) and the resume command.
-Fix the cause, then run the command it printed:
-
-```bash
-./deploy.sh from <step>
-```
-
-| Symptom | Fix |
+| Step | What it does |
 |---|---|
-| `No working AWS credentials` | `aws configure`, or `export AWS_PROFILE=<profile>`, then re-run |
-| `Bedrock model access failed` | Enable Nova Pro and Titan Embeddings V2 in Bedrock, Model access |
-| `Could not create s3://...` bucket error | The name is taken globally: `export TF_STATE_BUCKET=<unique-name>` and re-run |
-| First `terraform` run times out on macOS | Re-run: provider binaries are warmed on the first attempt (`init` also retries 3 times) |
-| `python3: command not found: pip` or package errors | Activate the venv: `source .venv/bin/activate` |
-| `Gateway role lacks permission to invoke Lambda` | IAM propagation; the script retries for 2 minutes. If it still fails, `./deploy.sh from harness` |
-| Anything else | Read the last 30 lines of the log named in the error |
+| `preflight` | Tools, versions, credentials and the three models |
+| `state` | Terraform state bucket (already there after B4) |
+| `ci` | Validates the code and Terraform offline |
+| `backends` | Terraform apply (no changes after B4) |
+| `seed` | Loads the 9 stores into Aurora and checks the promotions API |
+| `orders` | Loads the sample orders |
+| `docs` | Creates the documents bucket and uploads the knowledge-base files |
+| `kbs` | OpenSearch Serverless vector store and 5 knowledge bases (about 15 min) |
+| `role` | IAM role for the agent runtime |
+| `guardrail` | Bedrock guardrail |
+| `app` | Cognito sign-in, AgentCore Memory, the agent runtime (built in CodeBuild), the website (Amplify) |
+| `user` | Creates the default login |
+| `harness` | harness-manager: AgentCore harness + MCP gateway |
+| `test` | Asks the live assistant one question per area |
 
-Check what exists in the account at any time:
-
-```bash
-./deploy.sh status
-```
-
-## 4. Sign-in user
-
-Every deploy creates (or repairs) one default login and prints it at the end:
+The last lines print the website and the login:
 
 ```
   URL      : https://main.<app-id>.amplifyapp.com
   Username : demo
-  Password : <random, 20 characters>
+  Password : <generated>
 ```
 
-Show it again at any time with `make demo-user`. The password is generated on the first deploy and kept in
-Secrets Manager (`spbc-demo-user`), never in the repo; later deploys reuse it. A teardown deletes it, so the
-next fresh deploy prints a new one. To choose your own: `DEMO_USERNAME=<name> DEMO_PASSWORD='<password>' make demo-user`
-(the password needs upper and lower case, a number and a symbol).
+Show the login again at any time: `make demo-user`. The password is kept in Secrets Manager
+(`spbc-demo-user`), never in the code.
 
-## 5. harness-manager (AgentCore harness)
+### B6. Check it works (optional)
 
-A second, config-defined agent for staff: AgentCore runs its loop, there is no agent code or container.
-It looks up orders through an AgentCore Gateway (read-only) and **requests** cancellations with an inline
-tool, so nothing changes until a person approves it in the terminal:
+```bash
+make eval           # 42 questions with known answers
+make e2e            # a real customer journey (sign-in, chat, order) + staff cancellation
+make browser-test   # the live website in headless Chrome/Brave: login, streaming, no leaks
+```
+
+### B7. Tear down when you are done
+
+OpenSearch Serverless (about $350/month) and Aurora bill while they exist, even when idle.
+
+```bash
+./teardown.sh             # dry run: lists everything it would delete
+./teardown.sh --execute   # deletes it all (asks you to type the account ID)
+./deploy.sh status        # every line should show "missing"
+```
+
+The teardown also removes the Terraform resources (it switches deletion protection off first).
+Data is not kept: orders and conversation history are deleted.
+
+---
+
+## If something fails
+
+`./deploy.sh` stops, names the step and its log (`.deploy-logs/<step>.log`) and prints the command
+to continue, for example `./deploy.sh from kbs`. Finished steps are skipped.
+
+| Symptom | Fix |
+|---|---|
+| `No working AWS credentials` | `aws configure`, or `export AWS_PROFILE=<profile>` |
+| `Bedrock model access is missing ... for: ...` | Enable the listed models (B3), then re-run |
+| `Terraform 1.10 or later is needed` | `brew install hashicorp/tap/terraform` |
+| `Could not create s3://spbc-tfstate-...` | The name is taken: `export TF_STATE_BUCKET=<unique-name>` and re-run (use the same name for `terraform init`) |
+| `terraform init` slow or times out on macOS | Re-run; providers download on first use |
+| `Gateway role lacks permission to invoke Lambda` | IAM propagation; the script retries. If it still fails: `./deploy.sh from harness` |
+| `pip: command not found` or import errors | `source .venv/bin/activate` |
+| Anything else | Read the last 30 lines of the log named in the error |
+
+See what exists in the account at any time: `./deploy.sh status`.
+
+---
+
+## Day-to-day
+
+| Task | Command |
+|---|---|
+| Ship changed agent code | `FORCE=1 ./deploy.sh` (or `FORCE=1 ./deploy.sh only app` for the runtime only) |
+| Ship website changes | `make amplify` |
+| Run one step | `./deploy.sh only <step>` (`./deploy.sh list` shows the names) |
+| Reset the sample orders | `(cd 2_data_strategy/orders && python3 orders_load_helper_script.py)` |
+| Skip the account prompt | `YES=1 ./deploy.sh` |
+
+### harness-manager (staff order cancellation)
+
+A config-defined AgentCore harness: no agent code, no container. It looks orders up through an
+AgentCore Gateway (MCP) and requests cancellations through an inline tool, so nothing changes
+until a person approves it:
 
 ```bash
 python3 6_deploy/harness/invoke_harness.py "Cancel order ord_7977_021 for customer_7977"
 ```
 
-The script shows the request and asks `Approve this cancellation? [y/N]`. Only `y` cancels it, and your
-AWS identity is written to the order (`cancelled_by`). No terminal, or any other answer, means no change.
-Only PROCESSING orders can be cancelled, as the orders policy says. To reset the demo orders afterwards:
-`(cd 2_data_strategy/orders && python3 orders_load_helper_script.py)`.
+Only PROCESSING orders can be cancelled; the approver's AWS identity is written to the order.
 
-Files: `6_deploy/harness/` (system prompt, deploy and chat scripts; your original prompt is kept as
-`harness-manager.prompt.md`) and the `spbc-order-admin` Lambda in `6_deploy/infra/agentcore-backends/`.
+### How the website talks to the assistant
 
-## 6. Check answer quality
-
-```bash
-make eval
-```
-
-Asks the live assistant 25 questions whose correct answers come from the project data (prices,
-stock, store hours, order status, return period, promotions active today, refusals, memory) and
-runs each 3 times, because answers vary between runs. It also checks the guardrail directly: normal
-questions and replies must pass, abuse must be blocked. Results: `.deploy-logs/eval-results.json`.
-Run it after every change to prompts, models or the guardrail.
-
-`make e2e` goes further: it signs in as a fresh Cognito customer with the web app's own
-credentials, runs a whole conversation (advice, stock, discount, financing, click & collect
-order, status, cancellation request, memory on a later visit, abuse), checks the order in
-DynamoDB, then has harness-manager cancel that order (declined, approved, re-cancel, shipped
-order, missing ID, prompt injection). Transcripts are in `.deploy-logs/`.
-
-`make browser-test` opens the live website in headless Brave or Chrome, signs in as a fresh
-customer and records what the chat bubble shows over time: the progress lines ("Checking
-current deals…", "Putting your answer together…"), the streamed answer, and that no internal
-reasoning ever appears.
-
-**Streaming.** The web app sends `"stream": true` and receives the answer as Server-Sent Events:
-`status` while tools run, `delta` text as it is written, `done` with the final cleaned answer.
-Without the flag the runtime returns plain JSON, as the tests and CLI use.
-
-## 7. Redeploy after changing code
-
-```bash
-FORCE=1 ./deploy.sh
-```
-
-`FORCE=1` rebuilds the container and ships the new agent code. Without it, an existing runtime is left as is.
-
-## 8. Useful options
-
-| Variable | Effect |
-|---|---|
-| `FORCE=1` | Rebuild and redeploy the agent code |
-| `YES=1` | Do not ask to confirm the account |
-| `SKIP_CI=1` | Skip the local validation step |
-| `TF_STATE_BUCKET=<name>` | Use a different Terraform state bucket name |
-
-`./deploy.sh list` shows the step names. `./deploy.sh only <step>` runs one step.
-
-## 9. Cost and tear down
-
-Two resources bill while they exist, even when idle:
-
-- OpenSearch Serverless, about $350 a month (the `kbs` step creates it)
-- Aurora Serverless v2, billed per hour
-
-Tear down everything, including harness-manager, with `./teardown.sh` (a dry run that lists what it
-would delete) and then `./teardown.sh --execute`. Run `./deploy.sh status` afterwards to confirm nothing
-is left. The orders and sessions tables are deleted with their data, so export any orders you need first.
+The web app sends `"stream": true` and receives Server-Sent Events: progress lines while tools
+run ("Checking current deals…"), then the answer as it is written. Without the flag the runtime
+returns plain JSON, which the tests and the CLI use. Memory is the current conversation only;
+there is no long-term memory across chats.

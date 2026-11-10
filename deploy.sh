@@ -56,6 +56,12 @@ s_preflight() {
     for c in aws terraform jq python3 make; do
         command -v "$c" >/dev/null 2>&1 || die "$c is not installed"
     done
+    python3 -c 'import sys; sys.exit(sys.version_info < (3, 10))' \
+        || die "Python 3.10 or later is needed ($(python3 --version 2>&1)). Recreate .venv with a newer python3."
+    local tfv
+    tfv=$(terraform version -json 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["terraform_version"])' 2>/dev/null || echo 0)
+    python3 -c "import sys; v=[int(x) for x in '$tfv'.split('.')[:2]]; sys.exit(v < [1, 10])" 2>/dev/null \
+        || die "Terraform 1.10 or later is needed (found $tfv): it uses S3 native state locking. brew install hashicorp/tap/terraform"
     python3 -c "import bedrock_agentcore_starter_toolkit, bedrock_agentcore, strands" 2>/dev/null \
         || die "Python deployment packages are missing. Run: source .venv/bin/activate && pip install -r 6_deploy/agents/requirements-deploy.txt awscurl"
     local arn acct
@@ -67,11 +73,32 @@ s_preflight() {
         read -r -p "Deploy to THIS account? [y/N] " a
         case "$a" in y|Y|yes) ;; *) die "Aborted. Switch credentials (aws configure / AWS_PROFILE) and re-run." ;; esac
     fi
-    aws bedrock-runtime converse --region "$REGION" --model-id eu.amazon.nova-pro-v1:0 \
-        --messages '[{"role":"user","content":[{"text":"Reply with OK"}]}]' \
-        --inference-config maxTokens=10 >/dev/null 2>&1 \
-        || die "Bedrock model access failed for Nova Pro (eu.amazon.nova-pro-v1:0). Enable model access in the Bedrock console (Model access), then re-run."
-    ok "Credentials and Bedrock model access are fine"
+    # Every model the deploy uses, checked now rather than 40 minutes in
+    local missing
+    missing=$(python3 - "$REGION" <<'PY'
+import json, sys
+import boto3
+rt = boto3.client("bedrock-runtime", region_name=sys.argv[1])
+missing = []
+for label, model in (("Amazon Nova Pro (assistant)", "eu.amazon.nova-pro-v1:0"),
+                     ("Amazon Nova 2 Lite (harness-manager)", "eu.amazon.nova-2-lite-v1:0")):
+    try:
+        rt.converse(modelId=model, messages=[{"role": "user", "content": [{"text": "Reply with OK"}]}],
+                    inferenceConfig={"maxTokens": 10})
+    except Exception as e:  # noqa: BLE001
+        missing.append(f"{label}: {model} ({type(e).__name__})")
+try:
+    rt.invoke_model(modelId="amazon.titan-embed-text-v2:0",
+                    body=json.dumps({"inputText": "ok", "dimensions": 1024}))
+except Exception as e:  # noqa: BLE001
+    missing.append(f"Titan Text Embeddings V2 (knowledge bases): amazon.titan-embed-text-v2:0 ({type(e).__name__})")
+print("\n".join(missing))
+PY
+)
+    [ -z "$missing" ] || die "Bedrock model access is missing in $REGION for:
+$missing
+   Enable them in the Bedrock console (Model access), then re-run ./deploy.sh"
+    ok "Credentials, tool versions and model access (Nova Pro, Nova 2 Lite, Titan Embeddings V2) are fine"
 }
 s_state()   { bash 6_deploy/scripts/terraform_backend_setup.sh; }
 s_ci() {
