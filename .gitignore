@@ -58,6 +58,7 @@ kubeconfig
 # ── Internal workflow / tool artifacts (never project source) ──
 .agents/
 .bob/
+.worktrees/
 
 # ── Raw Kaggle downloads (rebuilt by 2_data_strategy/build_from_kaggle.py) ──
 2_data_strategy/kaggle_source/
