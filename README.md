@@ -311,7 +311,7 @@ CodeCommit + CodePipeline V2 + CodeBuild, with no stored AWS keys. A push to `ma
 | `make amplify` | Ship website changes |
 | `./deploy.sh only harness` | Re-apply the harness-manager configuration or its system prompt |
 | `make backends-plan` / `make backends` | Review and apply Terraform changes to the data backends |
-| `aws s3 cp promos_records.json s3://spbc-promotions-<account>/promotions/promos_records.json` | Publish new promotions (a JSON list, `[]` for none); live within about a minute, no Terraform or redeploy |
+| `aws s3 cp <your promos_records.json> s3://spbc-promotions-<account>/promotions/promos_records.json` | Publish new promotions (a JSON list, `[]` for none); live within about a minute, no Terraform or redeploy |
 | `bash 3_proof_of_concept/knowledge_bases/setup_knowledge_bases.sh <domain>` | Re-sync one knowledge base after editing its source document |
 | `make demo-user` | Show (and repair) the default login |
 | `make eval` | 42 questions with known answers, each asked 3 times |

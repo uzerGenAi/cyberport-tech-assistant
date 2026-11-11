@@ -117,9 +117,11 @@ It prints the plan (a few dozen resources), then asks you to type `apply`. The a
 Terraform also uploads `2_data_strategy/promos/promos_records.json` to the promotions bucket once,
 as the starting promotions. From then on, change promotions without Terraform or a redeploy:
 upload a new file (a JSON list; `[]` means no promotions) and it is live within about a minute.
+Edit a copy of `2_data_strategy/promos/promos_records.json`, then upload it (run from the repo folder;
+change the first path if your file is somewhere else):
 
 ```bash
-aws s3 cp promos_records.json "s3://spbc-promotions-$(aws sts get-caller-identity --query Account --output text)/promotions/promos_records.json"
+aws s3 cp 2_data_strategy/promos/promos_records.json "s3://spbc-promotions-$(aws sts get-caller-identity --query Account --output text)/promotions/promos_records.json"
 ```
 
 Versioning is on, so a bad upload can be rolled back. If the file is missing or not valid JSON,
