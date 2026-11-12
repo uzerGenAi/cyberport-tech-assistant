@@ -255,6 +255,14 @@ make backends-plan && make backends # Terraform: Aurora, promotions API, DynamoD
 ./deploy.sh                         # everything else, then a live test
 ```
 
+When you are done, tear everything down (it bills while it exists):
+
+```bash
+./teardown.sh                       # dry run: lists what it would delete, changes nothing
+./teardown.sh --execute             # deletes it all, no snapshots; asks you to type the account ID
+./deploy.sh status                  # afterwards every line should show "missing"
+```
+
 `./deploy.sh` runs these steps in order. Each one is idempotent, so a re-run skips finished work;
 after a failure it prints the step's log (`.deploy-logs/<step>.log`) and the command to resume.
 
