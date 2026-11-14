@@ -109,14 +109,25 @@ class ReasoningStreamFilter:
         return "" if self._PARTIAL.fullmatch(rest or "x") else rest
 
 
+_ASTERISK_BULLET = re.compile(r"(?m)^([ \t]*)\*[ \t]+")
+
+
+def plain_text(text):
+    """Remove markdown asterisks (**bold**, *italic*, "* " bullets): the chat shows plain text."""
+    if not isinstance(text, str):
+        return text
+    return _ASTERISK_BULLET.sub(r"\1- ", text).replace("*", "")
+
+
 def strip_internal_reasoning(text):
-    """Remove model reasoning blocks from a customer-facing response."""
+    """Remove model reasoning blocks and markdown asterisks from a customer-facing response."""
     if not isinstance(text, str):
         return text
     cleaned = text
     for pattern in _REASONING_PATTERNS:
         cleaned = pattern.sub("", cleaned)
     cleaned = _ANSWER_TAG.sub("", cleaned)       # <answer> wrappers from the prompts: keep the content
+    cleaned = plain_text(cleaned)
     return re.sub(r"\n{3,}", "\n\n", cleaned).strip()
 
 
@@ -323,6 +334,8 @@ Your responses should:
 - For a laptop recommendation for a student, also mention the student discount from
   promos_agent_tool
 - Format prices clearly in Euros (€)
+- Use plain text only: never use asterisks or other markdown (no bold, italics, headings or tables).
+  For a list, put each item on its own line starting with a dash
 - Begin all responses with a newline
 - Acknowledge conflicting or missing information
 - Never mention internal routing to specialised agents
@@ -466,7 +479,7 @@ async def stream_answer(agent, user_input):
         async for event in agent.stream_async(user_input):
             text = event.get("data")
             if isinstance(text, str) and text:
-                visible = filt.feed(text)
+                visible = plain_text(filt.feed(text))
                 if visible:
                     streamed += visible
                     yield {"type": "delta", "text": visible}
@@ -485,7 +498,7 @@ async def stream_answer(agent, user_input):
             elif "result" in event:
                 result = event["result"]
                 final = strip_internal_reasoning(getattr(result, "text", None) or str(result))
-        tail = filt.flush()
+        tail = plain_text(filt.flush())
         if tail:
             yield {"type": "delta", "text": tail}
         if not final:

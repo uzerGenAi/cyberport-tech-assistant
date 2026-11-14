@@ -4,9 +4,9 @@ Production AWS deployment pipeline for the **Cyberport Tech Assistant** — a mu
 shopping and service assistant for an electronics retailer, built on Amazon Bedrock AgentCore and
 deployed to `eu-central-1` (Frankfurt).
 
-> **Client project for Cyberport.** Until it is connected to Cyberport's systems it runs on sample
-> data: the smartphone and laptop catalog comes from public Kaggle datasets (PcComponentes prices in
-> €, Apache 2.0); stores, stock, orders, promotions and policies are sample content. See
+> **Client project for Cyberport.** The smartphone and laptop catalog and the orders are company
+> data supplied by Cyberport; store details, stock levels, promotions and policies are still sample
+> content until they are connected to Cyberport's systems. See
 > [2_data_strategy/SOURCES.md](2_data_strategy/SOURCES.md).
 
 > **Deploy in one command:** `./deploy.sh`. Step-by-step runbook, troubleshooting and tear down: [DEPLOY.md](DEPLOY.md).
@@ -61,7 +61,7 @@ model, and order lookups require both the customer ID and the order ID.
 | CI/CD | **CodeCommit**, **CodePipeline** V2, **CodeBuild** (`amazonlinux2-x86_64-standard:5.0`) | Source, Validate (`make ci`), manual Approve, Deploy |
 | Observability | **CloudWatch** generative AI observability and Logs, OpenTelemetry (`aws-opentelemetry-distro`) | AgentCore publishes runtime metrics (`AWS/Bedrock-AgentCore`), logs and traces |
 | Tests | `make ci` (offline), `make eval` (42 answer checks), `make e2e` (customer journey + staff cancellation), `make browser-test` (headless browser, streaming) | The last three run against the live deployment in `6_deploy/eval/` |
-| Data and analysis tooling | Python, `pandas` (catalog builder), **Streamlit** (value model) | `pip install pandas` to run `2_data_strategy/build_from_kaggle.py`, `pip install streamlit` then `streamlit run 1_business_modeling/business_value.py` for the value model; neither is part of the runtime |
+| Analysis tooling | Python, **Streamlit** (value model) | `pip install streamlit` then `streamlit run 1_business_modeling/business_value.py` for the value model; not part of the runtime |
 
 ---
 
@@ -343,9 +343,8 @@ CodeCommit + CodePipeline V2 + CodeBuild, with no stored AWS keys. A push to `ma
 ├── setup_env.sh                Discovers + exports AWS resource IDs into ~/environment/env.sh
 ├── deploy_agentcore.sh         Lower-level steps used by deploy.sh (docs bucket, runtime role, tests)
 ├── 1_business_modeling/        Business value model (EUR, Streamlit)
-├── 2_data_strategy/            Seed data: product catalog (Kaggle), stores, orders, promotions, KB documents
-│   ├── build_from_kaggle.py     Rebuilds the catalog and orders from the Kaggle datasets
-│   ├── SOURCES.md               Data sources, licences, and which data is illustrative
+├── 2_data_strategy/            Seed data: product catalog, stores, orders, promotions, KB documents
+│   ├── SOURCES.md               Where the data comes from and which data is illustrative
 │   └── stores/load_stores_data_api.py   Stores loader through the RDS Data API
 ├── 3_proof_of_concept/
 │   └── knowledge_bases/         Vector store bootstrap and the four KBs (idempotent, each sync verified)
