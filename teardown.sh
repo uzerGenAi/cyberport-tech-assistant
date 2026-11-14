@@ -213,6 +213,11 @@ run_all() {
     hdr "Terraform state bucket"
     if [ "${KEEP_STATE_BUCKET:-0}" = "1" ]; then
         say "KEEP_STATE_BUCKET=1: keeping s3://$STATE_BUCKET"
+    elif [[ " ${FAILED[*]-} " == *" Terraform backends stack "* ]]; then
+        # Without its state Terraform cannot destroy what is left, so a re-run could not finish
+        # the job: keep the bucket until the backends are gone (found when a network drop
+        # interrupted terraform destroy and the state was deleted anyway)
+        warn "Keeping s3://$STATE_BUCKET because the backends were not destroyed; re-run ./teardown.sh --execute"
     else
         item "State bucket $STATE_BUCKET" "aws s3api head-bucket --bucket $STATE_BUCKET >/dev/null 2>&1 && echo $STATE_BUCKET" d_state_bucket
     fi
