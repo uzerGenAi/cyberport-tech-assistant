@@ -256,6 +256,10 @@ def ensure_harness_role(gateway_arn, gr_id, memory_arn):
          "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents", "logs:DescribeLogStreams"],
          "Resource": [f"arn:aws:logs:{REGION}:{ACCOUNT}:log-group:/aws/bedrock-agentcore/runtimes/*",
                       f"arn:aws:logs:{REGION}:{ACCOUNT}:log-group:/aws/bedrock-agentcore/runtimes/*:log-stream:*"]},
+        # AgentCore delivers spans to the harness's own log group and needs this to let X-Ray write
+        # there; without it the observability dashboard shows no sessions or traces
+        {"Sid": "SpansToAgentLogGroup", "Effect": "Allow", "Action": "logs:PutResourcePolicy",
+         "Resource": f"arn:aws:logs:{REGION}:{ACCOUNT}:log-group:/aws/bedrock-agentcore/runtimes/harness_{HARNESS_NAME}-*"},
         {"Sid": "LogsDescribe", "Effect": "Allow", "Action": "logs:DescribeLogGroups",
          "Resource": f"arn:aws:logs:{REGION}:{ACCOUNT}:log-group:*"},
         {"Sid": "Tracing", "Effect": "Allow",

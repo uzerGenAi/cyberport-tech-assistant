@@ -399,6 +399,7 @@ CodeCommit + CodePipeline V2 + CodeBuild, with no stored AWS keys. A push to `ma
 
 ### Known limitations
 
+- **Observability:** the customer runtime's spans (sessions, traces, model and tool calls) go to the `spans` stream of its own log group and show on the AgentCore Observability page. That needs `logs:PutResourcePolicy` on the runtime's log group in its execution role, which `deploy_agentcore.sh step2-iam-role` grants; a runtime created before the role had it only starts sending spans after its next update (`FORCE=1 ./deploy.sh only app`). The harness-manager role has the same permission, but the harness has not delivered spans in testing, so its Observability card can stay empty
 - **Model answers vary.** The facts come from tools, but the wording is generated, so the same question can be phrased differently between runs. `make eval` asks each question 3 times; the last full run before teardown passed 41 of 42 cases.
 - **Latency:** the first status line appears in about 3 seconds; the first words of the answer after 6 to 16 seconds, and a full answer can take about 20 seconds, because the orchestrator and a specialist each call Nova Pro.
 - **Customer identity:** the customer ID the agents use comes from the web app (`[[CTX]] userId`). It keeps demo users apart, but it is not checked against the signed-in Cognito user.

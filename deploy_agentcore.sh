@@ -510,6 +510,12 @@ TRUST
       "Resource": "arn:aws:logs:${REGION}:${ACCOUNT_ID}:log-group:/aws/bedrock-agentcore/runtimes/*"
     },
     {
+      "Sid": "SpansToAgentLogGroup",
+      "Effect": "Allow",
+      "Action": "logs:PutResourcePolicy",
+      "Resource": "arn:aws:logs:${REGION}:${ACCOUNT_ID}:log-group:/aws/bedrock-agentcore/runtimes/${RUNTIME_NAME}-*"
+    },
+    {
       "Sid": "LogsDescribe",
       "Effect": "Allow",
       "Action": "logs:DescribeLogGroups",
