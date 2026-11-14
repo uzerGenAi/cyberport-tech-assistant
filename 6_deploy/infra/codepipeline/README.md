@@ -91,7 +91,7 @@ Only `TOGGLE_DEPLOY_AGENT` is on by default. Override per run by editing the pip
 values when you start the execution.
 
 The deploy stage runs `./deploy.sh` (the same command used by hand) and maps the toggles to
-`SKIP_STEPS`. `DEMO_USERNAME` (Terraform variable `demo_username`, default `demo`) names the
+`SKIP_STEPS`. `DEMO_USERNAME` (Terraform variable `demo_username`, default `enterprise`) names the
 default sign-in user; its password lives only in Secrets Manager (`spbc-demo-user`) and is never
 printed in the build log. Read it afterwards with `make demo-user`. The smoke step runs only
 when `TOGGLE_SMOKE` is true **and** `SMOKE_TEST_URL` is set.

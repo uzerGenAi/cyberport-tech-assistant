@@ -235,7 +235,7 @@ The AWS resources and the names they are created with.
 | Security | Database credentials | Secrets Manager | `spbc-stores-db-reader` (read-only user used by the agents); the RDS-managed master secret is used only by the loader |
 | Observability | Runtime metrics (invocations, latency, errors, sessions) and logs | CloudWatch generative AI observability + Logs | namespace `AWS/Bedrock-AgentCore`, log groups `/aws/bedrock-agentcore/runtimes/<runtime-id>-DEFAULT` |
 | Staff agent | harness-manager (order lookup + approved cancellation of PROCESSING orders; other orders are handed to the team) | AgentCore harness, AgentCore Gateway (MCP), Lambda, AgentCore Memory (short-term) | `harness_manager`, `spbc-order-admin-gateway`, `spbc-order-admin`, `spbc_harness_manager_memory` |
-| Auth | Default web-app login | Cognito user + Secrets Manager | `demo`, password in `spbc-demo-user` (`make demo-user`) |
+| Auth | Default web-app login | Cognito user + Secrets Manager | `enterprise`, password in `spbc-demo-user` (`make demo-user`) |
 | IaC state | Remote state for both Terraform stacks (`agentcore-backends`, `codepipeline`), locked with an S3 lock file | S3 bucket | `spbc-tfstate-<account-id>` |
 
 ---
@@ -279,7 +279,7 @@ flowchart LR
 | `docs` / `kbs` | Documents bucket, OpenSearch Serverless vector store and the 4 knowledge bases (about 15 min) |
 | `role` / `guardrail` | Runtime execution role, Bedrock guardrail |
 | `app` | Cognito, AgentCore Memory, the runtime container (built in CodeBuild), the website on Amplify |
-| `user` | Default login `demo`; the generated password is kept in Secrets Manager (`spbc-demo-user`) |
+| `user` | Default login `enterprise`; the generated password is kept in Secrets Manager (`spbc-demo-user`) |
 | `harness` | harness-manager: AgentCore harness, MCP gateway and its target |
 | `test` | One live question per area |
 

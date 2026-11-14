@@ -19,7 +19,7 @@ import boto3
 REGION = os.environ.get("REGION") or os.environ.get("AWS_REGION") or "eu-central-1"
 POOL_NAME = "spbcuserpool"
 SECRET_ID = "spbc-demo-user"
-USERNAME = os.environ.get("DEMO_USERNAME", "demo")
+USERNAME = os.environ.get("DEMO_USERNAME", "enterprise")
 
 idp = boto3.client("cognito-idp", region_name=REGION)
 sm = boto3.client("secretsmanager", region_name=REGION)

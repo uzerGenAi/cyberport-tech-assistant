@@ -8,7 +8,7 @@ repository_name = "spbc-tech-assistant"
 
 # Default web-app sign-in user (created by deploy.sh's user step). The password is generated
 # and stored in Secrets Manager as spbc-demo-user; read it with `make demo-user`.
-# demo_username = "demo"
+# demo_username = "enterprise"
 
 # Optional frontend smoke test. Only runs when toggle_smoke is true AND this is set.
 # smoke_test_url = "https://app.example.com"

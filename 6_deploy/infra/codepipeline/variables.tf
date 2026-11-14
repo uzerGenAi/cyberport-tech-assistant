@@ -131,7 +131,7 @@ variable "toggle_smoke" {
 variable "demo_username" {
   description = "Default web-app sign-in user that deploy.sh's user step creates. Its password is generated and kept in Secrets Manager (spbc-demo-user), never in the build log."
   type        = string
-  default     = "demo"
+  default     = "enterprise"
 }
 
 variable "smoke_test_url" {

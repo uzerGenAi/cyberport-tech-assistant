@@ -156,7 +156,7 @@ It ends with:
 ```
 ✅ Deployment complete
   URL      : https://main.<app-id>.amplifyapp.com
-  Username : demo
+  Username : enterprise
   Password : <generated>
 ```
 
