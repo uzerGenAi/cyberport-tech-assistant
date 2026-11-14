@@ -122,6 +122,61 @@ button { cursor: pointer; }
   padding: 2px 8px;
 }
 
+/* ── Utility bar, site header, category menu ──────────────────────────── */
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+.utilbar { background: var(--navy); color: #e2e8f0; font-size: 0.8rem; position: relative; z-index: 70; }
+.utilbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 42px; }
+.segment { display: inline-flex; border: 1px solid #334155; border-radius: 8px; padding: 2px; }
+.segment-btn { background: transparent; border: 0; color: #cbd5e1; font-weight: 600; font-size: 0.78rem; padding: 5px 12px; border-radius: 6px; }
+.segment-btn:hover { color: #fff; }
+.segment-btn.active { background: #fff; color: var(--ink); }
+.util-links { display: flex; align-items: center; gap: 20px; }
+.util-links > a { display: inline-flex; align-items: center; gap: 6px; color: #e2e8f0; text-decoration: none; font-weight: 600; }
+.util-links > a:hover { color: #fff; text-decoration: underline; }
+.util-links .icon { width: 15px; height: 15px; }
+.util-links .dropdown-btn { padding: 4px 10px; font-size: 0.78rem; }
+
+.site-header { background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 60; }
+.header-inner { display: flex; align-items: center; gap: 28px; min-height: 76px; }
+.site-header .brand { color: var(--ink); }
+.site-header .brand-sub { color: var(--muted); }
+.ask {
+  flex: 1; max-width: 560px; display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 14px;
+  border: 1px solid var(--line-strong); border-radius: 10px; background: #fff; color: var(--muted);
+}
+.ask:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(29, 78, 216, .15); color: var(--primary); }
+.ask input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); height: 100%; }
+.ask input::placeholder { color: #94a3b8; }
+.header-actions { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+.account { display: inline-flex; align-items: center; gap: 8px; color: var(--text); font-size: 0.88rem; font-weight: 500; }
+.account .avatar { width: 30px; height: 30px; background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.account .avatar .icon { width: 16px; height: 16px; }
+.account .user-name { color: var(--ink); }
+.btn-dark { background: var(--ink); color: #fff; }
+.btn-dark:hover:not(:disabled) { background: #000; }
+.btn-lg { padding: 12px 22px; font-size: 0.95rem; }
+
+.catnav { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 48px; overflow-x: auto; scrollbar-width: none; }
+.catnav::-webkit-scrollbar { display: none; }
+.catnav-main, .catnav-side { display: flex; gap: 26px; }
+.catnav a { color: var(--ink); text-decoration: none; font-weight: 600; font-size: 0.9rem; white-space: nowrap; padding: 12px 0; border-bottom: 2px solid transparent; }
+.catnav a:hover { border-bottom-color: var(--primary); color: var(--primary); }
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 18px; background: #e8edf6; border-radius: var(--radius-lg); padding: 18px; margin-bottom: 24px; }
+.hero-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); align-items: center; position: relative; min-height: 280px; padding: 18px 22px 40px; }
+.hero-copy h1 { font-size: 2.5rem; line-height: 1.1; font-weight: 600; letter-spacing: -0.03em; margin-bottom: 14px; }
+.hero-copy h1 em { font-style: italic; font-weight: 600; }
+.hero-copy p { color: var(--text); max-width: 34ch; margin: 0 0 22px; }
+.hero-visual { position: relative; display: flex; justify-content: center; align-items: center; min-height: 220px; }
+.hero-blob { position: absolute; width: 74%; height: 76%; background: var(--primary); border-radius: 46% 54% 50% 50% / 60% 55% 45% 40%; opacity: .95; }
+.hero-visual img { position: relative; width: 84%; max-width: 340px; height: auto; filter: drop-shadow(0 18px 24px rgba(15, 23, 42, .28)); }
+.hero-note { position: absolute; left: 22px; bottom: 12px; margin: 0; display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600; color: var(--text); }
+.hero-note .icon { width: 14px; height: 14px; }
+.hero-list { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 10px; display: flex; flex-direction: column; justify-content: center; gap: 2px; box-shadow: var(--shadow); }
+.hero-list button { text-align: left; background: none; border: 0; border-radius: 6px; padding: 9px 12px; font-size: 0.88rem; font-weight: 500; color: var(--ink); }
+.hero-list button:hover { background: var(--primary-soft); color: var(--primary); }
+
 /* ── Page ─────────────────────────────────────────────────────────────── */
 .page { max-width: var(--max); margin: 0 auto; padding: 28px 24px 56px; }
 .page-head { margin-bottom: 20px; }
@@ -284,10 +339,24 @@ button { cursor: pointer; }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 1060px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .hero-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .workspace { grid-template-columns: minmax(0, 1fr); }
   .side .suggest-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 720px) {
+  .wrap { padding: 0 14px; }
+  .util-links > a { display: none; }
+  .header-inner { flex-wrap: wrap; gap: 12px; padding-top: 10px; padding-bottom: 10px; min-height: 0; }
+  .ask { order: 3; flex-basis: 100%; max-width: none; }
+  .account .user-name { display: none; }
+  .catnav-side { display: none; }
+  .hero { padding: 12px; }
+  .hero-main { grid-template-columns: minmax(0, 1fr); padding: 8px 8px 44px; min-height: 0; }
+  .hero-copy h1 { font-size: 1.9rem; }
+  .hero-visual { min-height: 170px; }
+  .hero-note { left: 8px; right: 8px; }
+  .hero-list { grid-template-columns: minmax(0, 1fr); }
   .appbar-inner { padding: 0 14px; gap: 12px; height: auto; min-height: 56px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; }
   .brand-sub, .user-name { display: none; }
   .page { padding: 18px 14px 40px; }
