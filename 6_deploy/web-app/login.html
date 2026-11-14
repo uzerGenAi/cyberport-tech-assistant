@@ -3,332 +3,115 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cyberport Tech Assistant - Login</title>
-  <meta name="theme-color" content="#1c1f2b">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,500&display=swap" rel="stylesheet">
-  <style>
-    /* Body styling to match main page */
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    /* Header styling to match main page */
-    .login-header {
-      text-align: center;
-      padding: 40px 20px 20px 20px;
-      color: white;
-    }
-    
-    .login-header h1 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 3rem;
-      margin: 0 0 10px 0;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-      color: white;
-      font-weight: 900;
-    }
-    
-    .login-header p {
-      font-size: 1.2rem;
-      margin: 0;
-      opacity: 0.9;
-      color: white;
-    }
-    
-    /* Login container styling */
-    .login-container {
-      max-width: 450px;
-      width: 90%;
-      padding: 40px;
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      margin-top: 20px;
-    }
-    
-    .login-container h2 {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      color: #667eea;
-      font-size: 2rem;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      color: #333;
-      font-weight: 500;
-      font-size: 14px;
-    }
-    
-    .form-group input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #e1e5e9;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      box-sizing: border-box;
-    }
-    
-    .form-group input:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    
-    .btn {
-      width: 100%;
-      padding: 12px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-top: 10px;
-    }
-    
-    .btn:hover {
-      background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-    
-    .btn:active {
-      transform: translateY(0);
-    }
-    
-    .error-message {
-      background-color: #fee;
-      color: #c33;
-      padding: 10px;
-      border-radius: 5px;
-      margin-top: 15px;
-      border: 1px solid #fcc;
-      display: none;
-    }
-    
-    /* Password field with eye icon */
-    .password-container {
-      position: relative;
-    }
-    
-    .password-toggle {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      color: #667eea;
-      font-size: 18px;
-      user-select: none;
-    }
-    
-    .password-toggle:hover {
-      color: #5a6fd8;
-    }
-    
-    /* Loading spinner for login button */
-    .btn.loading {
-      position: relative;
-      color: transparent;
-    }
-    
-    .btn.loading::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top: 2px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      0% { transform: translate(-50%, -50%) rotate(0deg); }
-      100% { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-    
-    /* Secondary / link styling for forgot-password */
-    .forgot-password-link {
-      display: inline-block;
-      margin-top: 14px;
-      color: #667eea;
-      font-size: 14px;
-      font-weight: 500;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .forgot-password-link:hover {
-      color: #5a6fd8;
-      text-decoration: underline;
-    }
-
-    .link-button {
-      background: none;
-      border: none;
-      padding: 0;
-      font: inherit;
-    }
-
-    .success-message {
-      background-color: #e8f5e9;
-      color: #2e7d32;
-      padding: 10px;
-      border-radius: 5px;
-      margin-top: 15px;
-      border: 1px solid #c8e6c9;
-      display: none;
-    }
-
-    .reset-hint {
-      color: #666;
-      font-size: 13px;
-      margin: 0 0 20px 0;
-      text-align: center;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* Responsive design */
-    @media (max-width: 768px) {
-      .login-header h1 {
-        font-size: 2rem;
-      }
-      
-      .login-container {
-        padding: 30px 20px;
-        margin: 10px;
-      }
-    }
-  </style>
-  <!-- Cyberport theme (shared with index.html) -->
-  <link rel="stylesheet" href="cyberport-theme.css?v=1">
+  <title>Sign in | Cyberport Tech Assistant</title>
+  <meta name="theme-color" content="#0b1220">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css?v=1">
   <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
   <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1563.0.min.js"></script>
   <script src="cognito-enhanced.js?v=5"></script>
 </head>
 <body>
-  <div class="cp-topbar">
-    <div class="cp-wrap cp-topbar-inner">
-      <div class="cp-segment" role="group" aria-label="Customer type">
-        <span class="cp-segment-btn active">Private customers</span>
-        <span class="cp-segment-btn">Business customers</span>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 01-8.5 8.5 8.7 8.7 0 01-3.8-.9L3 21l1.9-5.4A8.4 8.4 0 014 11.5 8.5 8.5 0 0112.5 3 8.4 8.4 0 0121 11.5z"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="auth">
+    <section class="auth-brand" aria-label="About the Tech Assistant">
+      <div>
+        <span class="brand">
+          <span class="brand-mark" aria-hidden="true"><svg class="icon"><use href="#i-chat"/></svg></span>
+          <span class="brand-text"><span class="brand-name">Cyberport</span><span class="brand-sub">Tech Assistant</span></span>
+        </span>
+        <h1>One assistant for products, stock and orders</h1>
+        <p>Answers come from the catalog, the store systems and the order database, so customers and staff get current information.</p>
+        <ul class="auth-points">
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>Product advice and comparisons for smartphones and laptops</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>Stock and opening hours for each store</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>Order status, returns and payment questions</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>Current promotions and how to qualify</span></li>
+        </ul>
       </div>
-    </div>
-  </div>
-  <header class="cp-header">
-    <div class="cp-wrap cp-header-inner">
-      <span class="cp-wordmark" aria-label="Tech Assistant">
-        <span class="cp-mark" aria-hidden="true"></span>
-        <span class="cp-wordmark-text">tech assistant</span>
-      </span>
-    </div>
-  </header>
-  <div class="login-header">
-    <h1>Welcome back</h1>
-    <p>Sign in to chat with your Tech Assistant: products, store stock, orders, payments and deals.</p>
-  </div>
-  
-  <div class="login-container">
-    <h2>Sign In</h2>
-    
-    <form id="loginForm">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" required>
+      <div class="auth-foot">Access is limited to authorised users.</div>
+    </section>
+
+    <section class="auth-main">
+      <div class="auth-card login-container" id="login-container">
+        <h2>Sign in</h2>
+        <p class="lead">Use the account provided to you.</p>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-container">
+              <input type="password" id="password" name="password" autocomplete="current-password" required>
+              <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="Show or hide password">Show</button>
+            </div>
+          </div>
+
+          <div class="login-actions">
+            <button type="submit" class="btn btn-primary btn-block" id="login-button">Sign in</button>
+            <button type="button" class="btn btn-secondary btn-block" id="preview-button">Continue in preview mode</button>
+          </div>
+
+          <div id="errorMessage" class="error-message" role="alert"></div>
+          <p class="helper-text">Preview mode shows the interface with local sample data and does not use live AWS credentials.</p>
+
+          <div class="auth-links">
+            <button type="button" class="link-button" id="forgot-password-link">Forgot password?</button>
+          </div>
+        </form>
       </div>
-      
-      <div class="form-group">
-        <label for="password">Password</label>
-        <div class="password-container">
-          <input type="password" id="password" name="password" required>
-          <span class="password-toggle" onclick="togglePassword()">👁️</span>
+
+      <!-- Password reset panel -->
+      <div class="auth-card login-container hidden" id="reset-container">
+        <h2>Reset password</h2>
+        <p class="lead">We send a reset code to the email address on your account.</p>
+
+        <!-- Stage 1: request a reset code -->
+        <form id="resetRequestForm">
+          <div class="form-group">
+            <label for="reset-username">Username</label>
+            <input type="text" id="reset-username" name="reset-username" autocapitalize="none" spellcheck="false" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="send-code-button">Send reset code</button>
+        </form>
+
+        <!-- Stage 2: enter the code and a new password -->
+        <form id="resetConfirmForm" class="hidden">
+          <p class="reset-hint">Check your email for the reset code, then set a new password.</p>
+          <div class="form-group">
+            <label for="reset-code">Reset code</label>
+            <input type="text" id="reset-code" name="reset-code" inputmode="numeric" autocomplete="one-time-code" required>
+          </div>
+          <div class="form-group">
+            <label for="new-password">New password</label>
+            <div class="password-container">
+              <input type="password" id="new-password" name="new-password" autocomplete="new-password" required>
+              <button type="button" class="password-toggle" onclick="toggleResetPassword()" aria-label="Show or hide password">Show</button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="confirm-reset-button">Reset password</button>
+        </form>
+
+        <div id="resetErrorMessage" class="error-message" role="alert"></div>
+        <div id="resetSuccessMessage" class="success-message" role="status"></div>
+
+        <div class="auth-links">
+          <button type="button" class="link-button" id="back-to-login-link">Back to sign in</button>
         </div>
       </div>
-      
-      <div class="login-actions">
-        <button type="submit" class="btn" id="login-button">
-          Sign In
-        </button>
-        <button type="button" class="btn btn-secondary" id="preview-button">
-          Try Preview Mode
-        </button>
-      </div>
-      
-      <div id="errorMessage" class="error-message"></div>
-      <p class="helper-text">Preview mode lets you explore the experience locally without live AWS credentials.</p>
-
-      <div style="text-align:center;">
-        <button type="button" class="forgot-password-link link-button" id="forgot-password-link">Forgot password?</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Password reset panel -->
-  <div class="login-container hidden" id="reset-container">
-    <h2>Reset Password</h2>
-
-    <!-- Stage 1: request a reset code -->
-    <form id="resetRequestForm">
-      <p class="reset-hint">Enter your username and we'll send a reset code to your registered email.</p>
-      <div class="form-group">
-        <label for="reset-username">Username</label>
-        <input type="text" id="reset-username" name="reset-username" required>
-      </div>
-      <button type="submit" class="btn" id="send-code-button">Send Reset Code</button>
-    </form>
-
-    <!-- Stage 2: enter the code and a new password -->
-    <form id="resetConfirmForm" class="hidden">
-      <p class="reset-hint">Check your email for the reset code, then set a new password.</p>
-      <div class="form-group">
-        <label for="reset-code">Reset Code</label>
-        <input type="text" id="reset-code" name="reset-code" inputmode="numeric" autocomplete="one-time-code" required>
-      </div>
-      <div class="form-group">
-        <label for="new-password">New Password</label>
-        <div class="password-container">
-          <input type="password" id="new-password" name="new-password" required>
-          <span class="password-toggle" onclick="toggleResetPassword()">👁️</span>
-        </div>
-      </div>
-      <button type="submit" class="btn" id="confirm-reset-button">Reset Password</button>
-    </form>
-
-    <div id="resetErrorMessage" class="error-message"></div>
-    <div id="resetSuccessMessage" class="success-message"></div>
-
-    <div style="text-align:center;">
-      <button type="button" class="forgot-password-link link-button" id="back-to-login-link">← Back to Sign In</button>
-    </div>
+    </section>
   </div>
 
   <script>
@@ -478,24 +261,24 @@
       const icon = document.querySelector('#resetConfirmForm .password-toggle');
       if (field.type === 'password') {
         field.type = 'text';
-        icon.textContent = '🙈';
+        icon.textContent = 'Hide';
       } else {
         field.type = 'password';
-        icon.textContent = '👁️';
+        icon.textContent = 'Show';
       }
     }
     
     // Password toggle functionality
     function togglePassword() {
       const passwordField = document.getElementById('password');
-      const toggleIcon = document.querySelector('.password-toggle');
+      const toggleIcon = document.querySelector('#loginForm .password-toggle');
       
       if (passwordField.type === 'password') {
         passwordField.type = 'text';
-        toggleIcon.textContent = '🙈';
+        toggleIcon.textContent = 'Hide';
       } else {
         passwordField.type = 'password';
-        toggleIcon.textContent = '👁️';
+        toggleIcon.textContent = 'Show';
       }
     }
   </script>

@@ -4,454 +4,308 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cyberport Tech Assistant</title>
-  <meta name="theme-color" content="#1c1f2b">
+  <meta name="theme-color" content="#0b1220">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="enhanced-styles.css">
-  <!-- Cyberport theme (overrides enhanced-styles.css) -->
-  <link rel="stylesheet" href="cyberport-theme.css?v=1">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css?v=1">
   <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
   <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1563.0.min.js"></script>
   <script src="cognito-enhanced.js?v=5"></script>
 </head>
 <body>
-  <!-- Utility bar -->
-  <div class="cp-topbar">
-    <div class="cp-wrap cp-topbar-inner">
-      <div class="cp-segment" role="group" aria-label="Customer type">
-        <button type="button" class="cp-segment-btn active" aria-pressed="true">Private customers</button>
-        <button type="button" class="cp-segment-btn" aria-pressed="false"
-                onclick="sendSamplePrompt('What discounts do you have for business customers?')">Business customers</button>
-      </div>
-      <nav class="cp-toplinks" aria-label="Service links">
-        <a href="#chatbot" onclick="document.getElementById('storeLocatorButton').click()"><span aria-hidden="true">📍</span> Stores</a>
-        <a href="#chatbot" onclick="sendSamplePrompt('Which repair and recycling services do your stores offer?')"><span aria-hidden="true">🛠</span> Services</a>
-        <a href="#chatbot" onclick="sendSamplePrompt('How can I contact customer service?')"><span aria-hidden="true">💬</span> Contact</a>
-      </nav>
-    </div>
-  </div>
+  <!-- Icon sprite: every icon on the page is an inline SVG referenced with <use> -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 01-8.5 8.5 8.7 8.7 0 01-3.8-.9L3 21l1.9-5.4A8.4 8.4 0 014 11.5 8.5 8.5 0 0112.5 3 8.4 8.4 0 0121 11.5z"/></symbol>
+      <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></symbol>
+      <symbol id="i-compare" viewBox="0 0 24 24"><path d="M7 7h13M16 3l4 4-4 4M17 17H4M8 13l-4 4 4 4"/></symbol>
+      <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></symbol>
+      <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20 12l-8 8-9-9V3h8l9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+      <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></symbol>
+      <symbol id="i-truck" viewBox="0 0 24 24"><path d="M1 6h13v10H1zM14 10h4l4 3v3h-8z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+      <symbol id="i-return" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M20 20v-7a4 4 0 00-4-4H4"/></symbol>
+      <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+      <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></symbol>
+      <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></symbol>
+    </defs>
+  </svg>
 
-  <!-- Main header: wordmark, ask bar, account -->
-  <header class="cp-header">
-    <div class="cp-wrap cp-header-inner">
-      <a class="cp-wordmark" href="#" aria-label="Tech Assistant home">
-        <span class="cp-mark" aria-hidden="true"></span>
-        <span class="cp-wordmark-text">tech assistant</span>
+  <header class="appbar">
+    <div class="appbar-inner">
+      <a class="brand" href="index.html" aria-label="Cyberport Tech Assistant home">
+        <span class="brand-mark" aria-hidden="true"><svg class="icon"><use href="#i-chat"/></svg></span>
+        <span class="brand-text">
+          <span class="brand-name">Cyberport</span>
+          <span class="brand-sub">Tech Assistant</span>
+        </span>
       </a>
-      <form class="cp-search" id="cp-ask-form" role="search" onsubmit="event.preventDefault(); const q=document.getElementById('cp-ask-input'); if (q.value.trim()) { sendSamplePrompt(q.value.trim()); q.value=''; }">
-        <span class="cp-search-icon" aria-hidden="true"></span>
-        <label for="cp-ask-input" class="cp-sr-only">Ask the Tech Assistant</label>
-        <input id="cp-ask-input" type="search" placeholder="What are you looking for? Ask the Tech Assistant…" autocomplete="off">
-      </form>
-      <div class="cp-header-actions">
-        <span class="cp-account" id="cp-account" title="Signed in"><span aria-hidden="true">👤</span><span id="cp-account-name">Account</span></span>
-        <button id="signOutButton" class="cp-icon-btn top-signout" type="button">Sign out</button>
+      <span class="appbar-spacer"></span>
+      <div class="appbar-actions">
+        <!-- Monitoring links (CloudWatch). IDs are used by the inline script below -->
+        <div class="dropdown-container">
+          <button id="cloudwatchButton" class="dropdown-btn on-dark" type="button" aria-haspopup="true" aria-expanded="false">
+            <svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>
+            <span class="btn-text">Monitoring</span>
+            <svg class="icon chev" aria-hidden="true"><use href="#i-chevron"/></svg>
+          </button>
+          <div id="cloudwatchDropdown" class="dropdown-menu">
+            <a href="#" id="agentDashboardLink" class="dropdown-item">
+              <svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>Agent dashboard
+            </a>
+            <a href="#" id="agentLogsLink" class="dropdown-item">
+              <svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg>Agent logs
+            </a>
+          </div>
+        </div>
+        <div class="user-chip" id="cp-account" title="Signed in">
+          <span class="avatar" id="account-initial" aria-hidden="true">U</span>
+          <span class="user-name" id="cp-account-name">Account</span>
+        </div>
+        <button id="signOutButton" class="btn btn-ghost-dark" type="button">
+          <svg class="icon" aria-hidden="true"><use href="#i-logout"/></svg>Sign out
+        </button>
       </div>
     </div>
-    <nav class="cp-wrap cp-nav" aria-label="Product categories">
-      <div class="cp-nav-main">
-        <a href="#products" onclick="openCategory('smartphones')">Smartphones</a>
-        <a href="#products" onclick="openCategory('premium_laptops')">Premium laptops</a>
-        <a href="#products" onclick="openCategory('gaming_laptops')">Gaming</a>
-        <a href="#products" onclick="openCategory('business_laptops')">Business</a>
-        <a href="#products" onclick="openCategory('everyday_laptops')">Everyday laptops</a>
-        <a href="#products" onclick="openCategory('refurbished_laptops')">Refurbished</a>
-      </div>
-      <div class="cp-nav-side">
-        <a href="#chatbot" onclick="sendSamplePrompt('Which promotions are running right now?')">Deals</a>
-        <a href="#chatbot" onclick="sendSamplePrompt('Do you have refurbished laptops?')">Outlet</a>
-      </div>
-    </nav>
   </header>
 
-  <div class="main-container">
-    <!-- Filled in by script-enhanced.js when the app is in preview or limited mode.
-         Hidden while everything is live. -->
-    <div id="app-state-banner" class="app-state-banner" role="status" aria-live="polite" hidden></div>
-
-    <section class="cp-hero" aria-label="Featured">
-      <div class="cp-hero-main">
-        <div class="cp-hero-copy">
-          <h1><em>Flexible</em> with<br>0% financing</h1>
-          <p>Spread purchases from €299 over 6, 12 or 24 months. Ask the Tech Assistant which devices qualify.</p>
-          <a class="cp-btn-dark" href="#chatbot" onclick="sendSamplePrompt('Can I pay for a laptop in instalments?')">Find out more</a>
-        </div>
-        <div class="cp-hero-visual">
-          <span class="cp-blob" aria-hidden="true"></span>
-          <img src="hero-devices.svg" alt="A laptop and a smartphone" width="320" height="240" decoding="async">
-        </div>
-        <p class="cp-hero-note"><span aria-hidden="true">ⓘ</span> Please note: taking out credit costs money. Illustrative demo offer.</p>
-      </div>
-      <aside class="cp-hero-list" aria-label="Quick questions">
-        <button type="button" class="active" onclick="sendSamplePrompt('Which laptop under €1,000 is best for a student?')">Best student laptop under €1,000</button>
-        <button type="button" onclick="sendSamplePrompt('Which promotions are running right now?')">% Deals this week %</button>
-        <button type="button" onclick="sendSamplePrompt('Compare the Apple iPhone 14 and the Samsung Galaxy S23')">iPhone 14 vs Galaxy S23</button>
-        <button type="button" onclick="sendSamplePrompt('Recommend a gaming laptop under 1000 euros')">Gaming laptops under €1,000</button>
-        <button type="button" onclick="sendSamplePrompt('How does the trade-in bonus work?')">Trade-in bonus: +€50</button>
-        <button type="button" onclick="sendSamplePrompt('Is the Black Friday sale on right now?')">BLACK NOVEMBER</button>
-        <button type="button" onclick="sendSamplePrompt('What is the status of order ord_2055_023 for customer_2055?')">Track an order</button>
-        <button type="button" onclick="sendSamplePrompt('Which stores have a 24/7 pickup station?')">Click &amp; collect stores</button>
-      </aside>
-    </section>
-
-    <div class="chatbot-section">
-      <div class="chatbot-header">
-        <h2 class="cp-section-title">Your Tech Assistant</h2>
-        <div class="user-controls-header">
-          <div class="connection-status" id="connection-status">Connecting...</div>
-          
-          <!-- CloudWatch Dropdown Button -->
-          <div class="dropdown-container">
-            <button id="cloudwatchButton" class="bubble-btn cloudwatch-btn compact">
-              <span class="btn-icon">📊</span>
-              <span class="btn-text">CloudWatch</span>
-              <span class="dropdown-arrow">▼</span>
-            </button>
-            <div id="cloudwatchDropdown" class="dropdown-menu">
-              <a href="#" id="agentDashboardLink" class="dropdown-item">
-                <span class="dropdown-icon">📈</span>
-                Agent Dashboard
-              </a>
-              <a href="#" id="agentLogsLink" class="dropdown-item">
-                <span class="dropdown-icon">📋</span>
-                Agent Logs
-              </a>
-            </div>
-          </div>
-          
-          <!-- Store Locator Dropdown Button -->
-          <div class="dropdown-container">
-            <button id="storeLocatorButton" class="bubble-btn store-locator-btn compact">
-              <span class="btn-icon">📍</span>
-              <span class="btn-text" id="selected-store-text">Select Store</span>
-              <span class="dropdown-arrow">▼</span>
-            </button>
-            <div id="storeLocatorDropdown" class="dropdown-menu store-dropdown-menu">
-              <!-- Store options will be populated by JavaScript -->
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Enhanced Chatbot Widget - Larger Size -->
-      <div class="chatbot-container-main large" id="chatbot">
-        <div class="chatbot-messages" id="chatbot-messages">
-          <div class="bot-message" id="initial-greeting">Loading...</div>
-        </div>
-        <form class="chatbot-input-area" id="chatbot-form">
-          <label for="chatbot-input" class="cp-sr-only">Message</label>
-          <input type="text" id="chatbot-input" placeholder="Ask about products, stock, orders, payments or deals…" autocomplete="off" required>
-          <button type="submit">Send</button>
-        </form>
-      </div>
-      
-      <!-- Sample Prompts Section -->
-      <div class="sample-prompts">
-        <h3>Popular questions</h3>
-        <p class="prompt-sub">Tap a question to ask the Tech Assistant. Each one uses a different part of the system.</p>
-        <div class="prompt-grid">
-          <button type="button" class="prompt-card" onclick="sendSamplePrompt('Which laptop under €1,000 is best for a student?')">
-            <span class="prompt-card-label"><span aria-hidden="true">💻</span> Products</span>
-            <span class="prompt-card-q">Which laptop under €1,000 is best for a student?</span>
-            <span class="prompt-card-src">Catalog, ranked by specs</span>
-          </button>
-          <button type="button" class="prompt-card" onclick="sendSamplePrompt('Compare the Apple iPhone 14 and the Samsung Galaxy S23')">
-            <span class="prompt-card-label"><span aria-hidden="true">⚖️</span> Compare</span>
-            <span class="prompt-card-q">Compare the Apple iPhone 14 and the Samsung Galaxy S23</span>
-            <span class="prompt-card-src">Catalog prices per storage size</span>
-          </button>
-          <button type="button" class="prompt-card" onclick="sendSamplePrompt('Is the Apple iPhone 14 in stock at my store?')">
-            <span class="prompt-card-label"><span aria-hidden="true">📦</span> Store stock</span>
-            <span class="prompt-card-q">Is the Apple iPhone 14 in stock at my store?</span>
-            <span class="prompt-card-src">Uses your selected store</span>
-          </button>
-          <button type="button" class="prompt-card" onclick="sendSamplePrompt('Which deals are running right now?')">
-            <span class="prompt-card-label"><span aria-hidden="true">🏷️</span> Deals</span>
-            <span class="prompt-card-q">Which deals are running right now?</span>
-            <span class="prompt-card-src">Live promotions API</span>
-          </button>
-          <button type="button" class="prompt-card" onclick="sendSamplePrompt('When is the Munich store open?')">
-            <span class="prompt-card-label"><span aria-hidden="true">📍</span> Stores</span>
-            <span class="prompt-card-q">When is the Munich store open?</span>
-            <span class="prompt-card-src">Store database</span>
-          </button>
-          <button type="button" class="prompt-card" onclick="sendSamplePrompt('Can I pay for a laptop in instalments?')">
-            <span class="prompt-card-label"><span aria-hidden="true">💳</span> Payments</span>
-            <span class="prompt-card-q">Can I pay for a laptop in instalments?</span>
-            <span class="prompt-card-src">Payments knowledge base</span>
-          </button>
-          <button type="button" class="prompt-card" onclick="sendSamplePrompt('What is the status of order ord_2055_023 for customer_2055?')">
-            <span class="prompt-card-label"><span aria-hidden="true">🚚</span> Orders</span>
-            <span class="prompt-card-q">What is the status of order ord_2055_023 for customer_2055?</span>
-            <span class="prompt-card-src">Orders database</span>
-          </button>
-          <button type="button" class="prompt-card" onclick="sendSamplePrompt('How long do I have to return an online order?')">
-            <span class="prompt-card-label"><span aria-hidden="true">↩️</span> Returns</span>
-            <span class="prompt-card-q">How long do I have to return an online order?</span>
-            <span class="prompt-card-src">Returns policy</span>
-          </button>
-        </div>
-      </div>
+  <main class="page">
+    <div class="page-head">
+      <h1>Tech Assistant</h1>
+      <p>Product advice, store stock, orders, payments and promotions for smartphones and laptops, in one place.</p>
     </div>
 
-    <!-- Product catalog section (the CSS classes keep their original menu-* names) -->
-    <div class="menu-section" id="products">
-      <h2 class="cp-section-title">Our products</h2>
-      <div class="menu-categories" id="menu-categories">
+    <!-- Filled in by script-enhanced.js when the app is in preview or limited mode. Hidden while live. -->
+    <div id="app-state-banner" class="app-state-banner" role="status" aria-live="polite" hidden></div>
+
+    <div class="workspace">
+      <section class="panel chat-panel" aria-label="Assistant">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">Assistant</h2>
+            <div class="panel-sub">Answers use your selected store.</div>
+          </div>
+          <div class="panel-tools">
+            <div class="connection-status" id="connection-status">Connecting...</div>
+            <div class="dropdown-container">
+              <button id="storeLocatorButton" class="dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                <span class="btn-text" id="selected-store-text">Select store</span>
+                <svg class="icon chev" aria-hidden="true"><use href="#i-chevron"/></svg>
+              </button>
+              <div id="storeLocatorDropdown" class="dropdown-menu store-dropdown-menu">
+                <!-- Store options are filled in by the script below -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chat" id="chatbot">
+          <div class="chatbot-messages" id="chatbot-messages" aria-live="polite">
+            <div class="bot-message" id="initial-greeting">Loading...</div>
+          </div>
+          <form class="chatbot-input-area" id="chatbot-form">
+            <label for="chatbot-input" class="sr-only">Message</label>
+            <input type="text" id="chatbot-input" placeholder="Ask about products, stock, orders, payments or promotions" autocomplete="off" required>
+            <button type="submit" class="btn btn-primary">
+              <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>Send
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <aside class="panel side" aria-label="Suggested questions">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">Suggested questions</h2>
+            <div class="panel-sub">Select one to ask the assistant.</div>
+          </div>
+        </div>
+        <div class="suggest-list">
+          <button type="button" class="suggest" onclick="sendSamplePrompt('Which laptop under €1,000 is best for a student?')">
+            <span class="suggest-icon"><svg class="icon"><use href="#i-laptop"/></svg></span>
+            <span><span class="suggest-label">Products</span><span class="suggest-q">Which laptop under €1,000 is best for a student?</span><span class="suggest-src">Catalog, ranked by specifications</span></span>
+          </button>
+          <button type="button" class="suggest" onclick="sendSamplePrompt('Compare the Apple iPhone 14 and the Samsung Galaxy S23')">
+            <span class="suggest-icon"><svg class="icon"><use href="#i-compare"/></svg></span>
+            <span><span class="suggest-label">Compare</span><span class="suggest-q">Compare the Apple iPhone 14 and the Samsung Galaxy S23</span><span class="suggest-src">Catalog prices per storage size</span></span>
+          </button>
+          <button type="button" class="suggest" onclick="sendSamplePrompt('Is the Apple iPhone 14 in stock at my store?')">
+            <span class="suggest-icon"><svg class="icon"><use href="#i-box"/></svg></span>
+            <span><span class="suggest-label">Store stock</span><span class="suggest-q">Is the Apple iPhone 14 in stock at my store?</span><span class="suggest-src">Uses the store selected above</span></span>
+          </button>
+          <button type="button" class="suggest" onclick="sendSamplePrompt('Which deals are running right now?')">
+            <span class="suggest-icon"><svg class="icon"><use href="#i-tag"/></svg></span>
+            <span><span class="suggest-label">Promotions</span><span class="suggest-q">Which deals are running right now?</span><span class="suggest-src">Promotions API</span></span>
+          </button>
+          <button type="button" class="suggest" onclick="sendSamplePrompt('When is the Munich store open?')">
+            <span class="suggest-icon"><svg class="icon"><use href="#i-pin"/></svg></span>
+            <span><span class="suggest-label">Stores</span><span class="suggest-q">When is the Munich store open?</span><span class="suggest-src">Store database</span></span>
+          </button>
+          <button type="button" class="suggest" onclick="sendSamplePrompt('Can I pay for a laptop in instalments?')">
+            <span class="suggest-icon"><svg class="icon"><use href="#i-card"/></svg></span>
+            <span><span class="suggest-label">Payments</span><span class="suggest-q">Can I pay for a laptop in instalments?</span><span class="suggest-src">Payments knowledge base</span></span>
+          </button>
+          <button type="button" class="suggest" onclick="sendSamplePrompt('What is the status of order ord_2055_023 for customer_2055?')">
+            <span class="suggest-icon"><svg class="icon"><use href="#i-truck"/></svg></span>
+            <span><span class="suggest-label">Orders</span><span class="suggest-q">What is the status of order ord_2055_023 for customer_2055?</span><span class="suggest-src">Orders database</span></span>
+          </button>
+          <button type="button" class="suggest" onclick="sendSamplePrompt('How long do I have to return an online order?')">
+            <span class="suggest-icon"><svg class="icon"><use href="#i-return"/></svg></span>
+            <span><span class="suggest-label">Returns</span><span class="suggest-q">How long do I have to return an online order?</span><span class="suggest-src">Returns policy</span></span>
+          </button>
+        </div>
+      </aside>
+    </div>
+
+    <section class="panel catalog" id="products" aria-label="Product catalog">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Product catalog</h2>
+          <div class="panel-sub">Select a product to ask the assistant about it. Live prices and stock come from the assistant.</div>
+        </div>
+      </div>
+      <div class="tabs" id="catalog-tabs" role="tablist" aria-label="Product categories"></div>
+      <div class="catalog-desc" id="catalog-desc"></div>
+      <div class="catalog-grid" id="menu-categories">
         <!-- Products are loaded dynamically -->
         <div class="loading-menu">Loading products...</div>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <!-- Include enhanced scripts -->
-  <script src="agentcore-client-fixed.js?v=5"></script>
-  <script src="script-enhanced.js?v=5"></script>
-  
+  <script src="agentcore-client-fixed.js?v=6"></script>
+  <script src="script-enhanced.js?v=6"></script>
+
   <script>
-    // Store Locator functionality
+    // ── Stores and the store selector ─────────────────────────────────────
     let selectedStore = null;
     let storeData = [];
-    
-    // Load store data from the stores records
-    async function loadStoreData() {
-      try {
-        // Store data from 2_data_strategy/stores/stores_records.json (demo stores)
-        storeData = [
-          {"store_id": "spbc-de-001", "name": "Cyberport Store Dresden", "address": "Prager Straße 8", "city": "Dresden", "zip_code": "01069", "has_drive_thru": true, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
-          {"store_id": "spbc-de-002", "name": "Cyberport Store Berlin", "address": "Friedrichstraße 50-55", "city": "Berlin", "zip_code": "10117", "has_drive_thru": true, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
-          {"store_id": "spbc-de-003", "name": "Cyberport Store Hamburg", "address": "Ballindamm 40", "city": "Hamburg", "zip_code": "20095", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
-          {"store_id": "spbc-de-004", "name": "Cyberport Store Leipzig", "address": "Neumarkt 29-33", "city": "Leipzig", "zip_code": "04109", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
-          {"store_id": "spbc-de-005", "name": "Cyberport Store Dortmund", "address": "Westenhellweg 102-106", "city": "Dortmund", "zip_code": "44137", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
-          {"store_id": "spbc-de-006", "name": "Cyberport Store Bochum", "address": "Kortumstraße 100", "city": "Bochum", "zip_code": "44787", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
-          {"store_id": "spbc-de-007", "name": "Cyberport Store München", "address": "Kaufingerstraße 15", "city": "München", "zip_code": "80331", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
-          {"store_id": "spbc-de-008", "name": "Cyberport Store Köln", "address": "Hohe Straße 88", "city": "Köln", "zip_code": "50667", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
-          {"store_id": "spbc-at-001", "name": "Cyberport Store Wien", "address": "Mariahilfer Straße 78", "city": "Wien", "zip_code": "1060", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "19:00", "state": "AT"}
-        ];
 
-        // Set default store to Dresden (spbc-de-001)
-        selectedStore = storeData.find(store => store.store_id === "spbc-de-001");
-        updateSelectedStoreDisplay();
-        populateStoreDropdown();
+    function loadStoreData() {
+      // Sample store list from 2_data_strategy/stores/stores_records.json
+      storeData = [
+        {"store_id": "spbc-de-001", "name": "Cyberport Store Dresden", "address": "Prager Straße 8", "city": "Dresden", "zip_code": "01069", "has_drive_thru": true, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+        {"store_id": "spbc-de-002", "name": "Cyberport Store Berlin", "address": "Friedrichstraße 50-55", "city": "Berlin", "zip_code": "10117", "has_drive_thru": true, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+        {"store_id": "spbc-de-003", "name": "Cyberport Store Hamburg", "address": "Ballindamm 40", "city": "Hamburg", "zip_code": "20095", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+        {"store_id": "spbc-de-004", "name": "Cyberport Store Leipzig", "address": "Neumarkt 29-33", "city": "Leipzig", "zip_code": "04109", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+        {"store_id": "spbc-de-005", "name": "Cyberport Store Dortmund", "address": "Westenhellweg 102-106", "city": "Dortmund", "zip_code": "44137", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+        {"store_id": "spbc-de-006", "name": "Cyberport Store Bochum", "address": "Kortumstraße 100", "city": "Bochum", "zip_code": "44787", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+        {"store_id": "spbc-de-007", "name": "Cyberport Store München", "address": "Kaufingerstraße 15", "city": "München", "zip_code": "80331", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+        {"store_id": "spbc-de-008", "name": "Cyberport Store Köln", "address": "Hohe Straße 88", "city": "Köln", "zip_code": "50667", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "20:00", "state": "DE"},
+        {"store_id": "spbc-at-001", "name": "Cyberport Store Wien", "address": "Mariahilfer Straße 78", "city": "Wien", "zip_code": "1060", "has_drive_thru": false, "hours_start": "10:00", "hours_end": "19:00", "state": "AT"}
+      ];
 
-      } catch (error) {
-        console.error('Error loading store data:', error);
-      }
+      // The default store is also what the assistant is told about until the user picks another
+      const saved = sessionStorage.getItem('selectedStore');
+      let initial = null;
+      try { initial = saved ? JSON.parse(saved) : null; } catch (e) { initial = null; }
+      selectedStore = (initial && storeData.find(s => s.store_id === initial.store_id))
+        || storeData.find(s => s.store_id === 'spbc-de-001');
+      if (selectedStore) sessionStorage.setItem('selectedStore', JSON.stringify(selectedStore));
+      updateSelectedStoreDisplay();
+      populateStoreDropdown();
     }
-    
+
     function populateStoreDropdown() {
       const dropdown = document.getElementById('storeLocatorDropdown');
       if (!dropdown) return;
-      
-      // Group stores by city
-      const storesByCity = {};
+      const byCity = {};
       storeData.forEach(store => {
-        const cityState = `${store.city}, ${store.state}`;
-        if (!storesByCity[cityState]) {
-          storesByCity[cityState] = [];
-        }
-        storesByCity[cityState].push(store);
+        const key = `${store.city}, ${store.state}`;
+        (byCity[key] = byCity[key] || []).push(store);
       });
-      
-      // Sort cities alphabetically
-      const sortedCities = Object.keys(storesByCity).sort();
-      
-      let dropdownHTML = '';
-      sortedCities.forEach(cityState => {
-        dropdownHTML += `<div class="store-city-group">`;
-        dropdownHTML += `<div class="store-city-header">${cityState}</div>`;
-        
-        // Sort stores within city by name
-        storesByCity[cityState].sort((a, b) => a.name.localeCompare(b.name));
-        
-        storesByCity[cityState].forEach(store => {
-          const hours = `Mon–Sat ${store.hours_start} - ${store.hours_end}`;
+      let html = '';
+      Object.keys(byCity).sort().forEach(key => {
+        html += `<div class="store-city-group"><div class="store-city-header">${esc(key)}</div>`;
+        byCity[key].sort((a, b) => a.name.localeCompare(b.name)).forEach(store => {
           // has_drive_thru marks a 24/7 pickup station (column name kept from the original schema)
-          const driveThruBadge = store.has_drive_thru ? '<span class="drive-thru-badge">Pickup station</span>' : '';
-          
-          dropdownHTML += `
-            <div class="store-item" onclick="selectStore('${store.store_id}')">
-              <div class="store-name">${store.name}${driveThruBadge}</div>
-              <div class="store-address">${store.address}, ${store.city}, ${store.state} ${store.zip_code}</div>
-              <div class="store-hours">Hours: ${hours}</div>
-            </div>
-          `;
+          const badge = store.has_drive_thru ? '<span class="drive-thru-badge">Pickup station</span>' : '';
+          html += `
+            <div class="store-item" onclick="selectStore('${esc(store.store_id)}')">
+              <div class="store-name">${esc(store.name)}${badge}</div>
+              <div class="store-address">${esc(store.address)}, ${esc(store.city)}, ${esc(store.state)} ${esc(store.zip_code)}</div>
+              <div class="store-hours">Mon to Sat, ${esc(store.hours_start)} to ${esc(store.hours_end)}</div>
+            </div>`;
         });
-        
-        dropdownHTML += `</div>`;
+        html += '</div>';
       });
-      
-      dropdown.innerHTML = dropdownHTML;
+      dropdown.innerHTML = html;
     }
-    
+
     function selectStore(storeId) {
       selectedStore = storeData.find(store => store.store_id === storeId);
       updateSelectedStoreDisplay();
-      
-      // Close dropdown using active class
-      const storeDropdownContainer = document.querySelector('#storeLocatorButton')?.closest('.dropdown-container');
-      if (storeDropdownContainer) {
-        storeDropdownContainer.classList.remove('active');
-      }
-      
-      // Store selection in session storage for agent use
-      if (selectedStore) {
-        sessionStorage.setItem('selectedStore', JSON.stringify(selectedStore));
-        console.log('Selected store:', selectedStore);
-      }
+      const container = document.getElementById('storeLocatorButton')?.closest('.dropdown-container');
+      if (container) container.classList.remove('active');
+      if (selectedStore) sessionStorage.setItem('selectedStore', JSON.stringify(selectedStore));
     }
-    
+
     function updateSelectedStoreDisplay() {
-      const selectedStoreText = document.getElementById('selected-store-text');
-      if (selectedStoreText && selectedStore) {
-        selectedStoreText.textContent = `${selectedStore.name} - ${selectedStore.city}`;
-      }
+      const label = document.getElementById('selected-store-text');
+      if (label && selectedStore) label.textContent = selectedStore.name;
     }
-    
-    // Enhanced functionality for sign out and connection status
-    document.addEventListener('DOMContentLoaded', function() {
-      // Sign-out is wired once, in script-enhanced.js, which routes through
-      // CognitoAuth.signOut(). A second handler used to live here and cleared
-      // only idToken + username — leaving awsCredentials, userId and other
-      // per-user state in sessionStorage, so "signing out" left usable AWS
-      // credentials behind and the next sign-in could inherit the previous
-      // user's state. Removed.
-      
-      // CloudWatch Dropdown Functionality
-      const cloudwatchBtn = document.getElementById('cloudwatchButton');
-      const cloudwatchDropdown = document.getElementById('cloudwatchDropdown');
-      const dropdownContainer = cloudwatchBtn?.parentElement;
-      
-      if (cloudwatchBtn && cloudwatchDropdown) {
-        // Toggle dropdown on button click
-        cloudwatchBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          dropdownContainer.classList.toggle('active');
-          console.log('CloudWatch dropdown toggled');
-        });
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-          if (!dropdownContainer.contains(e.target)) {
-            dropdownContainer.classList.remove('active');
-          }
-          
-          // Close store locator dropdown when clicking outside
-          const storeDropdownContainer = document.querySelector('#storeLocatorButton')?.closest('.dropdown-container');
-          if (storeDropdownContainer && !storeDropdownContainer.contains(e.target)) {
-            storeDropdownContainer.classList.remove('active');
+
+    function esc(value) {
+      return String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    // ── Dropdown menus ────────────────────────────────────────────────────
+    function setupDropdowns() {
+      const containers = Array.from(document.querySelectorAll('.dropdown-container'));
+      const closeAll = () => containers.forEach(c => {
+        c.classList.remove('active');
+        c.querySelector('.dropdown-btn')?.setAttribute('aria-expanded', 'false');
+      });
+      containers.forEach(container => {
+        const button = container.querySelector('.dropdown-btn');
+        if (!button) return;
+        button.addEventListener('click', event => {
+          event.preventDefault();
+          event.stopPropagation();
+          const opening = !container.classList.contains('active');
+          closeAll();
+          if (opening) {
+            container.classList.add('active');
+            button.setAttribute('aria-expanded', 'true');
           }
         });
-        
-        // Load observability configuration and set up links
-        loadObservabilityConfig();
-        
-        console.log('CloudWatch dropdown functionality added successfully');
-      } else {
-        console.error('CloudWatch dropdown elements not found');
-      }
-      
-      // Store Locator Dropdown Functionality
-      const storeLocatorButton = document.getElementById('storeLocatorButton');
-      const storeLocatorDropdown = document.getElementById('storeLocatorDropdown');
-      const storeDropdownContainer = storeLocatorButton?.closest('.dropdown-container');
-      
-      if (storeLocatorButton && storeLocatorDropdown && storeDropdownContainer) {
-        storeLocatorButton.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          // Close other dropdowns
-          if (dropdownContainer) {
-            dropdownContainer.classList.remove('active');
+      });
+      document.addEventListener('click', event => {
+        containers.forEach(c => {
+          if (!c.contains(event.target)) {
+            c.classList.remove('active');
+            c.querySelector('.dropdown-btn')?.setAttribute('aria-expanded', 'false');
           }
-          
-          // Toggle store dropdown using active class
-          storeDropdownContainer.classList.toggle('active');
         });
-        
-        console.log('Store Locator dropdown functionality added successfully');
-      } else {
-        console.error('Store Locator dropdown elements not found');
+      });
+      document.addEventListener('keydown', event => { if (event.key === 'Escape') closeAll(); });
+    }
+
+    // CloudWatch links: from observability-config.json when present, otherwise the console defaults
+    async function loadObservabilityLinks() {
+      let dashboard = 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#gen-ai-observability';
+      // AgentCore runtime log groups: /aws/bedrock-agentcore/runtimes/<runtime-id>-DEFAULT
+      let logs = 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#logsV2:log-groups$3FlogGroupNameFilter$3D$252Faws$252Fbedrock-agentcore$252Fruntimes';
+      try {
+        const response = await fetch('observability-config.json');
+        const config = await response.json();
+        dashboard = config.cloudwatch?.dashboardUrl || dashboard;
+        logs = config.cloudwatch?.logsUrl || logs;
+      } catch (error) {
+        console.warn('Observability configuration not available, using console defaults:', error);
       }
-      
-      // Initialize store data
-      loadStoreData();
-      
-      // Function to load observability configuration
-      async function loadObservabilityConfig() {
-        try {
-          const response = await fetch('observability-config.json');
-          const config = await response.json();
-          
-          // Set up Agent Dashboard link
-          const agentDashboardLink = document.getElementById('agentDashboardLink');
-          if (agentDashboardLink && config.cloudwatch?.dashboardUrl) {
-            agentDashboardLink.addEventListener('click', function(e) {
-              e.preventDefault();
-              window.open(config.cloudwatch.dashboardUrl, '_blank');
-              dropdownContainer.classList.remove('active');
-              console.log('Opening Agent Dashboard:', config.cloudwatch.dashboardUrl);
-            });
-          }
-          
-          // Set up Agent Logs link
-          const agentLogsLink = document.getElementById('agentLogsLink');
-          if (agentLogsLink) {
-            // AgentCore runtime log groups: /aws/bedrock-agentcore/runtimes/<runtime-id>-DEFAULT
-            const logsUrl = config.cloudwatch?.logsUrl || 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#logsV2:log-groups$3FlogGroupNameFilter$3D$252Faws$252Fbedrock-agentcore$252Fruntimes';
-            agentLogsLink.addEventListener('click', function(e) {
-              e.preventDefault();
-              window.open(logsUrl, '_blank');
-              dropdownContainer.classList.remove('active');
-              console.log('Opening Agent Logs:', logsUrl);
-            });
-          }
-          
-          console.log('Observability configuration loaded successfully');
-        } catch (error) {
-          console.error('Failed to load observability configuration:', error);
-          
-          // Fallback URLs if config fails to load
-          const agentDashboardLink = document.getElementById('agentDashboardLink');
-          const agentLogsLink = document.getElementById('agentLogsLink');
-          
-          if (agentDashboardLink) {
-            agentDashboardLink.addEventListener('click', function(e) {
-              e.preventDefault();
-              // CloudWatch generative AI observability: AgentCore runtime metrics, sessions and traces
-              const fallbackDashboardUrl = 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#gen-ai-observability';
-              window.open(fallbackDashboardUrl, '_blank');
-              dropdownContainer.classList.remove('active');
-              console.log('Opening Agent Dashboard (fallback):', fallbackDashboardUrl);
-            });
-          }
-          
-          if (agentLogsLink) {
-            agentLogsLink.addEventListener('click', function(e) {
-              e.preventDefault();
-              const fallbackLogsUrl = 'https://eu-central-1.console.aws.amazon.com/cloudwatch/home?region=eu-central-1#logsV2:log-groups$3FlogGroupNameFilter$3D$252Faws$252Fbedrock-agentcore$252Fruntimes';
-              window.open(fallbackLogsUrl, '_blank');
-              dropdownContainer.classList.remove('active');
-              console.log('Opening Agent Logs (fallback):', fallbackLogsUrl);
-            });
-          }
-        }
-      }
-      
-      // The connection status is owned by script-enhanced.js, which sets it from
-      // real AgentCore events. A timer used to force it to "Connected" after two
-      // seconds regardless of whether anything had connected, so the page claimed
-      // a working agent while every message was failing. Removed deliberately.
-      
-      // Load and display the product catalog
-      loadInteractiveMenu();
-    });
-    
-    
-    // Product data (embedded to avoid CORS issues) — summary of 2_data_strategy/menu/menu_records.json.
-    // Prices and stock shown in chat come from the live catalog, not from this list.
+      [['agentDashboardLink', dashboard], ['agentLogsLink', logs]].forEach(([id, url]) => {
+        const link = document.getElementById(id);
+        if (link) { link.href = url; link.target = '_blank'; link.rel = 'noopener noreferrer'; }
+      });
+    }
+
+    // ── Product catalog ───────────────────────────────────────────────────
+    // Summary of 2_data_strategy/menu/menu_records.json. Prices and stock shown in chat come from
+    // the live catalog, not from this list.
     const menuData = [
       {"item_id": "phone_samsung_galaxy_s21_fe_5g", "name": "Samsung Galaxy S21 FE 5G", "category": "smartphones", "price_eur": 472.15, "spec": "128GB / 256GB", "attributes_json": {"popularity_score": 89, "condition": "New"}},
       {"item_id": "phone_samsung_galaxy_s23_ultra", "name": "Samsung Galaxy S23 Ultra", "category": "smartphones", "price_eur": 1052.0, "spec": "256GB / 512GB / 1TB", "attributes_json": {"popularity_score": 82, "condition": "New"}},
@@ -578,125 +432,98 @@
       {"item_id": "laptop_asus_rog_zephyrus_g14_ga401ii_he004", "name": "ASUS ROG Zephyrus G14 GA401II-HE004", "category": "refurbished_laptops", "price_eur": 771.79, "spec": "AMD Ryzen 7 4800HS, 16GB RAM, 1TB SSD, GTX 1650", "attributes_json": {"popularity_score": 99, "condition": "Refurbished"}},
       {"item_id": "laptop_apple_macbook_pro", "name": "Apple MacBook Pro", "category": "refurbished_laptops", "price_eur": 604.0, "spec": "Intel Core i5, 8GB RAM, 128GB flash", "attributes_json": {"popularity_score": 99, "condition": "Refurbished"}}
     ];
-    
+
+    const categoryInfo = {
+      smartphones:         { name: 'Smartphones', description: 'Apple, Samsung, Google, Xiaomi and more, priced per storage size.' },
+      premium_laptops:     { name: 'Premium laptops', description: 'MacBook, Surface, XPS, ZenBook and other thin-and-light models.' },
+      gaming_laptops:      { name: 'Gaming laptops', description: 'Dedicated graphics for gaming and creative work.' },
+      everyday_laptops:    { name: 'Everyday laptops', description: 'Affordable laptops and Chromebooks for home, school and browsing.' },
+      business_laptops:    { name: 'Business laptops', description: 'ThinkPad, EliteBook, Latitude and other models built for work.' },
+      refurbished_laptops: { name: 'Refurbished', description: 'Tested, reset and sold with a 12-month warranty.' }
+    };
+    let activeCategory = 'smartphones';
+
     function loadInteractiveMenu() {
-      const menuContainer = document.getElementById('menu-categories');
-      if (!menuContainer) return;
-      
-      // Group items by category
-      const categories = {};
-      menuData.forEach(item => {
-        if (!categories[item.category]) {
-          categories[item.category] = [];
-        }
-        categories[item.category].push(item);
+      const grid = document.getElementById('menu-categories');
+      const tabs = document.getElementById('catalog-tabs');
+      if (!grid || !tabs) return;
+
+      const byCategory = {};
+      menuData.forEach(item => (byCategory[item.category] = byCategory[item.category] || []).push(item));
+      Object.values(byCategory).forEach(list => list.sort((a, b) => b.attributes_json.popularity_score - a.attributes_json.popularity_score));
+      const keys = Object.keys(categoryInfo).filter(key => byCategory[key]);
+
+      tabs.innerHTML = '';
+      keys.forEach(key => {
+        const tab = document.createElement('button');
+        tab.type = 'button';
+        tab.className = 'tab';
+        tab.id = `tab-${key}`;
+        tab.dataset.category = key;
+        tab.setAttribute('role', 'tab');
+        tab.innerHTML = `${esc(categoryInfo[key].name)}<span class="tab-count">${byCategory[key].length}</span>`;
+        tab.addEventListener('click', () => showCategory(key, byCategory));
+        tabs.appendChild(tab);
       });
-      
-      // Sort items within each category by popularity
-      Object.keys(categories).forEach(category => {
-        categories[category].sort((a, b) => b.attributes_json.popularity_score - a.attributes_json.popularity_score);
+
+      grid.addEventListener('click', event => {
+        const card = event.target.closest('.product-card');
+        if (card) selectMenuItem(card.dataset.id, card.dataset.name);
       });
-      
-      // Create category display names and icons
-      const categoryInfo = {
-        'smartphones':         { name: 'Smartphones', icon: '📱', description: 'Apple, Samsung, Google, Xiaomi and more — priced per storage size' },
-        'premium_laptops':     { name: 'Premium Laptops', icon: '💻', description: 'MacBook, Surface, XPS, Zenbook and other thin-and-light models' },
-        'gaming_laptops':      { name: 'Gaming Laptops', icon: '🎮', description: 'Dedicated NVIDIA GeForce graphics for gaming and creative work' },
-        'everyday_laptops':    { name: 'Everyday Laptops & Chromebooks', icon: '🖥️', description: 'Affordable laptops for home, school and browsing' },
-        'business_laptops':    { name: 'Business Laptops', icon: '💼', description: 'ThinkPad, EliteBook, Latitude and other models built for work' },
-        'refurbished_laptops': { name: 'Refurbished Laptops', icon: '♻️', description: 'Tested, reset and sold with a 12-month warranty' }
-      };
-      
-      // Clear loading message
-      menuContainer.innerHTML = '';
-      
-      // Create expandable categories, in the order of categoryInfo
-      Object.keys(categories).sort((a, b) => Object.keys(categoryInfo).indexOf(a) - Object.keys(categoryInfo).indexOf(b)).forEach(categoryKey => {
-        const category = categoryInfo[categoryKey] || { name: categoryKey, icon: '🛒', description: '' };
-        const items = categories[categoryKey];
-        
-        const categoryElement = document.createElement('div');
-        categoryElement.className = 'menu-category';
-        
-        categoryElement.innerHTML = `
-          <div class="menu-category-header" onclick="toggleCategory('${categoryKey}')">
-            <div class="category-info">
-              <span class="category-icon">${category.icon}</span>
-              <div class="category-text">
-                <h3>${category.name}</h3>
-                <p>${category.description}</p>
-              </div>
-            </div>
-            <span class="category-arrow">▼</span>
-          </div>
-          <div class="menu-category-items" id="category-${categoryKey}">
-            ${items.map(item => `
-              <div class="menu-item-card" onclick="selectMenuItem('${item.item_id}', '${item.name}')">
-                <div class="item-header">
-                  <h4>${item.name}</h4>
-                  ${item.attributes_json.popularity_score >= 90
-                    ? '<span class="popularity-badge hot">Popular</span>'
-                    : `<span class="popularity-badge">Popularity ${item.attributes_json.popularity_score}%</span>`}
-                </div>
-                <div class="item-details">
-                  <span class="detail-badge price">from €${item.price_eur.toFixed(2)}</span>
-                  ${item.spec ? `<span class="detail-badge">${item.spec}</span>` : ''}
-                  ${item.attributes_json.condition === 'Refurbished' ? '<span class="detail-badge">♻️ Refurbished</span>' : ''}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-        
-        menuContainer.appendChild(categoryElement);
-      });
-      
-      console.log('Product catalog loaded successfully');
+
+      showCategory(byCategory[activeCategory] ? activeCategory : keys[0], byCategory);
     }
-    
-    function toggleCategory(categoryKey) {
-      const categoryItems = document.getElementById(`category-${categoryKey}`);
-      const arrow = categoryItems.parentElement.querySelector('.category-arrow');
-      
-      if (categoryItems.style.display === 'none' || !categoryItems.style.display) {
-        categoryItems.style.display = 'block';
-        arrow.style.transform = 'rotate(180deg)';
-        categoryItems.parentElement.classList.add('expanded');
-      } else {
-        categoryItems.style.display = 'none';
-        arrow.style.transform = 'rotate(0deg)';
-        categoryItems.parentElement.classList.remove('expanded');
-      }
+
+    function showCategory(key, byCategory) {
+      activeCategory = key;
+      document.querySelectorAll('#catalog-tabs .tab').forEach(tab =>
+        tab.setAttribute('aria-selected', tab.dataset.category === key ? 'true' : 'false'));
+      const desc = document.getElementById('catalog-desc');
+      if (desc) desc.textContent = categoryInfo[key]?.description || '';
+      const grid = document.getElementById('menu-categories');
+      grid.innerHTML = (byCategory[key] || []).map(item => {
+        const refurb = item.attributes_json.condition === 'Refurbished';
+        const tag = refurb ? '<span class="tag refurb">Refurbished</span>'
+          : (item.attributes_json.popularity_score >= 90 ? '<span class="tag popular">Popular</span>' : '');
+        return `
+          <button type="button" class="product-card" data-id="${esc(item.item_id)}" data-name="${esc(item.name)}">
+            <span class="product-name">${esc(item.name)}</span>
+            <span class="product-spec">${esc(item.spec || '')}</span>
+            <span class="product-foot">
+              <span class="product-price"><small>from</small>€${item.price_eur.toFixed(2)}</span>
+              ${tag}
+            </span>
+          </button>`;
+      }).join('');
     }
-    
+
+    // Put a question about the product into the chat input; the user presses Send
     function selectMenuItem(itemId, itemName) {
-      // Add the selected item to the chat
       const chatInput = document.getElementById('chatbot-input');
       if (chatInput) {
         chatInput.value = `Tell me more about the ${itemName}`;
         chatInput.focus();
+        document.getElementById('chatbot')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-      
-      // Optional: Auto-send the message
-      // const chatForm = document.getElementById('chatbot-form');
-      // if (chatForm) {
-      //   chatForm.dispatchEvent(new Event('submit'));
-      // }
     }
 
-    // Header category links: open that product category and scroll to it
-    function openCategory(categoryKey) {
-      const items = document.getElementById(`category-${categoryKey}`);
-      if (!items) return;
-      if (items.style.display !== 'grid' && items.style.display !== 'block') toggleCategory(categoryKey);
-      items.parentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    // Show the signed-in user in the header (set by the login page)
+    // ── Start-up ──────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function () {
+      // Sign-out is wired once, in script-enhanced.js, through CognitoAuth.signOut(), which clears
+      // every piece of per-user session state. Do not add a second handler here.
+      setupDropdowns();
+      loadObservabilityLinks();
+      loadStoreData();
+      loadInteractiveMenu();
+
+      // Show the signed-in user (set by the login page)
       const name = sessionStorage.getItem('username');
-      const el = document.getElementById('cp-account-name');
-      if (el && name) el.textContent = name;
+      if (name) {
+        const label = document.getElementById('cp-account-name');
+        const initial = document.getElementById('account-initial');
+        if (label) label.textContent = name;
+        if (initial) initial.textContent = name.charAt(0);
+      }
     });
   </script>
 </body>

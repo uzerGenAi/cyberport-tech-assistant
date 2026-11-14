@@ -94,16 +94,16 @@ class FixedAgentCoreClient {
   async initialize() {
     if (this.isInitialized) return; // idempotent
     try {
-      console.log('🔧 Initializing Fixed AgentCore client...');
+      console.log('Initializing Fixed AgentCore client...');
 
       // 1) Load AgentCore configuration
       await this.#loadAgentCoreConfig();
-      console.log('✅ AgentCore configuration loaded');
+      console.log('AgentCore configuration loaded');
 
       // 2) Fetch AWS credentials via your Cognito wrapper
       console.log('Step 2: Getting AWS credentials...');
       this.credentials = await window.CognitoAuth.getCurrentAWSCredentials();
-      console.log('✅ AWS credentials obtained');
+      console.log('AWS credentials obtained');
 
       // 3) Configure global AWS SDK
       AWS.config.update({
@@ -116,11 +116,11 @@ class FixedAgentCoreClient {
       this.isInitialized = true;
       this.status = 'ready';
       this.lastFailure = null;
-      console.log('✅ Fixed AgentCore client initialized successfully');
+      console.log('Fixed AgentCore client initialized successfully');
       console.log('Agent Runtime ARN:', this.agentRuntimeArn);
       console.log('Session ID:', this.sessionId);
     } catch (err) {
-      console.error('❌ Failed to initialize Fixed AgentCore client:', err);
+      console.error('Failed to initialize Fixed AgentCore client:', err);
       this.status = 'failed';
       // Preserve the underlying reason — an un-authenticated user and a missing
       // config file are different problems and deserve different messages.

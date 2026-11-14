@@ -738,7 +738,7 @@ validate_web_app_directory() {
         exit 1
     fi
     
-    local required_files=("index.html" "login.html" "style.css")
+    local required_files=("index.html" "login.html" "app.css")
     
     for file in "${required_files[@]}"; do
         if [ ! -f "$WEB_APP_DIR/$file" ]; then

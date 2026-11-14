@@ -1,5 +1,5 @@
 // Tech Assistant Script - Direct AgentCore Integration
-console.log('🚀 Loading Enhanced Script with Direct AgentCore Integration');
+console.log('Loading Enhanced Script with Direct AgentCore Integration');
 
 const ASSISTANT_NAME = 'Tech Assistant';
 
@@ -203,7 +203,7 @@ async function retryLiveConnection() {
 async function connectLiveServices() {
     if (window.CognitoAuth && typeof window.CognitoAuth.loadCognitoConfig === 'function') {
         await window.CognitoAuth.loadCognitoConfig();
-        console.log('✅ Cognito configuration loaded');
+        console.log('Cognito configuration loaded');
     }
     if (!window.fixedAgentCoreClient || typeof window.fixedAgentCoreClient.initialize !== 'function') {
         const err = new Error('AgentCore client script did not load');
@@ -211,7 +211,7 @@ async function connectLiveServices() {
         throw err;
     }
     await window.fixedAgentCoreClient.initialize();
-    console.log('✅ AgentCore client initialized');
+    console.log('AgentCore client initialized');
 }
 
 // Single source of truth for signing out: clears all session state via CognitoAuth.
@@ -258,7 +258,7 @@ async function initializeApp() {
             setConnectionStatus('connecting', 'Ready');
         } catch (error) {
             // Do NOT swallow this. Record why, and show it.
-            console.error('❌ Live services unavailable:', error);
+            console.error('Live services unavailable:', error);
             setAppState('degraded', error.reason || 'unknown', error.message);
             setConnectionStatus('error', 'Disconnected');
         }
@@ -267,7 +267,7 @@ async function initializeApp() {
     // Store data loads from index.html's own DOMContentLoaded handler.
     
     isInitialized = true;
-    console.log(`✅ Application initialized (mode: ${appState.mode})`);
+    console.log(`Application initialized (mode: ${appState.mode})`);
     
     if (chatbotMessages) {
         chatbotMessages.innerHTML = '';
@@ -318,7 +318,7 @@ function addPersonalizedGreeting() {
 
 // Store data and the store-locator dropdown are owned by the inline script in
 // index.html: it holds the sample store list (as `storeData`) and drives the
-// dropdown with the `.dropdown-container.active` class that enhanced-styles.css
+// dropdown with the `.dropdown-container.active` class that app.css
 // actually styles. It loads that data from its own DOMContentLoaded handler.
 //
 // This file previously carried a second, conflicting copy of all of it. Because
@@ -464,7 +464,7 @@ function handleAgentFallback(userInput, error) {
                        
         if (stores.length > 0) {
             stores.forEach(store => {
-                fallbackMsg += `📍 ${store.name}\n`;
+                fallbackMsg += `${store.name}\n`;
                 fallbackMsg += `   Address: ${store.address}, ${store.city}, ${store.state}\n`;
                 fallbackMsg += `   Hours: ${store.hours_start} - ${store.hours_end}\n`;
                 if (store.has_drive_thru) fallbackMsg += '   Pickup station: yes\n';
@@ -491,7 +491,7 @@ function handleAgentFallback(userInput, error) {
             });
             Object.keys(categories).forEach(cat => {
                 const label = cat.charAt(0).toUpperCase() + cat.slice(1).replace(/_/g, ' ');
-                fallbackMsg += `📱 ${label}\n`;
+                fallbackMsg += `${label}\n`;
                 fallbackMsg += `   ${categories[cat].join(', ')}\n\n`;
             });
             fallbackMsg += "Expand 'Our Products' below for details. I cannot confirm current prices or " +
@@ -507,7 +507,7 @@ function handleAgentFallback(userInput, error) {
     if (isPromoQuery) {
         fallbackMsg += "Here are the promotions in this page's sample data:\n\n";
         LOCAL_PROMOTIONS.forEach(promo => {
-            fallbackMsg += `🎁 ${promo.title}\n`;
+            fallbackMsg += `${promo.title}\n`;
             fallbackMsg += `   ${promo.description}\n`;
             if (promo.code) fallbackMsg += `   Code: ${promo.code}\n`;
             fallbackMsg += '\n';
