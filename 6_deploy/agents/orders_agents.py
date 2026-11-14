@@ -273,8 +273,10 @@ def search_orders(name_on_order: str, product: str, store: str = "", order_date:
 
 
 @tool(name="find_orders",
-      description=("Find a customer's order when they do not know the order ID and it is NOT already in this "
-                   "conversation (if an order ID was placed or mentioned in this chat, use that instead). "
+      description=("Find a customer's order when they do not know the order ID and NO order ID (ord_...) "
+                   "appears anywhere in this conversation. NEVER call this when an order ID was placed, "
+                   "checked or mentioned earlier in this chat, even if the customer now describes the order "
+                   "by product (e.g. 'the laptop order'): use that order ID with orders_agent_tool instead. "
                    "Needs the name or customer "
                    "number used on the order AND what was ordered (brand, model or type, e.g. 'ASUS gaming "
                    "laptop'). If the description is general ('a laptop'), also pass the collection store or "
